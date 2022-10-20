@@ -1,0 +1,105 @@
+# Copyright 2022 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+steps:
+- id: 'branch name'
+  name: 'alpine'
+  entrypoint: 'sh'
+  args:
+  - '-c'
+  - |
+    echo "***********************"
+    echo "$BRANCH_NAME"
+    echo "***********************"
+- id: 'tf init'
+  name: 'hashicorp/terraform:1.0.0'
+  entrypoint: 'sh'
+  args:
+  - '-c'
+  - |
+    git config --global url."https://$$github_user:$$github_token@github.com".insteadOf "https://github.com"
+    if [ -d "env/$BRANCH_NAME/" ]; then
+      cd env/$BRANCH_NAME
+      terraform init
+    else
+      for dir in env/*/
+      do
+        cd ${dir}
+        env=${dir%*/}
+        env=${env#*/}
+        echo ""
+        echo "*************** TERRAFORM INIT ******************"
+        echo "******* At environment: ${env} ********"
+        echo "*************************************************"
+        terraform init -no-color || exit 1
+        cd ../../
+      done
+    fi
+  secretEnv:
+  - github_token
+  - github_user
+- id: 'tf plan'
+  name: 'hashicorp/terraform:1.0.0'
+  entrypoint: 'sh'
+  args:
+  - '-c'
+  - |
+    git config --global url."https://$$github_user:$$github_token@github.com".insteadOf "https://github.com"
+    if [ -d "env/$BRANCH_NAME/" ]; then
+      cd env/$BRANCH_NAME
+      terraform plan
+    else
+      for dir in env/*/
+      do
+        cd ${dir}
+        env=${dir%*/}
+        env=${env#*/}
+        echo ""
+        echo "*************** TERRAFOM PLAN ******************"
+        echo "******* At environment: ${env} ********"
+        echo "*************************************************"
+        terraform plan -no-color || exit 1
+        cd ../../
+      done
+    fi
+  secretEnv:
+  - github_token
+  - github_user
+- id: 'tf apply'
+  name: 'hashicorp/terraform:1.0.0'
+  entrypoint: 'sh'
+  args:
+  - '-c'
+  - |
+    git config --global url."https://$$github_user:$$github_token@github.com".insteadOf "https://github.com"
+    if [ -d "env/$BRANCH_NAME/" ]; then
+      cd env/$BRANCH_NAME
+      terraform apply -auto-approve -no-color
+    else
+      echo "***************************** SKIPPING APPLYING *******************************"
+      echo "Branch '$BRANCH_NAME' does not represent an oficial environment."
+      echo "*******************************************************************************"
+    fi
+  secretEnv:
+  - github_token
+  - github_user
+timeout: 1200s
+availableSecrets:
+  secretManager:
+  - versionName: projects/$PROJECT_ID/secrets/github-token/versions/latest
+    env: github_token
+  - versionName: projects/$PROJECT_ID/secrets/github-user/versions/latest
+    env: github_user
+options:
+  logging: CLOUD_LOGGING_ONLY

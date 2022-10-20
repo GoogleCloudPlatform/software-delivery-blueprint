@@ -1,0 +1,42 @@
+# Copyright 2022 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+steps:
+
+# Cloning repo because the credentials will be cached in gcloud.sh and will avoid authenticating again and again in subsequent steps
+- name: 'gcr.io/cloud-builders/git'
+  id: 'clone platform-repos'
+  entrypoint: /bin/sh
+  args: [ '-c', 'git clone https://${_GITHUB_USER}:$$GITHUB_TOKEN@github.com/${_GITHUB_ORG}/$REPO_NAME' ]
+  secretEnv: ['GITHUB_TOKEN']
+
+
+#Initialize apps directory.Lookup app_runtimes_list.txt to find allowed runtimes and add a terraform module for each runtime under apps folder
+- name: 'gcr.io/cloud-builders/gcloud'
+  id : 'Initialize dir structure'
+  entrypoint: 'bash'
+  args: [ '-xe','./setup/init.sh','${_GITHUB_USER}', '${_SA_TO_IMPERSONATE}', '${REPO_NAME}' ]
+  secretEnv: ['GITHUB_TOKEN']
+
+
+- name: 'gcr.io/cloud-builders/gcloud'
+  id: 'create tf file for app, commit it in github repo and push'
+  entrypoint: 'bash'
+  args: [ '-xe','./setup/generateAppTFCode.sh','${_APP_RUNTIME}','${_APP_NAME}','${_SA_TO_IMPERSONATE}', '${_INFRA_PROJECT_ID}','${_GITHUB_USER}', '${PROJECT_ID}', '${_FOLDER_ID}', '${_GITHUB_ORG}', '${REPO_NAME}', '${_TRIGGER_TYPE}', '${_GITHUB_TEAM}','${_REGION}' ]
+  secretEnv: ['GITHUB_TOKEN']
+
+availableSecrets:
+  secretManager:
+  - versionName: projects/$PROJECT_ID/secrets/$_GITHUB_SECRET_NAME/versions/latest
+    env: GITHUB_TOKEN
