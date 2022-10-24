@@ -1,3 +1,21 @@
+## Licensing
+
+```lang-none
+Copyright 2022 Google LLC
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+```
+
 # Overview
 
 Software delivery platforms enable organizations to shift the focus from individual technologies to highly automated/golden paths. That shift allows application teams to focus on delivering business value instead of having to learn new technology and tools. For example, if the process to create a new application including all of the supporting tools (Git repositories, CI/CD tools and application namespace) is automated and self service developers are able to quickly get the resources they need to delivery feature more quickly.
@@ -125,23 +143,6 @@ repos is done through helper scripts in the `launch-scripts` directory.
 | `resources`                                    | Images and other resources used in documentation.
 | [`terraform-modules`][terraform-modules]       | Terraform modules that are used by application and platform teams when creating infrastructure.
 
-## Licensing
-
-```lang-none
-Copyright 2022 Google LLC
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    https://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-```
 
 ## Usage
 
