@@ -43,30 +43,7 @@ module "web-hook" {
 
 If the CI/CD trigger type for an application is chosen to be webhook trigger, this module is called by application's IaC pipeline. This module creates a webhook trigger connected to the [source code repo][application-repo] of the application.
 
-## License
-
-Copyright 2022 Google LLC
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    https://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-## Contributing
-
-*   [Contributing guidelines][contributing-guidelines]
-*   [Code of conduct][code-of-conduct]
-
 <!-- LINKS: https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 
-[contributing-guidelines]: CONTRIBUTING.md
-[code-of-conduct]: code-of-conduct.md
 <!-- END_TF_DOCS -->
 [application-repo]: ../../../app-factory-template/README.md?plain=1#L63
