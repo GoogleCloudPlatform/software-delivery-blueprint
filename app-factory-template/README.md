@@ -29,9 +29,7 @@ The `app-factory-template` directory contains the structure and Cloud Build trig
       - [Change application code of an application](#change-application-code)
       - [Change IaC pipeline of an application](#change-iac-cloud-build-trigger-pipeline)
       - [Change CICD pipeline of an application](#change-cicd-cloud-build-trigger-pipeline)
-  - [Licensing](#licensing)
   - [Usage](#usage)
-  - [Contributing](#contributing)
 
 ## Application Factory Architecture
 

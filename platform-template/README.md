@@ -12,9 +12,7 @@ Running applications in multi-tenant infrastructure can increase overall resourc
     - [Infrastructure pipeline](#infrastructure-pipeline)
     - [Application landing zones](#application-landing-zones)
   - [Add new environment](#add-new-environment)
-  - [Licensing](#licensing)
   - [Usage](#usage)
-  - [Contributing](#contributing)
 
 ## Architecture
 

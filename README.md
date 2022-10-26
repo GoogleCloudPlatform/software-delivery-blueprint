@@ -23,9 +23,7 @@ This blueprint extends the concepts discussed in the Next 2020 session on [Moder
     - [Application Architecture](#application-architecture)
   - [Deploying the Blueprint](#deploying-the-blueprint)
   - [Contents of the Blueprint](#contents-of-the-blueprint)
-  - [Licensing](#licensing)
   - [Usage](#usage)
-  - [Contributing](#contributing)
 
 ## Core components and concepts
 
@@ -133,15 +131,7 @@ for production use and provided as-is, without warranty or representation for
 any use or purpose. Your use of it is discretionary and subject to your
 agreement with Google.
 
-## Contributing
-
-* [Contributing guidelines][contributing-guidelines]
-* [Code of conduct][code-of-conduct]
-
 <!-- LINKS: https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-
-[contributing-guidelines]: CONTRIBUTING.md
-[code-of-conduct]: code-of-conduct.md
 
 [acm]: https://cloud.google.com/anthos/config-management
 [acm-template]: acm-template/README.md

@@ -13,8 +13,6 @@
     - [Prerequisites](#prerequisites-1)
     - [Execute](#execute-1)
   - [Usage](#usage)
-  - [Licensing](#licensing)
-  - [Contributing](#contributing)
 
 ## software-delivery-infra.sh
 

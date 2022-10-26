@@ -19,9 +19,7 @@ All clusters are configured to monitor the `manifests` folder for their respecti
     - [Constraints](#constraints)
   - [Templates](#templates)
   - [Workflow](#workflow)
-  - [Licensing](#licensing)
   - [Usage](#usage)
-  - [Contributing](#contributing)
 
 ## Manifests
 

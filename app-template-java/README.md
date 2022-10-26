@@ -7,9 +7,7 @@ This is a template for Java that has simple "Hello world" code and should be use
 - [Overview](#overview)
   - [Table of Contents](#table-of-contents)
   - [Critical Files](#critical-files)
-  - [Licensing](#licensing)
   - [Usage](#usage)
-  - [Contributing](#contributing)
 
 ## Critical Files
 

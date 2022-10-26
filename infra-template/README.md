@@ -7,9 +7,7 @@
 - [Overview](#overview)
   - [Table of Contents](#table-of-contents)
   - [Architecture](#architecture)
-  - [Licensing](#licensing)
   - [Usage](#usage)
-  - [Contributing](#contributing)
 
 ## Architecture
 
