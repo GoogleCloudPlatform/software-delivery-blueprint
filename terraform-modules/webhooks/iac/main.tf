@@ -64,7 +64,7 @@ resource "google_cloudbuild_trigger" "deploy-infra" {
         "-c",
         <<-EOF
       branch=`echo "${"$"}{_REF}" | cut -d "/" -f3`
-      git clone https://$${github_user}:$${github_token}@github.com/$${github_org}/${"$"}{_REPO}
+      git clone https://$$GITHUB_USER:$$GITHUB_TOKEN@github.com/$$GITHUB_ORG/${"$"}{_REPO}
       cd ${"$"}{_REPO}
       git checkout $branch
       echo "***********************"
@@ -73,9 +73,9 @@ resource "google_cloudbuild_trigger" "deploy-infra" {
   EOF
       ]
       secret_env = [
-        "github_user",
-        "github_token",
-      "github_org"]
+        "GITHUB_USER",
+        "GITHUB_TOKEN",
+        "GITHUB_ORG"]
     }
     step {
       id         = "tf-init"
@@ -86,7 +86,7 @@ resource "google_cloudbuild_trigger" "deploy-infra" {
         <<-EOF
       branch=`echo "${"$"}{_REF}" | cut -d "/" -f3`
       cd ${"$"}{_REPO}
-      git config --global url."https://$$github_user:$$github_token@github.com".insteadOf "https://github.com"
+      git config --global url."https://$$GITHUB_USER:$$GITHUB_TOKEN@github.com".insteadOf "https://github.com"
       if [ -d "env/$branch/" ]; then
         cd env/$branch
         terraform init -no-color || exit 1
@@ -107,8 +107,8 @@ resource "google_cloudbuild_trigger" "deploy-infra" {
   EOF
       ]
       secret_env = [
-        "github_user",
-      "github_token"]
+        "GITHUB_USER",
+        "GITHUB_TOKEN"]
 
     }
     step {
@@ -120,7 +120,14 @@ resource "google_cloudbuild_trigger" "deploy-infra" {
         <<-EOF
       branch=`echo "${"$"}{_REF}" | cut -d "/" -f3`
       cd ${"$"}{_REPO}
-      git config --global url."https://$$github_user:$$github_token@github.com".insteadOf "https://github.com"
+      export TF_VAR_github_token=$$GITHUB_TOKEN
+      export TF_VAR_github_user=$$GITHUB_USER
+      export TF_VAR_github_email=$$GITHUB_EMAIL
+      export TF_VAR_github_org=$$GITHUB_ORG
+      export TF_VAR_org_id=$$GCP_ORG
+      export TF_VAR_folder_id=$$GCP_FOLDER
+      export TF_VAR_billing_account=$$GCP_BILLINGAC
+      git config --global url."https://$$GITHUB_USER:$$GITHUB_TOKEN@github.com".insteadOf "https://github.com"
       if [ -d "env/$branch/" ]; then
         cd env/$branch
         terraform plan -no-color || exit 1
@@ -141,8 +148,13 @@ resource "google_cloudbuild_trigger" "deploy-infra" {
   EOF
       ]
       secret_env = [
-        "github_user",
-      "github_token"]
+        "GITHUB_USER",
+        "GITHUB_TOKEN",
+        "GITHUB_ORG",
+        "GITHUB_EMAIL",
+        "GCP_ORG",
+        "GCP_FOLDER",
+        "GCP_BILLINGAC"]
     }
     step {
       id         = "tf-apply"
@@ -153,7 +165,14 @@ resource "google_cloudbuild_trigger" "deploy-infra" {
         <<-EOF
       branch=`echo "${"$"}{_REF}" | cut -d "/" -f3`
       cd ${"$"}{_REPO}
-      git config --global url."https://$$github_user:$$github_token@github.com".insteadOf "https://github.com"
+      export TF_VAR_github_token=$$GITHUB_TOKEN
+      export TF_VAR_github_user=$$GITHUB_USER
+      export TF_VAR_github_email=$$GITHUB_EMAIL
+      export TF_VAR_github_org=$$GITHUB_ORG
+      export TF_VAR_org_id=$$GCP_ORG
+      export TF_VAR_folder_id=$$GCP_FOLDER
+      export TF_VAR_billing_account=$$GCP_BILLINGAC
+      git config --global url."https://$$GITHUB_USER:$$GITHUB_TOKEN@github.com".insteadOf "https://github.com"
       git checkout $branch
       if [ -d "env/$branch/" ]; then
         cd env/$branch
@@ -166,21 +185,42 @@ resource "google_cloudbuild_trigger" "deploy-infra" {
   EOF
       ]
       secret_env = [
-        "github_user",
-      "github_token"]
+        "GITHUB_USER",
+        "GITHUB_TOKEN",
+        "GITHUB_ORG",
+        "GITHUB_EMAIL",
+        "GCP_ORG",
+        "GCP_FOLDER",
+        "GCP_BILLINGAC"]
     }
     available_secrets {
       secret_manager {
-        version_name = "projects/$PROJECT_ID/secrets/github-user/versions/latest"
-        env          = "github_user"
+        version_name = "projects/${var.secret_project_id}/secrets/github-user/versions/latest"
+        env          = "GITHUB_USER"
       }
       secret_manager {
-        version_name = "projects/$PROJECT_ID/secrets/github-token/versions/latest"
-        env          = "github_token"
+        version_name = "projects/${var.secret_project_id}/secrets/github-token/versions/latest"
+        env          = "GITHUB_TOKEN"
       }
       secret_manager {
-        version_name = "projects/$PROJECT_ID/secrets/github-org/versions/latest"
-        env          = "github_org"
+        version_name = "projects/${var.secret_project_id}/secrets/github-org/versions/latest"
+        env          = "GITHUB_ORG"
+      }
+      secret_manager {
+        version_name = "projects/${var.secret_project_id}/secrets/github-email/versions/latest"
+        env          = "GITHUB_EMAIL"
+      }
+      secret_manager {
+        version_name = "projects/${var.secret_project_id}/secrets/gcp-org/versions/latest"
+        env          = "GCP_ORG"
+      }
+      secret_manager {
+        version_name = "projects/${var.secret_project_id}/secrets/gcp-folder/versions/latest"
+        env          = "GCP_FOLDER"
+      }
+      secret_manager {
+        version_name = "projects/${var.secret_project_id}/secrets/gcp-billingac/versions/latest"
+        env          = "GCP_BILLINGAC"
       }
     }
 

@@ -1,0 +1,109 @@
+# Copyright 2022 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+steps:
+- name: gcr.io/cloud-builders/git
+  args:
+  - '-c'
+  - |
+    branch=`echo "${_REF}" | cut -d "/" -f3`
+    echo ${_REPO}
+    echo "###########"
+    echo $branch
+    echo "###########"
+    git clone -b ${branch} https://$$GITHUB_USER:$$GITHUB_TOKEN@github.com/${_REPO}  platform-repo
+  id: clone git
+  entrypoint: sh
+  secretEnv:
+  - GITHUB_TOKEN
+  - GITHUB_USER
+- name: 'hashicorp/terraform:1.0.0'
+  args:
+  - '-c'
+  - |
+    git config --global url."https://$$GITHUB_USER:$$GITHUB_TOKEN@github.com".insteadOf "https://github.com"
+    cd platform-repo
+    cd env/common
+    terraform init -no-color || exit 1
+  id: tf init
+  entrypoint: sh
+  secretEnv:
+  - GITHUB_TOKEN
+  - GITHUB_USER
+- name: 'hashicorp/terraform:1.0.0'
+  args:
+  - '-c'
+  - |
+    export TF_VAR_region=$$INFRA_REGION
+    export TF_VAR_app_factory_project_id=$$APP_FACTORY_PROJECT_ID
+    export TF_VAR_app_factory_project_num=$$APP_FACTORY_PROJECT_NUM
+    export TF_VAR_secrets_project_id=$$SECRETS_PROJECT
+    export TF_VAR_github_token=$$GITHUB_TOKEN
+    export TF_VAR_github_user=$$GITHUB_USER
+    export TF_VAR_infra_project_id=$PROJECT_ID
+    git config --global url."https://$$GITHUB_USER:$$GITHUB_TOKEN@github.com".insteadOf "https://github.com"
+    branch=`echo "${_REF}" | cut -d "/" -f3`
+    cd platform-repo
+    cd env/common
+    terraform plan -no-color || exit 1
+
+  id: tf plan
+  entrypoint: sh
+  secretEnv:
+  - INFRA_REGION
+  - APP_FACTORY_PROJECT_ID
+  - APP_FACTORY_PROJECT_NUM
+  - SECRETS_PROJECT
+  - GITHUB_TOKEN
+  - GITHUB_USER
+- name: 'hashicorp/terraform:1.0.0'
+  args:
+  - '-c'
+  - |
+    export TF_VAR_region=$$INFRA_REGION
+    export TF_VAR_app_factory_project_id=$$APP_FACTORY_PROJECT_ID
+    export TF_VAR_app_factory_project_num=$$APP_FACTORY_PROJECT_NUM
+    export TF_VAR_secrets_project_id=$$SECRETS_PROJECT
+    export TF_VAR_github_token=$$GITHUB_TOKEN
+    export TF_VAR_github_user=$$GITHUB_USER
+    export TF_VAR_infra_project_id=$PROJECT_ID
+    git config --global url."https://$$GITHUB_USER:$$GITHUB_TOKEN@github.com".insteadOf "https://github.com"
+    cd platform-repo
+    cd env/common
+    terraform apply -auto-approve -no-color
+
+  id: tf apply
+  entrypoint: sh
+  secretEnv:
+  - INFRA_REGION
+  - APP_FACTORY_PROJECT_ID
+  - APP_FACTORY_PROJECT_NUM
+  - SECRETS_PROJECT
+  - GITHUB_TOKEN
+  - GITHUB_USER
+timeout: 3600s
+availableSecrets:
+  secretManager:
+  - versionName: projects/YOUR_SECRET_PROJECT_ID/secrets/github-token/versions/latest
+    env: GITHUB_TOKEN
+  - versionName: projects/YOUR_SECRET_PROJECT_ID/secrets/github-user/versions/latest
+    env: GITHUB_USER
+  - versionName: projects/YOUR_SECRET_PROJECT_ID/secrets/infra-region/versions/latest
+    env: INFRA_REGION
+  - versionName: projects/YOUR_SECRET_PROJECT_ID/secrets/application-factory-id/versions/latest
+    env: APP_FACTORY_PROJECT_ID
+  - versionName: projects/YOUR_SECRET_PROJECT_ID/secrets/application-factory-number/versions/latest
+    env: APP_FACTORY_PROJECT_NUM
+  - versionName: projects/YOUR_SECRET_PROJECT_ID/secrets/secrets-project/versions/latest
+    env: SECRETS_PROJECT

@@ -21,7 +21,6 @@ spec:
   template:
     spec:
       serviceAccount: SERVICEACCOUNT
-      serviceAccountName: golang-template-ksa
       containers:
       - name: app
         env:

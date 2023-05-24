@@ -23,9 +23,4 @@ resource "null_resource" "landing_zone_renderer" {
     command = "${path.module}/create_wi.sh ${var.git_org} ${var.git_user} ${var.git_email} ${var.tf_modules_repo} ${var.cluster_name} ${var.cluster_project_id} ${var.env} ${var.index}"
   }
 
-  // https://github.com/hashicorp/terraform/issues/23679
-  //provisioner "local-exec" {
-  //  when = destroy
-  //  command = "${path.module}/create_target.sh ${var.git_org} ${var.git_repo} ${var.git_user} ${var.git_email} ${var.cluster_name}"
-  //}
 }

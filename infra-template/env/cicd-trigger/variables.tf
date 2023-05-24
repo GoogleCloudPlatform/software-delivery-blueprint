@@ -55,3 +55,9 @@ variable "region" {
   description = "Region where resources like Cloud Deploy and Artifact Registry should be created."
   default = "YOUR_REGION"
 }
+
+variable "secret_project_id" {
+  type = string
+  description = "ID of the project that holds common secrets."
+  default = "YOUR_SECRET_PROJECT_ID"
+}

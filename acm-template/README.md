@@ -1,6 +1,6 @@
 # Overview
 
-`acm-template` contains the [Anthos Config Management (ACM)][acm] starting point configuration for the multi-tenant platform. The `acm-template` folder is hydrated into a repository during the execution of the [`software-delivery-infra.sh`][software-delivery-infra]
+`acm-template` contains the [Anthos Config Management (ACM)][acm] starting point configuration for the multi-tenant platform. The `acm-template` folder is hydrated into a repository during the execution of the [`bootstrap.sh`][software-delivery-infra]
 script.
 
 The Anthos Config Management repo contains the k8s configuration for the multi-tenant [Google Kubernetes Engine (GKE)][gke] clusters. After the GKE clusters in multi-tenant infrastructure are created, they are associated with this repo for config management. In this blueprint we have choosen to store cluster configuration (Cluster, ClusterSelector, etc), policies, and application landing zones (Namespace, NetworkPolicy, Workload Identity, etc.) all of which should be deployed fleet wide or at the granularity of clusters. Deploying the cluster configuration equally to all environments to helps maintain consistency between environments. In some places [ClusterSelectors][cluster-selectors] are used to apply manifests to subset of clusters or environments. Application configuration (Service, ReplicaSet, ConfigMap, HPA, etc.) is deployed with [Cloud Deploy][cloud-deploy]. Typically, application config has a higher velocity of change and more variation within an individual cluster for example canary deployments.
@@ -19,7 +19,9 @@ All clusters are configured to monitor the `manifests` folder for their respecti
     - [Constraints](#constraints)
   - [Templates](#templates)
   - [Workflow](#workflow)
+  - [Licensing](#licensing)
   - [Usage](#usage)
+  - [Contributing](#contributing)
 
 ## Manifests
 
@@ -59,6 +61,24 @@ When you have reviewed the changes on dev cluster and are ready to deploy in sta
 
 Similarly, to make changes in prod, create PR from staging to prod. As soon as the PR is approved, the changes are merged to prod branch and policies are applied to GKE clusters in the prod environment.
 
+## Licensing
+
+```lang-none
+Copyright 2022 Google LLC
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+```
+
 ## Usage
 
 Copyright 2022 Google. This software is shared as sample code and not intended
@@ -66,14 +86,21 @@ for production use and provided as-is, without warranty or representation for
 any use or purpose. Your use of it is discretionary and subject to your
 agreement with Google.
 
+## Contributing
+
+*   [Contributing guidelines][contributing-guidelines]
+*   [Code of conduct][code-of-conduct]
 
 <!-- LINKS: https://www.markdownguide.org/basic-syntax/#reference-style-links -->
+
+[contributing-guidelines]: CONTRIBUTING.md
+[code-of-conduct]: code-of-conduct.md
 
 [acm]: https://cloud.google.com/anthos/config-management
 [cloud-deploy]: https://cloud.google.com/deploy
 [cluster-selectors]: https://cloud.google.com/anthos-config-management/docs/how-to/clusterselectors
 [gke]: https://cloud.google.com/kubernetes-engine
-[software-delivery-infra]: ../launch-scripts/software-delivery-infra.sh
+[software-delivery-infra]: ../launch-scripts/bootstrap.sh
 [workload-identity]: https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity
 [namespace]: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
 [network-policies]: https://kubernetes.io/docs/concepts/services-networking/network-policies/

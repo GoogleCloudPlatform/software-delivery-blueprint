@@ -22,55 +22,83 @@ data "google_project" "YOUR_APPLICATION_NAME_infra_project" {
   project_id = "YOUR_INFRA_PROJECT_ID"
 }
 
+data "google_project" "YOUR_APPLICATION_NAME_secrets_project" {
+  project_id = "YOUR_SECRET_PROJECT_ID"
+}
+
 data "google_secret_manager_secret_version" "YOUR_APPLICATION_NAME_github-user" {
   secret = "github-user"
-  project = "YOUR_INFRA_PROJECT_ID"
+  project = "YOUR_SECRET_PROJECT_ID"
 }
 
 data "google_secret_manager_secret_version" "YOUR_APPLICATION_NAME_github-token" {
   secret = "github-token"
-  project = "YOUR_INFRA_PROJECT_ID"
+  project = "YOUR_SECRET_PROJECT_ID"
 }
 
 data "google_secret_manager_secret_version" "YOUR_APPLICATION_NAME_github-email" {
   secret = "github-email"
-  project = "YOUR_INFRA_PROJECT_ID"
+  project = "YOUR_SECRET_PROJECT_ID"
 }
 
 data "google_secret_manager_secret_version" "YOUR_APPLICATION_NAME_gcp-billingac" {
   secret = "gcp-billingac"
-  project = "YOUR_INFRA_PROJECT_ID"
+  project = "YOUR_SECRET_PROJECT_ID"
 }
 
 data "google_secret_manager_secret_version" "YOUR_APPLICATION_NAME_github-org" {
   secret = "github-org"
-  project = "YOUR_INFRA_PROJECT_ID"
+  project = "YOUR_SECRET_PROJECT_ID"
 }
 
 data "google_secret_manager_secret_version" "YOUR_APPLICATION_NAME_gcp-org" {
   secret = "gcp-org"
-  project = "YOUR_INFRA_PROJECT_ID"
+  project = "YOUR_SECRET_PROJECT_ID"
 }
 
 data "google_secret_manager_secret_version" "YOUR_APPLICATION_NAME_gcp-folder" {
   secret = "gcp-folder"
-  project = "YOUR_INFRA_PROJECT_ID"
-}
-
-data "google_secret_manager_secret_version" "YOUR_APPLICATION_NAME_group-id" {
-  secret = "group-id"
-  project = "YOUR_INFRA_PROJECT_ID"
+  project = "YOUR_SECRET_PROJECT_ID"
 }
 
 data "google_secret_manager_secret_version" "YOUR_APPLICATION_NAME_acm-repo" {
   secret = "acm-repo"
-  project = "YOUR_INFRA_PROJECT_ID"
+  project = "YOUR_SECRET_PROJECT_ID"
+}
+
+#Looking up the bucket name that is used to trigger cloud function to add deploy permissions to the application's CICD and IAC service accounts
+data "google_secret_manager_secret_version" "YOUR_APPLICATION_NAME_trigger-bucket-dep" {
+  count = length(local.YOUR_APPLICATION_NAME_environments)
+  secret = local.YOUR_APPLICATION_NAME_trigger_bucket_dep[local.YOUR_APPLICATION_NAME_environments[count.index]]
+  project = "YOUR_SECRET_PROJECT_ID"
+}
+
+#Looking up the bucket name that is used to trigger cloud function to add read permissions to the secrets for application's CICD and IAC service accounts
+data "google_secret_manager_secret_version" "YOUR_APPLICATION_NAME_trigger-bucket-sec" {
+  secret = local.YOUR_APPLICATION_NAME_trigger_bucket_sec
+  project = "YOUR_SECRET_PROJECT_ID"
+}
+
+#Looking up the bucket name that is used to trigger cloud function to add billing user permission for application's IAC service account
+data "google_secret_manager_secret_version" "YOUR_APPLICATION_NAME_trigger-bucket-billing" {
+  secret = local.YOUR_APPLICATION_NAME_trigger_bucket_billing
+  project = "YOUR_SECRET_PROJECT_ID"
+}
+
+#Looking up the bucket name that is used to trigger cloud function to add project creator permission for application's IAC service account
+data "google_secret_manager_secret_version" "YOUR_APPLICATION_NAME_trigger-bucket-proj" {
+  secret = local.YOUR_APPLICATION_NAME_trigger_bucket_proj
+  project = "YOUR_SECRET_PROJECT_ID"
 }
 
 locals {
     YOUR_APPLICATION_NAME_environments = ["dev", "staging", "prod"]
     YOUR_APPLICATION_NAME_namespace = zipmap(local.YOUR_APPLICATION_NAME_environments,[for env in local.YOUR_APPLICATION_NAME_environments : "YOUR_APPLICATION_NAME"])
     YOUR_APPLICATION_NAME_ksa = zipmap(local.YOUR_APPLICATION_NAME_environments,[for env in local.YOUR_APPLICATION_NAME_environments : "YOUR_APPLICATION_NAME-ksa"])
+    YOUR_APPLICATION_NAME_trigger_bucket_dep = zipmap(local.YOUR_APPLICATION_NAME_environments,[for env in local.YOUR_APPLICATION_NAME_environments : "permission-fun-trg-bucket-${env}"])
+    YOUR_APPLICATION_NAME_trigger_bucket_sec = "secret-permission-fn-trg-bucket"
+    YOUR_APPLICATION_NAME_trigger_bucket_billing = "billing-permission-fn-trg-bucket"
+    YOUR_APPLICATION_NAME_trigger_bucket_proj = "project-permission-fn-trg-bucket"
 }
 
 //Create application seed/admin project and cloud build service accounts for iac and cicd
@@ -81,23 +109,15 @@ module "YOUR_APPLICATION_NAME-admin-seed" {
   org_id = data.google_secret_manager_secret_version.YOUR_APPLICATION_NAME_gcp-org.secret_data
   folder_id = "YOUR_GCP_FOLDER_ID" //Not passing the folder id from the secret gcp-folder in multi-tenant project to allow the teams to create applications in separate folder if needed.
   app_factory_cb_service_account = format("%s@%s",data.google_project.YOUR_APPLICATION_NAME_factory_project.number,"cloudbuild.gserviceaccount.com")
-  group_id = data.google_secret_manager_secret_version.YOUR_APPLICATION_NAME_group-id.secret_data
+  #group_id = data.google_secret_manager_secret_version.YOUR_APPLICATION_NAME_group-id.secret_data
   app_name = "YOUR_APPLICATION_NAME"
-  custom_sa = "YOUR_SA_TO_IMPERSONATE"
+  #custom_sa = "YOUR_SA_TO_IMPERSONATE"
   env = local.YOUR_APPLICATION_NAME_environments
   region = "YOUR_REGION"
-  providers = { google.impersonated = google.impersonated }
-}
-
-//Copy the secrets from multi-tenant infra/platform project to the application seed/admin project
-module "YOUR_APPLICATION_NAME-copy-secrets" {
-  source = "git::https://github.com/GITHUB_ORG_TO_CLONE_TEMPLATES_FROM/terraform-modules.git//app-group-copy-secrets"
-  secrets = ["github-user", "github-email", "github-token", "gcp-billingac", "github-org", "gcp-org", "gcp-folder"]
-  infra_project_id = "YOUR_INFRA_PROJECT_ID"
-  seed_project_id = module.YOUR_APPLICATION_NAME-admin-seed.project_id
-  cb_iac_service_account = module.YOUR_APPLICATION_NAME-admin-seed.iac_sa_email
-  app_name = "YOUR_APPLICATION_NAME"
-  region   = "YOUR_REGION"
+  trigger_buckets_dep = data.google_secret_manager_secret_version.YOUR_APPLICATION_NAME_trigger-bucket-dep.*.secret_data
+  trigger_bucket_sec = data.google_secret_manager_secret_version.YOUR_APPLICATION_NAME_trigger-bucket-sec.secret_data
+  trigger_bucket_billing = data.google_secret_manager_secret_version.YOUR_APPLICATION_NAME_trigger-bucket-billing.secret_data
+  trigger_bucket_proj = data.google_secret_manager_secret_version.YOUR_APPLICATION_NAME_trigger-bucket-proj.secret_data
 }
 
 module "YOUR_APPLICATION_NAME-iac-pipeline" {
@@ -114,10 +134,11 @@ module "YOUR_APPLICATION_NAME-iac-pipeline" {
   org_id = data.google_secret_manager_secret_version.YOUR_APPLICATION_NAME_gcp-org.secret_data
   billing_account = data.google_secret_manager_secret_version.YOUR_APPLICATION_NAME_gcp-billingac.secret_data
   state_bucket = module.YOUR_APPLICATION_NAME-admin-seed.iac_bucket_name
-  depends_on = [module.YOUR_APPLICATION_NAME-copy-secrets]
+  #depends_on = [module.YOUR_APPLICATION_NAME-copy-secrets]
   ci_sa  = module.YOUR_APPLICATION_NAME-admin-seed.cicd_sa_id
   cd_sa = module.YOUR_APPLICATION_NAME-admin-seed.clouddeploy_sa_email
   region = "YOUR_REGION"
+  secret_project_id = "YOUR_SECRET_PROJECT_ID"
   folder_id = "YOUR_GCP_FOLDER_ID" //Not passing the folder id from the secret gcp-folder in multi-tenant project to allow the teams to create applications in separate folder if needed.
 }
 
@@ -177,7 +198,7 @@ module "YOUR_APPLICATION_NAME-cicd-repo" {
   source = "git::https://github.com/GITHUB_ORG_TO_CLONE_TEMPLATES_FROM/terraform-modules.git//manage-repos/github-app-repo"
   application_name = "YOUR_APPLICATION_NAME"
   org_name_to_clone_template_from = "GITHUB_ORG_TO_CLONE_TEMPLATES_FROM"
-  trigger_type = "donotcreate" //This is to now create the githubtrigger or webhook with this call. The github trigger or webhook si created by the IaC trigger
+  trigger_type = "donotcreate" //Only creates the app git repo and perform the substitutions. The github trigger or webhook is created by the IaC trigger later.
   project_number = module.YOUR_APPLICATION_NAME-admin-seed.project_number
   project_id = module.YOUR_APPLICATION_NAME-admin-seed.project_id
   service_account = module.YOUR_APPLICATION_NAME-admin-seed.iac_sa_id
@@ -189,5 +210,6 @@ module "YOUR_APPLICATION_NAME-cicd-repo" {
   ksa = local.YOUR_APPLICATION_NAME_ksa
   env = local.YOUR_APPLICATION_NAME_environments
   region = "YOUR_REGION"
+  secret_project_id = "YOUR_SECRET_PROJECT_ID"
 
 }

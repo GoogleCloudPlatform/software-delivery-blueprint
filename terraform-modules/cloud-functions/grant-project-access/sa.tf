@@ -14,11 +14,19 @@
  * limitations under the License.
  */
 
-terraform {
-  required_providers {
-    google = {
-      source  = "hashicorp/google"
-      version = ">= 4.28.0"
-    }
-  }
+# Read the required SA from secrets manager
+data "google_secret_manager_secret_version" "function-sa" {
+  secret = "project-granting-sa"
+  project = var.secrets_project_id
 }
+
+resource "google_project_iam_member" "function-sa-roles" {
+  project = var.project_id
+  for_each = toset([
+    "roles/resourcemanager.projectIamAdmin",
+    "roles/storage.objectViewer"
+  ])
+  role   = each.key
+  member = "serviceAccount:${data.google_secret_manager_secret_version.function-sa.secret_data}"
+}
+

@@ -26,19 +26,14 @@ ci_sa=${9}
 cd_sa=${10}
 region=${11}
 trigger_type=${12}
-folder_id=${13}
+secret_project_id=${13}
+folder_id=${14}
 
 repo=${application_name}-infra
 for branch in "cicd-trigger"
 do
   git clone -b ${branch} https://github.com/${github_org}/${repo} ${repo}
   cd ${repo}
-  find . -type f -name "*.tf" -exec  sed -i "s/YOUR_BILLING_ACCOUNT/${billing_account}/g" {} +
-  find . -type f -name "*.tf" -exec  sed -i "s/YOUR_ORG_ID/${org_id}/g" {} +
-  find . -type f -name "*.tf" -exec  sed -i "s/YOUR_GITHUB_USER/${github_user}/g" {} +
-  find . -type f -name "*.tf" -exec  sed -i "s/YOUR_GITHUB_EMAIL/${github_email}/g" {} +
-  find . -type f -name "*.tf" -exec  sed -i "s/YOUR_GITHUB_ORG/${github_org}/g" {} +
-  find . -type f -name "*.tf" -exec  sed -i "s/YOUR_FOLDER_ID/${folder_id}/g" {} +
   find . -type f -name "*.tf" -exec  sed -i "s/YOUR_PROJECT_NAME/${application_name}/g" {} +
   find . -type f -name "*.tf" -exec  sed -i "s/YOUR_TERRAFORM_STATE_BUCKET/${state_bucket}/g" {} +
   find . -type f -name "*.tf" -exec  sed -i "s/YOUR_APPLICATION/${application_name}/g" {} +
@@ -48,9 +43,10 @@ do
   find . -type f -name "*.tf" -exec  sed -i "s/YOUR_REGION/${region}/g" {} +
   find . -type f -name "cloudbuild.yaml" -exec  sed -i "s:YOUR_CI_SA:${ci_sa}:g" {} +
   find . -type f -name "*.tf" -exec  sed -i "s/YOUR_TRIGGER_TYPE/${trigger_type}/g" {} +
+  find . -type f -exec  sed -i "s/YOUR_SECRET_PROJECT_ID/${secret_project_id}/g" {} +
   git add .
   git config --global user.name ${github_user}
   git config --global user.email ${github_email}
-  git commit -m "Setting up infra repo."
+  git commit -m "IGNORE running the trigger.Setting up infra repo for the first time."
   git push origin
 done

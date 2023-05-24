@@ -25,11 +25,6 @@ gsa=${7}
 env=${8}
 kubernetes_sa=${9}
 
-##The following code is to avoid race condition to the commits done to acm repo in different folders by this script
-#sleep_time=20
-#sleep_index=$((${index}+1))
-#sleep_total=$((${sleep_time}*${sleep_index}))
-#sleep $sleep_total
 random=$(echo $RANDOM | md5sum | head -c 20; echo)
 local_acm_repo="${acm_repo}-${random}"
 git config --global url."https://${github_user}:${github_token}@github.com".insteadOf "https://github.com"

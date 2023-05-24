@@ -59,3 +59,9 @@ variable "acm_repo" {
   type = string
   description = "ACM repo name."
 }
+
+variable "enable_config_management" {
+  type = string
+  description = "Flag to enable config management."
+  default = 1
+}

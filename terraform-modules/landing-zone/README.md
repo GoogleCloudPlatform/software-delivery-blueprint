@@ -22,7 +22,7 @@ Pre-requisite : The [landing-zone-render module][landing-zone-render] adds a fol
 This module is called from _app-name_.tf files in [Application Factory][application-factory] repo for each application and performs the following actions as part of landing zone creation for the application:
 
 -   creates Kubernetes yaml files for namespace, Kubernetes Service Account and network-policy and commits them to ACM repo that creates these resources on the GKE clusters.
--   grants permissions to Google Service Account on Kubernetes Service Account to complete workload identity setup. 
+-   grants permissions to Google Service Account on Kubernetes Service Account to complete workload identity setup.
 
 
 <!-- LINKS: https://www.markdownguide.org/basic-syntax/#reference-style-links -->

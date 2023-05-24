@@ -17,6 +17,6 @@
 terraform {
   backend "gcs" {
     bucket = "YOUR_APP_INFRA_TERRAFORM_STATE_BUCKET"
-    prefix = "softare-delivery-app-infra"
+    prefix = "tenant-factory"
   }
 }
