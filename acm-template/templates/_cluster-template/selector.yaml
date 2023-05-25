@@ -19,4 +19,4 @@ metadata:
 spec:
   selector:
     matchLabels:
-      clusterName: CLUSTER_NAME
+      environment: ENV

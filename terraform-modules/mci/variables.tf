@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-data "google_service_account_access_token" "default" {
-  provider               = google
-  target_service_account = "YOUR_SA_TO_IMPERSONATE"
-  scopes                 = ["userinfo-email", "cloud-platform"]
-  lifetime               = "300s"
+variable "membership_id" {
+  type = string
+  description = "Hub membership id."
 }
 
-provider "google" {
-  alias        = "impersonated"
-  access_token = data.google_service_account_access_token.default.access_token
+
+variable "project_id" {
+  type = string
+  description = "Project Id."
 }

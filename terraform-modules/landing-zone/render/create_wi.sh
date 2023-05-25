@@ -43,7 +43,7 @@ find ./${env} -type f -name ${cluster_project_id}-${cluster_name}.tf -exec  sed 
 git add .
 git config --global user.name ${git_user}
 git config --global user.email ${git_email}
-git commit -m "Adding Cloud Deploy target ${cluster_name}."
+git commit -m "Adding Cluster selector for ${cluster_name}."
 git push origin
 
 cd ../

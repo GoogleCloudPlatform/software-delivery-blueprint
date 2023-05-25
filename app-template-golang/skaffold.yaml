@@ -31,7 +31,12 @@ profiles:
     kustomize:
       paths:
       - k8s/staging
-- name: prod
+- name: prod-2
+  deploy:
+    kustomize:
+      paths:
+      - k8s/prod
+- name: prod-1
   deploy:
     kustomize:
       paths:

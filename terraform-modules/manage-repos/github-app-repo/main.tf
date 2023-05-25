@@ -42,7 +42,7 @@ resource "null_resource" "set-repo" {
     id = github_repository.application_repo.id
   }
   provisioner "local-exec" {
-    command = "${path.module}/prep-app-repo.sh ${var.org_name_to_clone_template_from} ${var.application_name} ${var.github_user} ${var.github_email} ${var.namespace[var.env[count.index]]} ${var.ksa[var.env[count.index]]} ${var.env[count.index]} ${count.index} ${var.region}"
+    command = "${path.module}/prep-app-repo.sh ${var.org_name_to_clone_template_from} ${var.application_name} ${var.github_user} ${var.github_email} ${var.namespace[var.env[count.index]]} ${var.ksa[var.env[count.index]]} ${var.env[count.index]} ${count.index} ${var.region} ${var.secret_project_id}"
   }
   depends_on = [github_repository.application_repo, module.app-github-trigger, module.app-web-hook]
 }
@@ -56,6 +56,7 @@ module "app-web-hook" {
   app_repo_name   = split("/", github_repository.application_repo.full_name)[1]
   project_id      = var.project_id
   service_account = var.service_account
+  secret_project_id = var.secret_project_id
   depends_on      = [github_repository.application_repo]
 }
 

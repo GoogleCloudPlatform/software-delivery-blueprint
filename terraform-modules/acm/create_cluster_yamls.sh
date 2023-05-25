@@ -20,20 +20,22 @@ github_user=${3}
 github_email=${4}
 cluster_env=${5}
 cluster_name=${6}
-
-git clone -b dev https://${github_user}:${TF_VAR_github_token}@github.com/${github_org}/${acm_repo_name} ${acm_repo_name}
-cd ${acm_repo_name}
+TIMESTAMP=$(date "+%Y%m%d%H%M%S")
+download_acm_repo_name=${acm_repo_name}-${TIMESTAMP}
+git clone -b dev https://${github_user}:${TF_VAR_github_token}@github.com/${github_org}/${acm_repo_name} ${download_acm_repo_name}
+cd ${download_acm_repo_name}
 
 git checkout dev
 cd manifests/clusters
 
 cp ../../templates/_cluster-template/cluster.yaml ./${cluster_name}-cluster.yaml
-cp ../../templates/_cluster-template/selector.yaml ./${cluster_name}-selector.yaml
+cp ../../templates/_cluster-template/selector.yaml ./${cluster_env}-selector.yaml
+#cp ../../templates/_cluster-template/config-selector.yaml ./config-selector.yaml
 
 find . -type f -name ${cluster_name}-cluster.yaml -exec  sed -i "s/CLUSTER_NAME/${cluster_name}/g" {} +
 find . -type f -name ${cluster_name}-cluster.yaml -exec  sed -i "s/ENV/${cluster_env}/g" {} +
-find . -type f -name ${cluster_name}-selector.yaml -exec  sed -i "s/CLUSTER_NAME/${cluster_name}/g" {} +
-find . -type f -name ${cluster_name}-selector.yaml -exec  sed -i "s/ENV/${cluster_env}/g" {} +
+find . -type f -name ${cluster_env}-selector.yaml -exec  sed -i "s/ENV/${cluster_env}/g" {} +
+#find . -type f -name config-selector.yaml -exec  sed -i "s/CLUSTER_NAME/${cluster_name}/g" {} +
 
 git add .
 git config --global user.name ${github_user}

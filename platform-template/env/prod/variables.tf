@@ -13,39 +13,43 @@
 # limitations under the License.
 
 variable "project_id" {
-  default =  "YOUR_INFRA_PROJECT_ID"
   description = "ID of your platform setup project/platform seed project"
 }
-variable "group" {
-  default = "YOUR_IAM_GROUP"
-  description = "IAM group"
+variable "app_factory_project_id" {
+  type = string
 }
+variable "app_factory_project_num" {
+  type = number
+  description = "project number of application factory"
+}
+variable "secrets_project_id" {
+  type = string
+  description = "Project ID of the projects hosting all secrets"
+}
+
 variable "billing_account" {
-  default = "YOUR_BILLING_ACCOUNT"
   description = "GCP billing account"
 }
 variable "org_id" {
-  default = "YOUR_ORG_ID"
   description = "GCP org id"
 }
 variable "github_user" {
-  default = "YOUR_GITHUB_USER"
+  type = string
 }
 variable "github_email" {
-  default = "YOUR_GITHUB_EMAIL"
+  type = string
 }
 variable "github_org" {
-  default = "YOUR_GITHUB_ORG"
+  type = string
 }
 variable "github_token" {
   description = "The access token that should be used for authenticating to GitHub."
   sensitive = true
 }
 variable "folder_id" {
-  default = "YOUR_FOLDER_ID"
 }
 variable "acm_repo" {
-  default = "YOUR_ACM_REPO"
+  type = string
 }
 variable "env" {
   default = "prod"
@@ -68,7 +72,7 @@ variable "subnet_01_ip" {
   default = "10.40.0.0/22"
 }
 variable "subnet_01_region" {
-  default = "YOUR_REGION"
+  description = "primary region where resources will be created"
 }
 variable "subnet_01_description" {
   default = "subnet 01"
@@ -80,7 +84,7 @@ variable "subnet_02_ip" {
   default = "10.12.0.0/22"
 }
 variable "subnet_02_region" {
-  default = "YOUR_REGION"
+  description = "secondary region where resources will be created"
 }
 variable "subnet_02_description" {
   default = "subnet 02"

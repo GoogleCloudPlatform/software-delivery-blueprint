@@ -19,7 +19,7 @@ terraform {
     google = {
       source                = "hashicorp/google"
       version               = ">= 4.28.0"
-      configuration_aliases = [google.impersonated]
+      #configuration_aliases = [google.impersonated]
     }
 
     google-beta = {

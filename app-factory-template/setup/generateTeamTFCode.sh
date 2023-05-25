@@ -17,7 +17,6 @@
 user=${1}
 email="${user}@github.com"
 org=${2}
-#secret=$4
 raw_team_name=${3}
 repo=${4}
 teams_basedir="teams"

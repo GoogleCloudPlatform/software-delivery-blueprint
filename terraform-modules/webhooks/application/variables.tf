@@ -38,3 +38,8 @@ variable "service_account" {
   description = "Service Account to associate Cloud Build trigger with."
   type        = string
 }
+
+variable "secret_project_id" {
+  type = string
+  description = "ID of the project that holds common secrets."
+}

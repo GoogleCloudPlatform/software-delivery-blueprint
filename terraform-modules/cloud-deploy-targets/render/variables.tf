@@ -55,3 +55,8 @@ variable "git_repo" {
   type        = string
   description = "GitHub repo name."
 }
+
+variable "env_name" {
+  type        = string
+  description = "Environment."
+}

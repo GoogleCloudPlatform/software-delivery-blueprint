@@ -46,6 +46,7 @@ module "app-web-hook" {
   app_repo_name   = var.application_name
   project_id      = var.project_id
   service_account = var.cloudbuild_service_account
+  secret_project_id = var.secret_project_id
 }
 
 //Create GitHub trigger to invoke Cloud Build trigger
@@ -93,17 +94,23 @@ resource "google_clouddeploy_delivery_pipeline" "primary" {
   serial_pipeline {
     stages {
       profiles  = ["dev"]
-      target_id = module.cloud-deploy-targets.gke-dev-us-central1.target.name
+      target_id = module.cloud-deploy-targets.dev-target.target.name
     }
 
     stages {
       profiles  = ["staging"]
-      target_id = module.cloud-deploy-targets.gke-staging-us-central1.target.name
+      target_id = module.cloud-deploy-targets.staging-target.target.name
     }
 
     stages {
-      profiles  = ["prod"]
-      target_id = module.cloud-deploy-targets.gke-prod-us-central1.target.name
+      profiles  = ["prod-1"]
+      target_id = module.cloud-deploy-targets.prod-1-target.target.name
     }
+
+    stages {
+      profiles  = ["prod-2"]
+      target_id = module.cloud-deploy-targets.prod-2-target.target.name
+    }
+
   }
 }

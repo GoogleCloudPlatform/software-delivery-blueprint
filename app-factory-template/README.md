@@ -2,7 +2,7 @@
 
 The Application Factory is an example of a golden path, that allows teams to quickly provision application landing zones in the multi-tenant infrstructure and single-tenant infrastructure in a self-service manner. Using the Application Factory developers, devops engineers or platform admins can create code repositories, an application landing zone, application CI/CD pipeline and an infrastructure as code pipeline to manage infrastructure dedicated to the application. The landing zone and infrastructure is created using Terraform and yaml templates defined by platform administrators so best practices are adopted from day 1.
 
-The `app-factory-template` directory contains the structure and Cloud Build triggers that teams will use to create new applications and manage application teams in the software delivery platform. `app-factory-template` folder is hydrated into a repository during the execution of the [`software-delivery-app.sh`][software-delivery-app] script.
+The `app-factory-template` directory contains the structure and Cloud Build triggers that teams will use to create new applications and manage application teams in the software delivery platform. `app-factory-template` folder is hydrated into a repository during the execution of the [`bootstrap.sh`][software-delivery-app] script.
 
 ## Table of Contents
 
@@ -29,7 +29,9 @@ The `app-factory-template` directory contains the structure and Cloud Build trig
       - [Change application code of an application](#change-application-code)
       - [Change IaC pipeline of an application](#change-iac-cloud-build-trigger-pipeline)
       - [Change CICD pipeline of an application](#change-cicd-cloud-build-trigger-pipeline)
+  - [Licensing](#licensing)
   - [Usage](#usage)
+  - [Contributing](#contributing)
 
 ## Application Factory Architecture
 
@@ -37,7 +39,7 @@ The `app-factory-template` directory contains the structure and Cloud Build trig
 
 The diagram above shows the components of the Application Factory and their interactions:
 
-1.  Users start the process of creating a new application by providing the application name and runtime to the `create-app` Cloud Build[cloud-build] trigger.
+1.  Users start the process of creating a new application by providing the application name and runtime to the `create-app` [Cloud Build][cloud-build] trigger.
 2.  Cloud Build performs variable substitution in [`application.tf.tpl`][application-tf-tpl] to hydrate Terraform to represent the new application. The hydrated Terraform is committed in the Application Factory's git repository as `<application_name>.tf`.
 3.  The `tf-apply` Cloud Build trigger reads the new code and starts the process of deploying new resources.
 4.  Applying the Terraform creates new git repos for the application code and application's infrastructure as code off of the runtime's template and `infra-template` respectively. Terraform also hydrates the Kubernetes [landing zone][landing-zone] in the [Anthos Config Management][acm] repo. Finally this process also creates the application's CI/CD project and infrastructure as code Cloud Build trigger.
@@ -57,7 +59,6 @@ The templates for applications and teams is intentionally very small and uses th
 The application template ([`application.tf.tpl`][application-tf-tpl]) is the IaC used to create the following resources.
 
 -   Application CI/CD project
--   Secrets copied from the multi-tenant admin project
 -   Application code repository from the language specific template
 -   Application group IaC repository from the [`infra-template`][infra-template]
 -   Infrastructure as code Cloud Build trigger in the CI/CD project
@@ -121,7 +122,7 @@ The application factory has four Cloud Build tiggers, each are defined as yaml f
 3.  `tf-plan`, performs a Terraform plan.
 4.  `tf-apply`, performs Terraform apply, updating the provisioned applications and teams in GitHub.
 
-Note: The script software-delivery-app.sh that creates your application factory accepts an input "TRIGGER_TYPE" which can be either `webhook` or `github`. 
+Note: The script bootstrap.sh that creates your application factory accepts an input "TRIGGER_TYPE" which can be either `webhook` or `github`. 
 If `github` is passed as "TRIGGER_TYPE" to the script, the script creates GitHub triggers in Cloud Build. 
 If `webhook` is passed as "TRIGGER_TYPE" to the script, the script creates webhook triggers in Cloud Build. 
 
@@ -154,7 +155,7 @@ The trigger will generate the Terraform code to spin up a new application and sa
 ### Create a new GitHub team
 
 -   In `teams` create a new template with the same name as the team you are creating.  For example, to create a team called Operations, you will need to create a file named `operations.tpl` under the `config/teams-config` folder. Note that the names are case-insensitive.
--   Commit and push your changes to the `app-factory` repo, as specified when running the `software-delivery-app.sh` launch script.
+-   Commit and push your changes to the `app-factory` repo, as specified when running the `bootstrap.sh` launch script.
 -   Run `add-team-files` trigger in the Application factory. Passing the following parameters:
     -  Team name (It should be the same as the name of the file you committed in previous step.)
 -   Run the `tf-plan` trigger to verify the actions Terraform will take.
@@ -252,6 +253,24 @@ When you create an application via Application Factory, you get the following co
 -   If the trigger was created as a **GitHub trigger**, the `cloudbuild.yaml` in _application-name_ repo will be used as configuration file(execution steps) for the trigger. You can change the yaml file if you need to change the trigger's execution steps.
 -   If the trigger was created as a **webhook trigger**, the configuration of the trigger will be inline in the Cloud Build trigger. In this scenario you will not need `cloudbuild.yaml` in _application-name_-infra repo so it is recommended to delete it to avoid confusion. To change the `deploy-app` trigger's execution steps, it is recommended to create a new version of [Terraform module][application-webhook-terraform-module] that creates the trigger in IaC Cloud Build pipeline. Alternatively, you can change it inline by opening the trigger from Google Cloud console or Google Cloud CLI or SDK, not recommended since those update could be overwritten by the Iac pipeline.
 
+## Licensing
+
+```lang-none
+Copyright 2022 Google LLC
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+```
+
 ## Usage
 
 Copyright 2022 Google. This software is shared as sample code and not intended
@@ -259,8 +278,15 @@ for production use and provided as-is, without warranty or representation for
 any use or purpose. Your use of it is discretionary and subject to your
 agreement with Google.
 
+## Contributing
+
+* [Contributing guidelines][contributing-guidelines]
+* [Code of conduct][code-of-conduct]
 
 <!-- LINKS: https://www.markdownguide.org/basic-syntax/#reference-style-links -->
+
+[contributing-guidelines]: CONTRIBUTING.md
+[code-of-conduct]: code-of-conduct.md
 
 [acm]: https://cloud.google.com/anthos/config-management
 [application-tf-tpl]: templates/application.tf.tpl
@@ -273,7 +299,7 @@ agreement with Google.
 [team-tf-tpl]: templates/team.tf.tpl
 [terraform-modules]: ../terraform-modules/
 [skaffold]: https://skaffold.dev/
-[software-delivery-app]: ../launch-scripts/software-delivery-app.sh
+[software-delivery-app]: ../launch-scripts/bootstrap.sh
 [next19-infra-as-code]: https://www.youtube.com/watch?v=3vfXQxWJazM
 [multi-tenant-repo]: ../platform-template/#infrastructure-pipeline
 [iac-webhook-terraform-module]: ../terraform-modules/webhooks/iac

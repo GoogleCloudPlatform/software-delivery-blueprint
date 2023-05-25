@@ -23,6 +23,7 @@ spec:
       serviceAccount: SERVICEACCOUNT
       containers:
       - name: app
+        image: us-docker.pkg.dev/google-samples/containers/gke/whereami:v1.2.9
         env:
         - name: ENVIRONMENT
           value: prod
