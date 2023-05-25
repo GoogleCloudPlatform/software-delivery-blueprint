@@ -17,9 +17,9 @@ steps:
 - name: 'gcr.io/cloud-builders/git'
   id: 'clone repo'
   entrypoint: /bin/sh
-  args: [ '-c', 'git clone https://${_GITHUB_USER}:$$GITHUB_TOKEN@github.com/${_GITHUB_ORG}/${_REPO_NAME}' ]
-  secretEnv: ['GITHUB_TOKEN']
-  
+  args: [ '-c', 'git clone https://$$GITHUB_USER:$$GITHUB_TOKEN@github.com/$$GITHUB_ORG/${_REPO_NAME}' ]
+  secretEnv: ['GITHUB_TOKEN','GITHUB_USER','GITHUB_ORG']
+
 - id: 'tf init'
   name: 'hashicorp/terraform:1.0.0'
   entrypoint: 'sh'
@@ -28,10 +28,10 @@ steps:
   - |
       echo ""
       echo "*************** TERRAFORM INIT ******************"
-      git config --global url."https://${_GITHUB_USER}:$$GITHUB_TOKEN@github.com".insteadOf "https://github.com"
+      git config --global url."https://$$GITHUB_USER:$$GITHUB_TOKEN@github.com".insteadOf "https://github.com"
       cd ${_REPO_NAME}
       terraform init || exit 1
-  secretEnv: ['GITHUB_TOKEN']
+  secretEnv: ['GITHUB_TOKEN','GITHUB_USER']
       
 - id: 'tf plan'
   name: 'hashicorp/terraform:1.0.0'
@@ -42,14 +42,18 @@ steps:
       echo ""
       echo "*************** TERRAFOM PLAN ******************"
 
-      git config --global url."https://${_GITHUB_USER}:$$GITHUB_TOKEN@github.com".insteadOf "https://github.com"
+      git config --global url."https://$$GITHUB_USER:$$GITHUB_TOKEN@github.com".insteadOf "https://github.com"
       cd ${_REPO_NAME}
       terraform plan || exit 1
-  secretEnv: ['GITHUB_TOKEN']
+  secretEnv: ['GITHUB_TOKEN','GITHUB_USER']
 
 
 availableSecrets:
   secretManager:
-  - versionName: projects/$PROJECT_ID/secrets/$_GITHUB_SECRET_NAME/versions/latest
+  - versionName: projects/YOUR_SECRET_PROJECT_ID/secrets/github-token/versions/latest
     env: GITHUB_TOKEN
+  - versionName: projects/YOUR_SECRET_PROJECT_ID/secrets/github-user/versions/latest
+    env: GITHUB_USER
+  - versionName: projects/YOUR_SECRET_PROJECT_ID/secrets/github-org/versions/latest
+    env: GITHUB_ORG
 

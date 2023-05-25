@@ -116,15 +116,15 @@ resource "google_cloudbuild_trigger" "deploy-app" {
         env          = "APP_NAME"
       }
       secret_manager {
-        version_name = "projects/$PROJECT_ID/secrets/github-user/versions/latest"
+        version_name = "projects/${var.secret_project_id}/secrets/github-user/versions/latest"
         env          = "GITHUB_USER"
       }
       secret_manager {
-        version_name = "projects/$PROJECT_ID/secrets/github-token/versions/latest"
+        version_name = "projects/${var.secret_project_id}/secrets/github-token/versions/latest"
         env          = "GITHUB_TOKEN"
       }
       secret_manager {
-        version_name = "projects/$PROJECT_ID/secrets/github-org/versions/latest"
+        version_name = "projects/${var.secret_project_id}/secrets/github-org/versions/latest"
         env          = "GITHUB_ORG"
       }
       secret_manager {

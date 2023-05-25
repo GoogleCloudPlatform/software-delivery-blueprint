@@ -24,7 +24,7 @@ module "CLUSTER_NAME" {
   service_account  = var.service_account
 }
 
-output "CLUSTER_NAME" {
+output "ENV_NAME-target" {
   value       = module.CLUSTER_NAME
   description = "The target object that is wrapped up in the module."
 }

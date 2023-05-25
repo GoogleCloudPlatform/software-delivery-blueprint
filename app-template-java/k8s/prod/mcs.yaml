@@ -1,0 +1,17 @@
+apiVersion: networking.gke.io/v1
+kind: MultiClusterService
+metadata:
+  name: mcs
+  namespace: YOUR_APPLICATION
+  annotations:
+    configmanagement.gke.io/cluster-selector: "config"
+spec:
+  template:
+    spec:
+      selector:
+        app: YOUR_APPLICATION-app
+      ports:
+      - name: http
+        protocol: TCP
+        port: 8080
+        targetPort: 8080

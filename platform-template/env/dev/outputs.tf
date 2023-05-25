@@ -46,11 +46,6 @@ output "network_name" {
   description = "The name of the VPC being created"
 }
 
-//output "network_id" {
-//  value       = module.create-vpc.network.network_id
-//  description = "The ID of the VPC being created"
-//}
-
 output "network_self_link" {
   value       = module.create-vpc.network.network_self_link
   description = "The URI of the VPC being created"
@@ -104,7 +99,6 @@ output "route_names" {
 
 
 output "gke-cluster-1" {
-  //value       = module.create_gke_1.name
   value       = module.create_gke_1.cluster_name.name
   description = "The name of gke cluster"
 }

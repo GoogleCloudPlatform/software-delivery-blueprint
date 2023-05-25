@@ -31,6 +31,7 @@ module "admin-project" {
     "secretmanager.googleapis.com",
     "serviceusage.googleapis.com",
     "cloudbilling.googleapis.com",
+    "cloudfunctions.googleapis.com",
     "apikeys.googleapis.com"
   ]
 }
@@ -55,22 +56,6 @@ resource "google_project_iam_member" "iac-sa-cloudbuild-roles" {
   member = "serviceAccount:${google_service_account.iac-sa[0].email}"
 }
 
-// Grant org level roles to the Cloud Build SA for IaC pipeline. TODO: We can refine the role to be on the specific billing account rather than on the org
-resource "google_organization_iam_member" "iac-sa-billing-user" {
-  count  = var.create_service_account ? 1 : 0
-  org_id = var.org_id
-  role   = "roles/billing.user"
-  member = "serviceAccount:${google_service_account.iac-sa[0].email}"
-}
-
-resource "google_organization_iam_member" "iac-sa-project-creator" {
-  count  = var.create_service_account ? 1 : 0
-  org_id = var.org_id
-  role   = "roles/resourcemanager.projectCreator"
-  member = "serviceAccount:${google_service_account.iac-sa[0].email}"
-}
-
-// State storage bucket and IAM for the IaC pipeline
 resource "google_storage_bucket" "iac-state-bucket" {
   name                        = join("-", [module.admin-project.project_id, "infra-tf"])
   project                     = module.admin-project.project_id
@@ -163,23 +148,49 @@ resource "google_secret_manager_secret_iam_member" "clouddeploy-sa-secret-access
   member    = "serviceAccount:${google_service_account.iac-sa[0].email}"
 }
 
-// Add Cloud Build CICD SA to IAM group through custom SA impersonation
-// The provider to do the impersonation is passed from the parent module
-resource "google_cloud_identity_group_membership" "iam_group_managers" {
-  provider = google.impersonated
-  group    = format("%s/%s", "groups", var.group_id)
-  preferred_member_key { id = google_service_account.cloud-deploy[0].email }
-  # MEMBER role must be specified. The order of roles should not be changed.
-  roles { name = "MEMBER" }
-  roles { name = "MANAGER" }
+# Add CloudDeploy SA to GCS so the Cloud Function can provide it roles to deploy to GKE
+resource "google_storage_bucket_object" "gke-deploy" {
+  count = length(var.trigger_buckets_dep)
+  name   = "${var.app_name}-CloudDeploy-SA.txt"
+  content = google_service_account.cloud-deploy[0].email
+  bucket = var.trigger_buckets_dep[count.index]
 }
+
+# Add IaC and CICD SA to GCS so Cloud Function can provide it secret read roles
+resource "google_storage_bucket_object" "secret-read-iac" {
+  name   = "${var.app_name}-IaC-SA.txt"
+  content = google_service_account.iac-sa[0].email
+  bucket = var.trigger_bucket_sec
+}
+resource "time_sleep" "wait_20_seconds" {
+  create_duration = "20s"
+}
+resource "google_storage_bucket_object" "secret-read-cicd" {
+  name   = "${var.app_name}-CICD-SA.txt"
+  content = google_service_account.cicd-sa[0].email
+  bucket = var.trigger_bucket_sec
+  depends_on = [google_storage_bucket_object.secret-read-cicd,time_sleep.wait_20_seconds]
+}
+# Add IaC SA to GCS so Cloud Function can provide it billing and project creator roles
+resource "google_storage_bucket_object" "billing-user-iac" {
+  name   = "${var.app_name}-IaC-SA.txt"
+  content = google_service_account.iac-sa[0].email
+  bucket = var.trigger_bucket_billing
+}
+resource "google_storage_bucket_object" "project-creator-iac" {
+  name   = "${var.app_name}-IaC-SA.txt"
+  content = google_service_account.iac-sa[0].email
+  bucket = var.trigger_bucket_proj
+}
+
+
 //Allow Cloud Build IaC to impersonate cloud deploy SA to do the deployment
 //TODO : not needed
-resource "google_service_account_iam_member" "iac-sa-impersonate-cd" {
-  service_account_id = google_service_account.cloud-deploy[0].name
-  role               = "roles/iam.serviceAccountUser"
-  member             = "serviceAccount:${google_service_account.iac-sa[0].email}"
-}
+//resource "google_service_account_iam_member" "iac-sa-impersonate-cd" {
+//  service_account_id = google_service_account.cloud-deploy[0].name
+//  role               = "roles/iam.serviceAccountUser"
+//  member             = "serviceAccount:${google_service_account.iac-sa[0].email}"
+//}
 
 //Allow Cloud Build IaC SA to impersonate Cloud Build CICD SA so the former can create a cloud build trigger and attach the latter to it,
 resource "google_service_account_iam_member" "iac-sa-impersonate-cicd" {
@@ -223,4 +234,41 @@ resource "google_project_iam_member" "workload-identity-sa-roles" {
   for_each = local.wi_roles_mapping
   role     = each.value.role
   member   = each.value.member
+}
+
+//Following section creates new secrets in application seed/admin project
+resource "google_secret_manager_secret" "app-name" {
+  secret_id = "app-name"
+  replication {
+    automatic = true
+  }
+  project = module.admin-project.project_id
+}
+resource "google_secret_manager_secret_version" "app-name-secret" {
+  secret      = google_secret_manager_secret.app-name.id
+  secret_data = var.app_name
+}
+
+resource "google_secret_manager_secret_iam_member" "app-name-secret-access" {
+  secret_id = google_secret_manager_secret.app-name.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.cicd-sa[0].email}"
+}
+
+resource "google_secret_manager_secret" "region" {
+  secret_id = "region"
+  replication {
+    automatic = true
+  }
+  project = module.admin-project.project_id
+}
+resource "google_secret_manager_secret_version" "region-secret" {
+  secret      = google_secret_manager_secret.region.id
+  secret_data = var.region
+}
+
+resource "google_secret_manager_secret_iam_member" "region-secret-access" {
+  secret_id = google_secret_manager_secret.region.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.cicd-sa[0].email}"
 }

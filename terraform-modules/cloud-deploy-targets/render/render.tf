@@ -23,12 +23,7 @@ resource "null_resource" "cloud_deploy_target_renderer" {
   }
   provisioner "local-exec" {
     when    = create
-    command = "${path.module}/create_target.sh ${var.git_org} ${var.git_repo} ${var.git_user} ${var.git_email} ${var.cluster_name} ${var.cluster_path} ${var.require_approval}"
+    command = "${path.module}/create_target.sh ${var.git_org} ${var.git_repo} ${var.git_user} ${var.git_email} ${var.cluster_name} ${var.cluster_path} ${var.require_approval} ${var.env_name}"
   }
 
-  // https://github.com/hashicorp/terraform/issues/23679
-  //provisioner "local-exec" {
-  //  when = destroy
-  //  command = "${path.module}/create_target.sh ${var.git_org} ${var.git_repo} ${var.git_user} ${var.git_email} ${var.cluster_name}"
-  //}
 }

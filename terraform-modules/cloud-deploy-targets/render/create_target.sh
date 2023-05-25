@@ -21,6 +21,7 @@ github_email=${4}
 cluster_name=${5}
 cluster_path=${6}
 require_approval=${7}
+env_name=${8}
 
 git clone -b main https://${github_user}:${TF_VAR_github_token}@github.com/${github_org}/${tf_modules_repo} cloud-deploy-target-${tf_modules_repo}
 cd cloud-deploy-target-${tf_modules_repo}
@@ -34,6 +35,7 @@ if [ ! -f ${cluster_name}.tf ]; then
   find . -type f -name ${cluster_name}.tf -exec  sed -i "s:CLUSTER_PATH:${cluster_path}:g" {} +
   find . -type f -name ${cluster_name}.tf -exec  sed -i "s/LOCATION/${location}/g" {} +
   find . -type f -name ${cluster_name}.tf -exec  sed -i "s/REQ_APPROVAL/${require_approval}/g" {} +
+  find . -type f -name ${cluster_name}.tf -exec  sed -i "s/ENV_NAME/${env_name}/g" {} +
 
   git add .
   git config --global user.name ${github_user}

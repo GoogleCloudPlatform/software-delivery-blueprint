@@ -13,30 +13,18 @@
 # limitations under the License.
 
 variable "billing_account" {
-  default = "YOUR_BILLING_ACCOUNT"
   description = "GCP billing account"
 }
 variable "org_id" {
-  default = "YOUR_ORG_ID"
   description = "GCP org id"
 }
 variable "folder_id" {
-  default = "YOUR_FOLDER_ID"
-}
-variable "group" {
-  default = "YOUR_IAM_GROUP"
-  description = "IAM group"
-}
-variable "group_id" {
-  default = "YOUR_GROUP_ID"
-  description = "ID of the IAM group specified above"
 }
 variable "env" {
   default = "dev"
 }
-
 variable "acm_repo" {
-  default = "YOUR_ACM_REPO"
+  type = string
 }
 variable "github_user" {
   type = string
@@ -52,7 +40,20 @@ variable "github_token" {
   description = "The access token that should be used for authenticating to GitHub."
   sensitive = true
 }
-
+variable "project_id" {
+  type = string
+}
+variable "app_factory_project_id" {
+  type = string
+}
+variable "app_factory_project_num" {
+  type = number
+  description = "project number of application factory"
+}
+variable "secrets_project_id" {
+  type = string
+  description = "Project ID of the projects hosting all secrets"
+}
 variable "base_project_name" {
   default = "sdp-gke"
   description = "Name of the project that will host GKE cluster"
@@ -71,7 +72,7 @@ variable "subnet_01_ip" {
   default = "10.40.0.0/22"
 }
 variable "subnet_01_region" {
-  default = "YOUR_REGION"
+  description = "primary region where resources will be created"
 }
 variable "subnet_01_description" {
   default = "subnet 01 in"
@@ -83,7 +84,7 @@ variable "subnet_02_ip" {
   default = "10.12.0.0/22"
 }
 variable "subnet_02_region" {
-  default = "YOUR_REGION"
+  description = "secondary region where resources will be created"
 }
 variable "subnet_02_description" {
   default = "subnet 02"

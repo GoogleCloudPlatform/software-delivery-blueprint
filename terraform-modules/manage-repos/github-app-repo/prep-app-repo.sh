@@ -23,6 +23,7 @@ ksa=${6}
 env=${7}
 index=${8}
 region=${9}
+secret_project_id=${10}
 repo=${application_name}
 #The following code is to avoid race condition to the commits done to acm repo in different folders by this script
 sleep_time=20
@@ -37,9 +38,10 @@ do
   find ./k8s/${env} -type f -name "*.yaml" -exec  sed -i "s/NAMESPACE/${namespace}/g" {} +
   find ./k8s/${env} -type f -name "*.yaml" -exec  sed -i "s/SERVICEACCOUNT/${ksa}/g" {} +
   find . -type f -name "cloudbuild.yaml" -exec  sed -i "s/YOUR_REGION/${region}/g" {} +
+  find . -type f -name "cloudbuild.yaml" -exec  sed -i "s/YOUR_SECRET_PROJECT_ID/${secret_project_id}/g" {} +
   git add .
   git config --global user.name ${github_user}
   git config --global user.email ${github_email}
-  git commit -m "Setting up app code repo."
+  git commit -m "IGNORE running the trigger.Setting up app code repo for the first time."
   git push origin
 done

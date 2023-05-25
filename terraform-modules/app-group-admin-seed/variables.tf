@@ -52,21 +52,31 @@ variable "app_factory_cb_service_account" {
   description = "Cloud Build service account of application factory."
 }
 
-variable "group_id" {
-  type        = string
-  description = "Google IAM Group Id."
-}
 variable "app_name" {
   type        = string
   description = "Name of the application being created."
 }
 
-variable "custom_sa" {
-  type        = string
-  description = "Service Account that will be used to add Cloud Deploy SA to IAM group through impersonation."
-}
-
 variable "env" {
   type        = list
   description = "environment list for the application."
+}
+
+variable "trigger_buckets_dep" {
+  type        = list
+  description = "bucket that will trigger cloud function to add GKE deploy permissions on CD SA."
+}
+
+variable "trigger_bucket_sec" {
+  type        = string
+  description = "bucket that will trigger cloud function to add secrets read permission for CICD and IaC SA."
+}
+variable "trigger_bucket_billing" {
+  type        = string
+  description = "bucket that will trigger cloud function to add billing user permission for IaC SA."
+}
+
+variable "trigger_bucket_proj" {
+  type        = string
+  description = "bucket that will trigger cloud function to add project creator permission IaC SA."
 }

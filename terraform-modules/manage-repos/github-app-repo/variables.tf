@@ -79,3 +79,8 @@ variable "region" {
   type        = string
   description = "Google Cloud region."
 }
+
+variable "secret_project_id" {
+  type = string
+  description = "ID of the project that holds common secrets."
+}

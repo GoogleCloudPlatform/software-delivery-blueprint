@@ -44,6 +44,7 @@ module "create-gcp-project" {
     "cloudbuild.googleapis.com",
     "containerregistry.googleapis.com",
     "gkehub.googleapis.com",
+    "cloudfunctions.googleapis.com",
     "anthosconfigmanagement.googleapis.com"]
 }
 
@@ -77,7 +78,7 @@ module "create-vpc" {
 # Create GKE zonal cluster in platform_admin project using subnet-01 zone a
 module "create_gke_1" {
   source            = "git::https://github.com/YOUR_GITHUB_ORG/terraform-modules.git//gke/"
-  subnet            = local.subnet1
+  subnet            = (local.subnet1.region ==  var.subnet_01_region) ? local.subnet1 : local.subnet2
   project_id        = module.create-gcp-project.project.project_id
   suffix            = "1"
   zone              = ["a","b","c"]
@@ -97,6 +98,20 @@ module "acm" {
   git_org               = var.github_org
   github_token          = var.github_token
   acm_repo              = var.acm_repo
+}
+
+module "deploy-cloud-function" {
+  source                = "git::https://github.com/YOUR_GITHUB_ORG/terraform-modules.git//cloud-functions/grant-deploy-access"
+  project_id            = module.create-gcp-project.project.project_id
+  function_name         = "add-deploy-permission-${var.env}"
+  function_gcs          = "add-deploy-permission-${var.env}-src"
+  trigger_gcs           = "add-deploy-permission-${var.env}-trg"
+  region                = var.subnet_01_region
+  app_factory_project   = var.app_factory_project_num
+  secrets_project_id    = var.secrets_project_id
+  infra_project_id      = var.project_id
+  env                   = var.env
+  depends_on            = [ module.create_gke_1 ]
 }
 
 module "artifact-registry-iam" {
@@ -119,8 +134,8 @@ module "cloud-deploy-target" {
   git_repo              = "terraform-modules"
   cluster_name          = module.create_gke_1.cluster_name.name
   cluster_path          = local.gke_cluster_id
-  //location              = local.subnet1.region
   require_approval      = "false"
+  env_name              = var.env
   depends_on            = [ module.artifact-registry-iam ]
 }
 

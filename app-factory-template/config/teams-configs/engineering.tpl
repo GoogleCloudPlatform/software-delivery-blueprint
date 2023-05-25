@@ -19,7 +19,7 @@
 ##### parent team #####
 #######################
 #parent_team=Engineering
-#parent_team here commented out since it is the [arent team and has no parent.
+#parent_team here commented out since it is the parent team and has no parent.
 
 #################################
 ##### user role on the team #####

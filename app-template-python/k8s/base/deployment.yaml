@@ -16,7 +16,12 @@ kind: Deployment
 apiVersion: apps/v1
 metadata:
   name: app
+  labels:
+    app: YOUR_APPLICATION-app
 spec:
+  selector:
+    matchLabels:
+      app: YOUR_APPLICATION-app
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -24,6 +29,8 @@ spec:
   template:
     metadata:
       name: app
+      labels:
+        app: YOUR_APPLICATION-app
     spec:
       containers:
       - name: app

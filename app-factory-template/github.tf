@@ -15,5 +15,5 @@
  */
 
 provider "github" {
-    organization = "YOUR_GITHUB_ORG"
+    organization = "cloud-maniac-temp"
 }

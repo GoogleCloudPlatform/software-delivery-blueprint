@@ -25,9 +25,4 @@ resource "null_resource" "cloud_deploy_target_renderer" {
     command = "${path.module}/create_iam_member.sh ${var.git_org} ${var.git_repo} ${var.git_user} ${var.git_email} ${var.service_account_name} ${var.cluster_name}"
   }
 
-  // https://github.com/hashicorp/terraform/issues/23679
-  //provisioner "local-exec" {
-  //  when = destroy
-  //  command = "${path.module}/delete_iam_member.sh ${var.git_org} ${var.git_repo} ${var.git_user} ${var.git_email} ${var.cluster_name}"
-  //}
 }
