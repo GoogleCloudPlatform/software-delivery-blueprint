@@ -88,11 +88,11 @@ resource "google_cloudbuild_trigger" "deploy-app" {
         <<-EOF
       cd ${"$"}{_REPO}
       skaffold build --file-output=/workspace/artifacts.json \
-                           --default-repo $$REGION-docker.pkg.dev/$PROJECT_ID/$$APP_NAME/image-$$APP_NAME-$(date '+%Y%m%d%H%M%S') \
+                           --default-repo ${var.region}-docker.pkg.dev/$PROJECT_ID/${var.app_name}/image-${var.app_name}-$(date '+%Y%m%d%H%M%S') \
                            --push=true
   EOF
       ]
-      secret_env = ["APP_NAME", "REGION"]
+
     }
 
     step {
@@ -102,34 +102,25 @@ resource "google_cloudbuild_trigger" "deploy-app" {
       args = [
         "-c",
         <<-EOF
-      gcloud config set deploy/region $$REGION
+      gcloud config set deploy/region ${var.region}
       cd ${"$"}{_REPO}
-      gcloud beta deploy releases create "release-pipeline-$(date '+%Y%m%d%H%M%S')" --delivery-pipeline=$$APP_NAME --description="First Release" --build-artifacts=/workspace/artifacts.json --annotations="release-id=rel-$(date '+%Y%m%d%H%M%S')"
+      gcloud beta deploy releases create "release-pipeline-$(date '+%Y%m%d%H%M%S')" --delivery-pipeline=${var.app_name} --description="First Release" --build-artifacts=/workspace/artifacts.json --annotations="release-id=rel-$(date '+%Y%m%d%H%M%S')"
   EOF
       ]
-      secret_env = [
-      "APP_NAME", "REGION"]
+
     }
     available_secrets {
       secret_manager {
-        version_name = "projects/$PROJECT_ID/secrets/app-name/versions/latest"
-        env          = "APP_NAME"
-      }
-      secret_manager {
-        version_name = "projects/${var.secret_project_id}/secrets/github-user/versions/latest"
+        version_name = "projects/$PROJECT_ID/secrets/github-user/versions/latest"
         env          = "GITHUB_USER"
       }
       secret_manager {
-        version_name = "projects/${var.secret_project_id}/secrets/github-token/versions/latest"
+        version_name = "projects/$PROJECT_ID/secrets/github-token/versions/latest"
         env          = "GITHUB_TOKEN"
       }
       secret_manager {
-        version_name = "projects/${var.secret_project_id}/secrets/github-org/versions/latest"
+        version_name = "projects/$PROJECT_ID/secrets/github-org/versions/latest"
         env          = "GITHUB_ORG"
-      }
-      secret_manager {
-        version_name = "projects/$PROJECT_ID/secrets/region/versions/latest"
-        env          = "REGION"
       }
 
     }

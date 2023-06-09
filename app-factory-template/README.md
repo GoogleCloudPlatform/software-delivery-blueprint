@@ -2,7 +2,7 @@
 
 The Application Factory is an example of a golden path, that allows teams to quickly provision application landing zones in the multi-tenant infrstructure and single-tenant infrastructure in a self-service manner. Using the Application Factory developers, devops engineers or platform admins can create code repositories, an application landing zone, application CI/CD pipeline and an infrastructure as code pipeline to manage infrastructure dedicated to the application. The landing zone and infrastructure is created using Terraform and yaml templates defined by platform administrators so best practices are adopted from day 1.
 
-The `app-factory-template` directory contains the structure and Cloud Build triggers that teams will use to create new applications and manage application teams in the software delivery platform. `app-factory-template` folder is hydrated into a repository during the execution of the [`bootstrap.sh`][software-delivery-app] script.
+The `app-factory-template` directory contains the structure and Cloud Build triggers that teams will use to create new applications and manage application teams in the software delivery platform. `app-factory-template` folder is hydrated into a repository during the execution of the [bootstrap.sh][bootstrap] script.
 
 ## Table of Contents
 
@@ -39,7 +39,7 @@ The `app-factory-template` directory contains the structure and Cloud Build trig
 
 The diagram above shows the components of the Application Factory and their interactions:
 
-1.  Users start the process of creating a new application by providing the application name and runtime to the `create-app` [Cloud Build][cloud-build] trigger.
+1.  Users start the process of creating a new application by providing the application name and runtime to the `create-app` Cloud Build[cloud-build] trigger.
 2.  Cloud Build performs variable substitution in [`application.tf.tpl`][application-tf-tpl] to hydrate Terraform to represent the new application. The hydrated Terraform is committed in the Application Factory's git repository as `<application_name>.tf`.
 3.  The `tf-apply` Cloud Build trigger reads the new code and starts the process of deploying new resources.
 4.  Applying the Terraform creates new git repos for the application code and application's infrastructure as code off of the runtime's template and `infra-template` respectively. Terraform also hydrates the Kubernetes [landing zone][landing-zone] in the [Anthos Config Management][acm] repo. Finally this process also creates the application's CI/CD project and infrastructure as code Cloud Build trigger.
@@ -59,6 +59,7 @@ The templates for applications and teams is intentionally very small and uses th
 The application template ([`application.tf.tpl`][application-tf-tpl]) is the IaC used to create the following resources.
 
 -   Application CI/CD project
+-   Secrets copied from the multi-tenant admin project
 -   Application code repository from the language specific template
 -   Application group IaC repository from the [`infra-template`][infra-template]
 -   Infrastructure as code Cloud Build trigger in the CI/CD project
@@ -122,7 +123,7 @@ The application factory has four Cloud Build tiggers, each are defined as yaml f
 3.  `tf-plan`, performs a Terraform plan.
 4.  `tf-apply`, performs Terraform apply, updating the provisioned applications and teams in GitHub.
 
-Note: The script bootstrap.sh that creates your application factory accepts an input "TRIGGER_TYPE" which can be either `webhook` or `github`. 
+Note: The script bootstrap.sh[bootstrap] that creates your application factory accepts an input "TRIGGER_TYPE" which can be either `webhook` or `github`. 
 If `github` is passed as "TRIGGER_TYPE" to the script, the script creates GitHub triggers in Cloud Build. 
 If `webhook` is passed as "TRIGGER_TYPE" to the script, the script creates webhook triggers in Cloud Build. 
 
@@ -299,7 +300,7 @@ agreement with Google.
 [team-tf-tpl]: templates/team.tf.tpl
 [terraform-modules]: ../terraform-modules/
 [skaffold]: https://skaffold.dev/
-[software-delivery-app]: ../launch-scripts/bootstrap.sh
+[bootstrap]: ../launch-scripts/bootstraps.sh
 [next19-infra-as-code]: https://www.youtube.com/watch?v=3vfXQxWJazM
 [multi-tenant-repo]: ../platform-template/#infrastructure-pipeline
 [iac-webhook-terraform-module]: ../terraform-modules/webhooks/iac

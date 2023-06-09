@@ -16,7 +16,7 @@
 
 data "google_secret_manager_secret_version" "github-token" {
   secret = "github-token"
-  project = "YOUR_SECRET_PROJECT_ID"
+  project = "YOUR_APP_ADMIN_PROJECT"
 }
 
 provider "github" {

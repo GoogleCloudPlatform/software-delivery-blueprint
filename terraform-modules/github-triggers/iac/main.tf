@@ -15,7 +15,7 @@
  */
 
 resource "google_cloudbuild_trigger" "trigger-infra" {
-  name            = "deploy-infra"
+  name            = "deploy-infra-${var.app_name}"
   project         = var.project_id
   description     = "Trigger to deploy the infrastructure for the app"
   filename        = "cloudbuild.yaml"

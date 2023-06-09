@@ -40,7 +40,7 @@ resource "google_gke_hub_feature_membership" "feature_member" {
   feature    = "configmanagement"
   membership = google_gke_hub_membership.membership.membership_id
   configmanagement {
-    version = "1.15.0"
+    version = "1.15.1"
     config_sync {
       source_format = "unstructured"
       git {

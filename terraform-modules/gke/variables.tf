@@ -58,3 +58,15 @@ variable "project_number" {
   type        = string
   description = "Project number where GKE cluster is to be created."
 }
+
+variable "node_count" {
+  type = number
+  description = "number of nodes in the node pool"
+  default = 2
+}
+
+variable "autoscaling" {
+  type = bool
+  description = "turning on autoscaling"
+  default = true
+}

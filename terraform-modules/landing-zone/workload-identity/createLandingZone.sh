@@ -25,6 +25,7 @@ gsa=${7}
 env=${8}
 kubernetes_sa=${9}
 
+
 random=$(echo $RANDOM | md5sum | head -c 20; echo)
 local_acm_repo="${acm_repo}-${random}"
 git config --global url."https://${github_user}:${github_token}@github.com".insteadOf "https://github.com"

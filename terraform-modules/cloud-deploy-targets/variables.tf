@@ -28,3 +28,19 @@ variable "location" {
   type = string
   description = "Region of the target."
 }
+
+variable "name" {
+  type = string
+  description = "Name of the target."
+}
+
+variable "cluster_name" {
+  type = string
+  description = "Name of the cluster."
+}
+
+variable "require_approval" {
+  type = bool
+  description = "Name of the cluster."
+  default = false
+}

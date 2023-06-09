@@ -19,10 +19,6 @@ variable "gsa" {
   type = string
 }
 
-//variable "gke_project_id" {
-//  description = "Id of the GKE cluster project"
-//}
-
 variable "app_name" {
   description = "Name of the application"
   type = string

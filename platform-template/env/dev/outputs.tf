@@ -14,22 +14,6 @@
  * limitations under the License.
  */
 
-output "project" {
-  value       = module.create-gcp-project.project
-  description = "The full host project info"
-}
-
-output "project_id" {
-  value       = module.create-gcp-project.project.project_id
-  description = "The ID of the created project"
-}
-
-
-output "project_number" {
-  value       = module.create-gcp-project.project.project_number
-  description = "The ID of the created project"
-}
-
 output "vpc_network" {
   value       = module.create-vpc.network
   description = "The created network"
@@ -99,6 +83,7 @@ output "route_names" {
 
 
 output "gke-cluster-1" {
+  //value       = module.create_gke_1.name
   value       = module.create_gke_1.cluster_name.name
   description = "The name of gke cluster"
 }

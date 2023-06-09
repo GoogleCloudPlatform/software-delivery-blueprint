@@ -19,6 +19,12 @@ variable "app_name" {
   type        = string
 }
 
+variable "region" {
+  description = "Region where the application for which the trigger is being created"
+  type        = string
+  default      = ""
+}
+
 variable "project_number" {
   description = "Project number of the application admin project."
   type        = number
@@ -37,9 +43,4 @@ variable "project_id" {
 variable "service_account" {
   description = "Service Account to associate Cloud Build trigger with."
   type        = string
-}
-
-variable "secret_project_id" {
-  type = string
-  description = "ID of the project that holds common secrets."
 }

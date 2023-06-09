@@ -18,32 +18,27 @@ github_org=${1}
 application_name=${2}
 github_user=${3}
 github_email=${4}
-org_id=${5}
-billing_account=${6}
-state_bucket=${7}
-app_factory_project_id=${8}
-ci_sa=${9}
-cd_sa=${10}
-region=${11}
-trigger_type=${12}
-secret_project_id=${13}
-folder_id=${14}
+state_bucket=${5}
+project_id=${6}
+ci_sa=${7}
+region=${8}
+trigger_type=${9}
+
 
 repo=${application_name}-infra
 for branch in "cicd-trigger"
 do
   git clone -b ${branch} https://github.com/${github_org}/${repo} ${repo}
   cd ${repo}
-  find . -type f -name "*.tf" -exec  sed -i "s/YOUR_PROJECT_NAME/${application_name}/g" {} +
-  find . -type f -name "*.tf" -exec  sed -i "s/YOUR_TERRAFORM_STATE_BUCKET/${state_bucket}/g" {} +
+
+
+  find . -type f -name "*.tf" -exec  sed -i "s/YOUR_APP_ADMIN_PROJECT/${project_id}/g" {} +
   find . -type f -name "*.tf" -exec  sed -i "s/YOUR_APPLICATION/${application_name}/g" {} +
   find . -type f -name "*.tf" -exec  sed -i "s:YOUR_CI_SA:${ci_sa}:g" {} +
-  find . -type f -name "*.tf" -exec  sed -i "s:YOUR_CD_SA:${cd_sa}:g" {} +
-  find . -type f -name "*.tf" -exec  sed -i "s/YOUR_APP_ADMIN_PROJECT/${app_factory_project_id}/g" {} +
   find . -type f -name "*.tf" -exec  sed -i "s/YOUR_REGION/${region}/g" {} +
   find . -type f -name "cloudbuild.yaml" -exec  sed -i "s:YOUR_CI_SA:${ci_sa}:g" {} +
   find . -type f -name "*.tf" -exec  sed -i "s/YOUR_TRIGGER_TYPE/${trigger_type}/g" {} +
-  find . -type f -exec  sed -i "s/YOUR_SECRET_PROJECT_ID/${secret_project_id}/g" {} +
+  find . -type f -name "*.tf" -exec  sed -i "s/YOUR_TERRAFORM_STATE_BUCKET/${state_bucket}/g" {} +
   git add .
   git config --global user.name ${github_user}
   git config --global user.email ${github_email}

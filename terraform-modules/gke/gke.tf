@@ -53,11 +53,12 @@ module "gke" {
     {
       name           = "node-pool-01"
       machine_type   = "e2-standard-4"
-      min_count      = 4
-      max_count      = 10
+      min_count      = 2
+      max_count      = 4
       auto_upgrade   = true
-      node_count     = 4
+      node_count     = var.node_count
       node_locations = "${local.region}-${local.zone2},${local.region}-${local.zone3}"
+      autoscaling    = var.autoscaling
     },
   ]
 }

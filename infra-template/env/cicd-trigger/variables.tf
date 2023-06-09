@@ -25,7 +25,6 @@ variable "org_name_to_clone_template_from" {
   description = "github org where the repo will be created"
   default = "YOUR_GITHUB_ORG"
 }
-
 variable "trigger_type" {
   type = string
   default = "YOUR_TRIGGER_TYPE"
@@ -44,20 +43,8 @@ variable "cloudbuild_service_account" {
   default = "YOUR_CI_SA"
 }
 
-variable "clouddeploy_service_account" {
-  type = string
-  description = "Cloud Deploy SA for releases to k8s"
-  default = "YOUR_CD_SA"
-}
-
 variable "region" {
   type = string
   description = "Region where resources like Cloud Deploy and Artifact Registry should be created."
   default = "YOUR_REGION"
-}
-
-variable "secret_project_id" {
-  type = string
-  description = "ID of the project that holds common secrets."
-  default = "YOUR_SECRET_PROJECT_ID"
 }
