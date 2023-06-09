@@ -13,26 +13,21 @@
 
 ## bootstrap.sh
 
-`bootstrap.sh` is used to create:
+`bootstrap.sh` is used to create the following resources inside the GCP project where the blueprint is installed:
 
 1. The projects and infrastructure necessary to manage the multi-tenant infrastructure which includes:
 
-   -   Multi-tenant admin project
-       - Infrastructure as Code pipeline
-   -   Git repositories hydrated from:
+   - Infrastructure as Code pipeline
+   - Git repositories hydrated from:
        -   [acm-template][acm-template]
        -   [platform-template][platform-template]
        -   [terraform-modules][terraform-modules]
    
-       ![multi-tenant-admin](../resources/multi-tenant-admin.png)
-
-       The above diagram depicts the resources deployed and their connections. For more details on the function of the Multi-tenant Admin Project refer to the [platform-template readme][platform-architecture].
 
 2. Application factory, which automates the process of creating applications, teams and landing zones in the software delivery platform:
 
-   -   Application factory project
-       - Cloud Build triggers:
-         - create a application
+    - Cloud Build triggers:
+        - create a application
          - manage GitHub teams
          - plan/apply Terraform used to managed applications and teams
    -   Git repositories hydrated from:
@@ -42,7 +37,7 @@
        -   [app-template-python][app-template-python]
        -   [infra-template][infra-template]
 
-       ![app-factory-project](../resources/app-factory-project.png)
+       ![single-project-blueprint](../resources/single-project-blueprint.png)
 
         The above diagram depicts the resources deployed and their connections.  For more details on the function of the Application Factory refer to the [app-factory-template readme][app-factory-architecture].
 
