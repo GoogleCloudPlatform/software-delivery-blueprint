@@ -1,6 +1,6 @@
 # Overview
 
-`infra-template` contains the infrastructure as code (IaC) for provisioning the single tenant application project group infrastructure. The `infra-template` folder is hydrated into a template repository during the execution of the [`bootstrap.sh`][software-delivery-app] script. During the creation of a new application by the Application Factory, the infrastructure template repository is then instantiated into an application specific IaC repository called `<app_name>-infra`.
+`infra-template` contains the infrastructure as code (IaC) for provisioning the single tenant application project group infrastructure. The `infra-template` folder is hydrated into a template repository during the execution of the [bootstrap.sh][bootstrap] script. During the creation of a new application by the Application Factory, the infrastructure template repository is then instantiated into an application specific IaC repository called `<app_name>-infra`.
 
 ## Table of Contents
 
@@ -30,5 +30,5 @@ agreement with Google.
 
 <!-- LINKS: https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 
-[software-delivery-app]: ../launch-scripts/bootstrap.sh
+[bootstrap]: ../launch-scripts/bootstraps.sh
 [next19-infra-as-code]: https://www.youtube.com/watch?v=3vfXQxWJazM

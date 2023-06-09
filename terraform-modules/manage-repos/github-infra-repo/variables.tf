@@ -45,11 +45,6 @@ variable "service_account" {
   description = "CICD Cloud Build IaC."
 }
 
-variable "app_runtime" {
-  type        = string
-  description = "Type of runtime for the application e.g java or golang or python etc."
-}
-
 variable "github_user" {
   type        = string
   description = "GitHub username."
@@ -58,16 +53,6 @@ variable "github_user" {
 variable "github_email" {
   type        = string
   description = "GitHub user email."
-}
-
-variable "org_id" {
-  type        = string
-  description = "GCP org id."
-}
-
-variable "billing_account" {
-  type        = string
-  description = "GCP billing account."
 }
 
 variable "state_bucket" {
@@ -80,23 +65,7 @@ variable "ci_sa" {
   description = "Cloud Build CICD SA."
 }
 
-variable "cd_sa" {
-  type        = string
-  description = "Cloud Deploy CICD SA."
-}
-
-variable "folder_id" {
-  type        = string
-  default     = ""
-  description = "GCP folder ID under which you are creating the application."
-}
-
 variable "region" {
   type        = string
   description = "Region where the application related resources will be created."
-}
-
-variable "secret_project_id" {
-  type = string
-  description = "ID of the project that holds common secrets."
 }

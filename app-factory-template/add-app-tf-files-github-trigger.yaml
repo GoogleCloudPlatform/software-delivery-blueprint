@@ -18,45 +18,25 @@ steps:
 - name: 'gcr.io/cloud-builders/git'
   id: 'clone platform-repos'
   entrypoint: /bin/sh
-  args: [ '-c', "git clone https://$$GITHUB_USER:$$GITHUB_TOKEN@github.com/$$GITHUB_ORG/$REPO_NAME" ]
-  secretEnv: ['GITHUB_TOKEN','GITHUB_USER','GITHUB_ORG']
+  args: [ '-c', 'git clone https://${_GITHUB_USER}:$$GITHUB_TOKEN@github.com/${_GITHUB_ORG}/$REPO_NAME' ]
+  secretEnv: ['GITHUB_TOKEN']
 
 
 #Initialize apps directory.Lookup app_runtimes_list.txt to find allowed runtimes and add a terraform module for each runtime under apps folder
 - name: 'gcr.io/cloud-builders/gcloud'
   id : 'Initialize dir structure'
   entrypoint: 'bash'
-  args: [ '-c',"./setup/init.sh $$GITHUB_USER ${REPO_NAME}" ]
-  secretEnv: ['GITHUB_TOKEN','GITHUB_USER','GITHUB_ORG']
+  args: [ '-xe','./setup/init.sh','${_GITHUB_USER}', '${_SA_TO_IMPERSONATE}', '${REPO_NAME}' ]
+  secretEnv: ['GITHUB_TOKEN']
 
-- name: 'gcr.io/cloud-builders/gcloud'
-  id : 'Handling the variables that could be empty'
-  entrypoint: 'sh'
-  args:
-  - '-c'
-  - |
-    if [ ${_GITHUB_TEAM} ] ; then
-       echo ${_GITHUB_TEAM} > /workspace/github_team
-    else
-       echo "null" > /workspace/github_team
-    fi
-    if [ ${_FOLDER_ID} ] ; then
-       echo ${_FOLDER_ID} > /workspace/folder
-    else
-       echo "null" > /workspace/folder
-    fi
 
 - name: 'gcr.io/cloud-builders/gcloud'
   id: 'create tf file for app, commit it in github repo and push'
   entrypoint: 'bash'
-  args: [ '-c',"./setup/generateAppTFCode.sh ${_APP_RUNTIME} ${_APP_NAME} ${_INFRA_PROJECT_ID} $$GITHUB_USER ${PROJECT_ID}  `cat /workspace/folder` $$GITHUB_ORG ${REPO_NAME} ${_TRIGGER_TYPE} `cat /workspace/github_team` ${_REGION}" ]
-  secretEnv: ['GITHUB_TOKEN','GITHUB_USER','GITHUB_ORG']
+  args: [ '-xe','./setup/generateAppTFCode.sh','${_APP_RUNTIME}','${_APP_NAME}','${_SA_TO_IMPERSONATE}', '${_INFRA_PROJECT_ID}','${_GITHUB_USER}', '${PROJECT_ID}', '${_FOLDER_ID}', '${_GITHUB_ORG}', '${REPO_NAME}', '${_TRIGGER_TYPE}', '${_GITHUB_TEAM}','${_REGION}' ]
+  secretEnv: ['GITHUB_TOKEN']
 
 availableSecrets:
   secretManager:
-  - versionName: projects/YOUR_SECRET_PROJECT_ID/secrets/github-token/versions/latest
+  - versionName: projects/$PROJECT_ID/secrets/github-token/versions/latest
     env: GITHUB_TOKEN
-  - versionName: projects/YOUR_SECRET_PROJECT_ID/secrets/github-user/versions/latest
-    env: GITHUB_USER
-  - versionName: projects/YOUR_SECRET_PROJECT_ID/secrets/github-org/versions/latest
-    env: GITHUB_ORG

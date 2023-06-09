@@ -2,6 +2,8 @@
 
 Software delivery platforms enable organizations to shift the focus from individual technologies to highly automated/golden paths. That shift allows application teams to focus on delivering business value instead of having to learn new technology and tools. For example, if the process to create a new application including all of the supporting tools (Git repositories, CI/CD tools and application namespace) is automated and self service developers are able to quickly get the resources they need to delivery feature more quickly.
 
+[![Modern CI/CD with Anthos](https://img.youtube.com/vi/3mSm_HvvgOs/0.jpg)](https://youtu.be/3mSm_HvvgOs "Next 2020 - Modern CI/CD with Anthos")
+
 This blueprint extends the concepts discussed in the Next 2020 session on [Modern CI/CD concepts][modern-cicd-video] to include:
 
 -   Self-service workflows for:
@@ -52,15 +54,13 @@ In a platform there is infrastructure and supporting automation for both multi-t
 
 Running applications in a multi-tenant platform can increase overall resource utilization and mimimize the operational overhead.  By running multiple application on the same infrastructure the opportunties for bin packing are increased which means you can make more efficient use of the underlying CPUs, memory and disks reducing costs. Also by centralizing the resources used to run applications infrastructure administrators have few systems reducing operational overhead. The following diagram depict the multi-tenant infrastructure and automation used to support it.
 
-![multi-tenant-architecture](resources/multi-tenant-architecture-with-automation-workflow.png)
+![multi-tenant-architecture](resources/multi-tenant-architecture.png)
 
 Platform developers and administrators use an infrastructure as code pipeline in the multi-tenant admin project to deploy infrastructure used by many teams. The multi-tenant automation allows the platform team use a GitOps model, where the platform repo contains the source of truth what instructure is deployed.
 
 The multi-tenant infrastructure component is a set of projects corresponding to the application environments. These projects contain resources used by several applications, to maximize resource utilization, governance and minimize operational overhead.
 
 In the base blueprint, the shared resources are [Google Kubernetes Engine][gke] (GKE) clusters, but this could be extended to include other resources like databases, buckets, etc. The goal of the multi-tenant infrastructure is to improve efficiency in terms of operational overhead, resource utilization (cost) and consistency between environments (development, staging and production).
-
-Along with multi-tenant infrastructure , there are Automation workflows that remove the manual steps in Application and Infrastructure onboarding like access provisioning etc. These workflows are serviced by [Cloud Functions][cloud-function] and created in a separate project.
 
 ### Application Architecture
 
@@ -82,21 +82,17 @@ The application infrastructure as code pipeline is triggered off of the applicat
 
 ## Deploying the Blueprint
 
-To deploy the blueprint the Application Factory and Multi-tenant Admin projects are deployed using the launch script. The launch script is one time use script that creates the git repositories and projects to used in those components.
+To deploy the blueprint the Application Factory and Multi-tenant Admin projects are deployed using the launch script. The launch script is one time use scripts that create the git repositories and projects to used in those components.
 
-1. From Cloud Shell or a Bash environment run `launch-scripts/bootstrap.sh`.
+1.  From Cloud Shell or a Bash environment run `launch-scripts/bootstrap.sh`.
 
-    See [launch-scripts readme - bootstrap.sh][launch-scripts-infra-instructions] for more detailed instructions.
+    See [launch-scripts readme - bootstrap.sh][bootstrap-instructions] for more detailed instructions.
 
-2. Deploy the multi-tenant infrastructure using the multi-tenant IaC pipeline.
+2.  Deploy the multi-tenant infrastructure using the multi-tenant IaC pipeline.
 
     See [platform-template readme - Infrastructure Pipleine][platform-template-infra-pipeline] for more details.
 
-3. Deploy the automation workflows using the common-setup IaC pipeline.
-
-    See [common-setup readme - Automation workflow Pipleine][common-setup-infra-pipeline] for more details.
-
-4. Create applications using the application factory.
+3. Create applications using the application factory.
 
     See [app-factory-template readme - Create a new Application][app-factory-template-add-app] for step by step instructions.
 
@@ -111,7 +107,7 @@ multiple different repositories for separation of duties. Creation of those
 repos is done through helper scripts in the `launch-scripts` directory.
 
 | Directory                                      | Description
-|------------------------------------------------| ----------
+| ---------------------------------------------- | ----------
 | [`acm-template`][acm-template]                 | This directory contains the template used to initialize the Anthos Config Management (ACM) repo, which helps provision landing zones and keep environments consistent.
 | [`app-factory-template`][app-factory-template] | App factory contains the Terraform specifying the applications and teams deployed on the software delivery platform.
 | [`app-template-golang`][app-template-golang]   | Starter application for Golang applications
@@ -119,8 +115,7 @@ repos is done through helper scripts in the `launch-scripts` directory.
 | [`app-template-python`][app-template-python]   | Starter application for Python applications
 | [`infra-template`][infra-template]             | Template used to initialize each application's infrastructure as code repository.
 | [`launch-scripts`][launch-scripts]             | Helper scripts used to deploy the software delivery blueprint.
-| [`platform-template`][platform-template]       | Platform template contains the Terraform to create the multi-tenant infrastructure supporting application deployment.
-| [`common-setup`][platform-template]            | common setup contains the Terraform to create the automation workflows using Cloud Functions.
+| [`platform-template`][platform-template]       | Platform template contains the Terraform to create the multi-tenant infrasture supporting application deployment.
 | `resources`                                    | Images and other resources used in documentation.
 | [`terraform-modules`][terraform-modules]       | Terraform modules that are used by application and platform teams when creating infrastructure.
 
@@ -143,11 +138,9 @@ agreement with Google.
 [app-template-python]: app-template-python/README.md
 [infra-template]: infra-template/README.md
 [launch-scripts]: launch-scripts/README.md
-[launch-scripts-infra-instructions]: launch-scripts/README.md#software-delivery-infrash
-[launch-scripts-app-instructions]: launch-scripts/README.md#software-delivery-appsh
+[bootstrap-instructions]: launch-scripts/README.md#bootstrapsh
 [platform-template]: platform-template/README.md
 [platform-template-infra-pipeline]: platform-template/README.md#infrastructure-pipeline
-[common-setup-infra-pipeline]: common-setup/README.md#automation-workflow-pipeline
 [terraform-modules]: terraform-modules/README.md
 [modern-cicd]: https://cloud.google.com/architecture/modern-cicd-anthos-user-guide
 [modern-cicd-video]: https://youtu.be/3mSm_HvvgOs
@@ -155,4 +148,3 @@ agreement with Google.
 [cloud-deploy]: https://cloud.google.com/deploy
 [cloud-build]: https://cloud.google.com/build/docs/overview
 [gke]: https://cloud.google.com/kubernetes-engine
-[cloud-function]: https://cloud.google.com/functions

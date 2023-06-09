@@ -1,6 +1,6 @@
 # Overview
 
-`platform-template` contains the infrastructure as code (IaC) for provisioning the multi-tenant platform infrastructure. The `platform-template` folder is hydrated into a repository during the execution of the [bootstrap.sh][software-delivery-infra] script.
+`platform-template` contains the infrastructure as code (IaC) for provisioning the multi-tenant platform infrastructure. The `platform-template` folder is hydrated into a repository during the execution of the [bootstrap.sh][bootstrap] script.
 
 Running applications in multi-tenant infrastructure can increase overall resource utilization and mimimize the operational overhead.  By running multiple application on the same infrastructure the opportunties for bin packing are increased which means you can make more efficient use of the underlying CPUs, memory and disks reducing costs. Also by centralizing the resources used to run applications infrastructure administrators have few systems reducing operational overhead.
 
@@ -73,6 +73,6 @@ agreement with Google.
 [acm]: https://cloud.google.com/anthos/config-management
 [cloud-deploy]: https://cloud.google.com/deploy
 [infra-template]: ../infra-template/README.md
-[software-delivery-infra]: ../launch-scripts/bootstrap.sh
+[bootstrap]: ../launch-scripts/bootstraps.sh
 [next19-infra-as-code]: https://www.youtube.com/watch?v=3vfXQxWJazM
 [cloud-build]: https://cloud.google.com/build/docs/overview

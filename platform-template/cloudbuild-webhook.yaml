@@ -67,15 +67,6 @@ steps:
     export TF_VAR_github_email=$$GITHUB_EMAIL
     export TF_VAR_github_org=$$GITHUB_ORG
     export TF_VAR_project_id=$PROJECT_ID
-    export TF_VAR_org_id=$$GCP_ORG
-    export TF_VAR_folder_id=$$GCP_FOLDER
-    export TF_VAR_billing_account=$$GCP_BILLINGAC
-    export TF_VAR_acm_repo=$$ACM_REPO
-    export TF_VAR_subnet_01_region=$$INFRA_REGION
-    export TF_VAR_subnet_02_region=$$INFRA_SEC_REGION
-    export TF_VAR_app_factory_project_id=$$APP_FACTORY_PROJECT_ID
-    export TF_VAR_app_factory_project_num=$$APP_FACTORY_PROJECT_NUM
-    export TF_VAR_secrets_project_id=$$SECRETS_PROJECT
     git config --global url."https://$$GITHUB_USER:$$GITHUB_TOKEN@github.com".insteadOf "https://github.com"
     
     branch=`echo "${_REF}" | cut -d "/" -f3`
@@ -105,16 +96,6 @@ steps:
   - GITHUB_USER
   - GITHUB_EMAIL
   - GITHUB_ORG
-  - GCP_ORG
-  - GCP_FOLDER
-  - GCP_BILLINGAC
-  - ACM_REPO
-  - INFRA_PROJECT_ID
-  - INFRA_REGION
-  - INFRA_SEC_REGION
-  - APP_FACTORY_PROJECT_ID
-  - APP_FACTORY_PROJECT_NUM
-  - SECRETS_PROJECT
 - name: 'hashicorp/terraform:1.0.0'
   args:
   - '-c'
@@ -124,15 +105,6 @@ steps:
     export TF_VAR_github_email=$$GITHUB_EMAIL
     export TF_VAR_github_org=$$GITHUB_ORG
     export TF_VAR_project_id=$PROJECT_ID
-    export TF_VAR_org_id=$$GCP_ORG
-    export TF_VAR_folder_id=$$GCP_FOLDER
-    export TF_VAR_billing_account=$$GCP_BILLINGAC
-    export TF_VAR_acm_repo=$$ACM_REPO
-    export TF_VAR_subnet_01_region=$$INFRA_REGION
-    export TF_VAR_subnet_02_region=$$INFRA_SEC_REGION
-    export TF_VAR_app_factory_project_id=$$APP_FACTORY_PROJECT_ID
-    export TF_VAR_app_factory_project_num=$$APP_FACTORY_PROJECT_NUM
-    export TF_VAR_secrets_project_id=$$SECRETS_PROJECT
     git config --global url."https://$$GITHUB_USER:$$GITHUB_TOKEN@github.com".insteadOf "https://github.com"
     
     branch=`echo "${_REF}" | cut -d "/" -f3`
@@ -143,7 +115,7 @@ steps:
       terraform apply -auto-approve -no-color
     else
       echo "***************************** SKIPPING APPLYING *******************************"
-      echo "Branch '$branch' does not represent an official environment."
+      echo "Branch '$branch' does not represent an oficial environment."
       echo "*******************************************************************************"
     fi
   id: tf apply
@@ -153,44 +125,14 @@ steps:
   - GITHUB_USER
   - GITHUB_EMAIL
   - GITHUB_ORG
-  - GCP_ORG
-  - GCP_FOLDER
-  - GCP_BILLINGAC
-  - ACM_REPO
-  - INFRA_PROJECT_ID
-  - INFRA_REGION
-  - INFRA_SEC_REGION
-  - APP_FACTORY_PROJECT_ID
-  - APP_FACTORY_PROJECT_NUM
-  - SECRETS_PROJECT
 timeout: 3600s
 availableSecrets:
   secretManager:
-  - versionName: projects/YOUR_SECRET_PROJECT_ID/secrets/github-token/versions/latest
+  - versionName: projects/$PROJECT_ID/secrets/github-token/versions/latest
     env: GITHUB_TOKEN
-  - versionName: projects/YOUR_SECRET_PROJECT_ID/secrets/github-user/versions/latest
+  - versionName: projects/$PROJECT_ID/secrets/github-user/versions/latest
     env: GITHUB_USER
-  - versionName: projects/YOUR_SECRET_PROJECT_ID/secrets/github-email/versions/latest
+  - versionName: projects/$PROJECT_ID/secrets/github-email/versions/latest
     env: GITHUB_EMAIL
-  - versionName: projects/YOUR_SECRET_PROJECT_ID/secrets/github-org/versions/latest
+  - versionName: projects/$PROJECT_ID/secrets/github-org/versions/latest
     env: GITHUB_ORG
-  - versionName: projects/YOUR_SECRET_PROJECT_ID/secrets/gcp-org/versions/latest
-    env: GCP_ORG
-  - versionName: projects/YOUR_SECRET_PROJECT_ID/secrets/gcp-folder/versions/latest
-    env: GCP_FOLDER
-  - versionName: projects/YOUR_SECRET_PROJECT_ID/secrets/gcp-billingac/versions/latest
-    env: GCP_BILLINGAC
-  - versionName: projects/YOUR_SECRET_PROJECT_ID/secrets/acm-repo/versions/latest
-    env: ACM_REPO
-  - versionName: projects/YOUR_SECRET_PROJECT_ID/secrets/infra-project-id/versions/latest
-    env: INFRA_PROJECT_ID
-  - versionName: projects/YOUR_SECRET_PROJECT_ID/secrets/infra-region/versions/latest
-    env: INFRA_REGION
-  - versionName: projects/YOUR_SECRET_PROJECT_ID/secrets/infra-sec-region/versions/latest
-    env: INFRA_SEC_REGION
-  - versionName: projects/YOUR_SECRET_PROJECT_ID/secrets/application-factory-id/versions/latest
-    env: APP_FACTORY_PROJECT_ID
-  - versionName: projects/YOUR_SECRET_PROJECT_ID/secrets/application-factory-number/versions/latest
-    env: APP_FACTORY_PROJECT_NUM
-  - versionName: projects/YOUR_SECRET_PROJECT_ID/secrets/secrets-project/versions/latest
-    env: SECRETS_PROJECT

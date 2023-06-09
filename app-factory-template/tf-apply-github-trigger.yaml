@@ -22,9 +22,9 @@ steps:
   - |
       echo ""
       echo "*************** TERRAFORM INIT ******************"
-      git config --global url."https://$$GITHUB_USER:$$GITHUB_TOKEN@github.com".insteadOf "https://github.com"
+      git config --global url."https://${_GITHUB_USER}:$$GITHUB_TOKEN@github.com".insteadOf "https://github.com"
       terraform init || exit 1
-  secretEnv: ['GITHUB_TOKEN','GITHUB_USER']
+  secretEnv: ['GITHUB_TOKEN']
 
 - id: 'tf apply'
   name: 'hashicorp/terraform:1.0.0'
@@ -34,15 +34,13 @@ steps:
   - | 
       echo ""
       echo "*************** TERRAFOM APPLY ******************"
-      git config --global url."https://$$GITHUB_USER:$$GITHUB_TOKEN@github.com".insteadOf "https://github.com"
+      git config --global url."https://${_GITHUB_USER}:$$GITHUB_TOKEN@github.com".insteadOf "https://github.com"
 
       terraform apply -auto-approve || exit 1
-  secretEnv: ['GITHUB_TOKEN','GITHUB_USER']
+  secretEnv: ['GITHUB_TOKEN']
 
 availableSecrets:
   secretManager:
-  - versionName: projects/YOUR_SECRET_PROJECT_ID/secrets/github-token/versions/latest
+  - versionName: projects/$PROJECT_ID/secrets/github-token/versions/latest
     env: GITHUB_TOKEN
-  - versionName: projects/YOUR_SECRET_PROJECT_ID/secrets/github-user/versions/latest
-    env: GITHUB_USER
 timeout: 600s

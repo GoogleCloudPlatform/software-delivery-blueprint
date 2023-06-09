@@ -30,7 +30,5 @@ module "YOUR_TEAM_NAME" {
     push_repositories = PUSH_REPOSITORIES
     triage_repositories = TRIAGE_REPOSITORIES
     pull_repositories = PULL_REPOSITORIES
-
-
 }
 

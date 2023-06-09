@@ -14,42 +14,10 @@
  * limitations under the License.
  */
 
-variable "project_name" {
-  type        = string
-  description = "Name of the application admin project that should be created, this will be same as the application name."
-}
-
-variable "org_id" {
-  type        = string
-  description = "Google Cloud organization identifier."
-}
-
-variable "folder_id" {
-  type        = string
-  default     = ""
-  description = "Google Cloud folder identifier that the application admin project will be created in."
-}
-
-variable "billing_account" {
-  type        = string
-  description = "Billing account identifier that will be linked to the application admin project."
-}
-
 variable "region" {
   type        = string
   default     = "us-central1"
   description = "The region that the IaC bucket should reside in."
-}
-
-variable "create_service_account" {
-  type        = bool
-  default     = true
-  description = "If set to true, Terraform will create the service accounts for Cloud Build IaC and CICD and Cloud Deploy and grant required permissions to them."
-}
-
-variable "app_factory_cb_service_account" {
-  type        = string
-  description = "Cloud Build service account of application factory."
 }
 
 variable "app_name" {
@@ -62,21 +30,7 @@ variable "env" {
   description = "environment list for the application."
 }
 
-variable "trigger_buckets_dep" {
-  type        = list
-  description = "bucket that will trigger cloud function to add GKE deploy permissions on CD SA."
-}
-
-variable "trigger_bucket_sec" {
+variable "project_id" {
   type        = string
-  description = "bucket that will trigger cloud function to add secrets read permission for CICD and IaC SA."
-}
-variable "trigger_bucket_billing" {
-  type        = string
-  description = "bucket that will trigger cloud function to add billing user permission for IaC SA."
-}
-
-variable "trigger_bucket_proj" {
-  type        = string
-  description = "bucket that will trigger cloud function to add project creator permission IaC SA."
+  description = "eProject Id."
 }

@@ -12,52 +12,37 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-variable "billing_account" {
-  description = "GCP billing account"
-}
-variable "org_id" {
-  description = "GCP org id"
-}
-variable "folder_id" {
+variable "project_id" {
+  type = string
+  description = "ID of the current project."
 }
 variable "env" {
   default = "dev"
+  description = "Environment"
 }
+
 variable "acm_repo" {
-  type = string
+  default = "YOUR_ACM_REPO"
+  description = "Repo that will be used for ACM"
 }
 variable "github_user" {
   type = string
+  description = "username for github"
 }
 variable "github_email" {
   type = string
+  description = "email for github user"
 }
 variable "github_org" {
   type = string
+  description = "github organization"
 }
 variable "github_token" {
   type = string
   description = "The access token that should be used for authenticating to GitHub."
   sensitive = true
 }
-variable "project_id" {
-  type = string
-}
-variable "app_factory_project_id" {
-  type = string
-}
-variable "app_factory_project_num" {
-  type = number
-  description = "project number of application factory"
-}
-variable "secrets_project_id" {
-  type = string
-  description = "Project ID of the projects hosting all secrets"
-}
-variable "base_project_name" {
-  default = "sdp-gke"
-  description = "Name of the project that will host GKE cluster"
-}
+
 variable "network_name" {
   default = "gke-vpc-network-dev"
   description = "VPC network where GKE cluster will be created"
@@ -72,7 +57,7 @@ variable "subnet_01_ip" {
   default = "10.40.0.0/22"
 }
 variable "subnet_01_region" {
-  description = "primary region where resources will be created"
+  default = "YOUR_REGION"
 }
 variable "subnet_01_description" {
   default = "subnet 01 in"
@@ -84,7 +69,7 @@ variable "subnet_02_ip" {
   default = "10.12.0.0/22"
 }
 variable "subnet_02_region" {
-  description = "secondary region where resources will be created"
+  default = "YOUR_SECONDARY_REGION"
 }
 variable "subnet_02_description" {
   default = "subnet 02"

@@ -17,21 +17,17 @@ steps:
 - name: 'gcr.io/cloud-builders/git'
   id: 'clone platform-repos'
   entrypoint: /bin/sh
-  args: [ '-c', "git clone https://$$GITHUB_USER:$$GITHUB_TOKEN@github.com/$$GITHUB_ORG/$REPO_NAME" ]
-  secretEnv: ['GITHUB_TOKEN','GITHUB_USER','GITHUB_ORG']
+  args: [ '-c', 'git clone https://${_GITHUB_USER}:$$GITHUB_TOKEN@github.com/${_GITHUB_ORG}/$REPO_NAME' ]
+  secretEnv: ['GITHUB_TOKEN']
 
 - name: 'gcr.io/cloud-builders/git'
   id: 'create tf files'
   entrypoint: 'bash'
-  args: [ '-c',"./setup/generateTeamTFCode.sh $$GITHUB_USER $$GITHUB_ORG ${_TEAM_NAME} ${REPO_NAME}" ]
-  secretEnv: ['GITHUB_TOKEN','GITHUB_USER','GITHUB_ORG']
+  args: [ '-xe','./setup/generateTeamTFCode.sh','${_GITHUB_USER}','${_GITHUB_ORG}','${_TEAM_NAME}', '${REPO_NAME}' ]
+  secretEnv: ['GITHUB_TOKEN']
 
 
 availableSecrets:
   secretManager:
-  - versionName: projects/YOUR_SECRET_PROJECT_ID/secrets/github-token/versions/latest
+  - versionName: projects/$PROJECT_ID/secrets/github-token/versions/latest
     env: GITHUB_TOKEN
-  - versionName: projects/YOUR_SECRET_PROJECT_ID/secrets/github-user/versions/latest
-    env: GITHUB_USER
-  - versionName: projects/YOUR_SECRET_PROJECT_ID/secrets/github-org/versions/latest
-    env: GITHUB_ORG

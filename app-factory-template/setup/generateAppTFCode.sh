@@ -16,16 +16,17 @@
 
 app_runtime=${1}
 app_name=${2}
-infra_project_id=${3}
-user=${4}
+sa_to_impersonate=${3}
+infra_project_id=${4}
+user=${5}
 email="${user}@github.com"
-seed_project_id=${5}
-folder_id=${6}
-github_org_to_clone_templates_from=${7}
-repo=${8}
-trigger_type=${9}
-github_team=${10}
-region=${11}
+seed_project_id=${6}
+folder_id=${7}
+github_org_to_clone_templates_from=${8}
+repo=${9}
+trigger_type=${10}
+github_team=${11}
+region=${12}
 cd ${repo}
 
 if [ -z $(find apps -maxdepth 1 -type d -name ${app_runtime}) ]; then
@@ -39,21 +40,19 @@ if [ ! -f apps/${app_runtime}/${app_name}.tf ]; then
   sed -i "s/YOUR_APP_PROJECT_NAME/${app_name}-project/g" ${app_name}.tf
   sed -i "s/YOUR_APP_PROJECT/${app_name}-tf-project/g" ${app_name}.tf
   sed -i "s/YOUR_SEED_PROJECT_ID/${seed_project_id}/g" ${app_name}.tf
+  sed -i "s/YOUR_SA_TO_IMPERSONATE/${sa_to_impersonate}/g" ${app_name}.tf
   sed -i "s/YOUR_INFRA_PROJECT_ID/${infra_project_id}/g" ${app_name}.tf
   sed -i "s/GITHUB_ORG_TO_CLONE_TEMPLATES_FROM/${github_org_to_clone_templates_from}/g" ${app_name}.tf
   sed -i "s/YOUR_TRIGGER_TYPE/${trigger_type}/g" ${app_name}.tf
   sed -i "s/YOUR_GITHUB_TEAM/${github_team}/g" ${app_name}.tf
   sed -i "s/YOUR_REGION/${region}/g" ${app_name}.tf
 
-  if [ ${folder_id} = "null" ]; then
+
+
+  if [ -z ${folder_id} ]; then
     sed -i '/YOUR_GCP_FOLDER_ID/d' ${app_name}.tf
   else
     sed -i "s/YOUR_GCP_FOLDER_ID/${folder_id}/g" ${app_name}.tf
-  fi
-  if [ ${github_team} = "null" ]; then
-    sed -i '/YOUR_GITHUB_TEAM/d' ${app_name}.tf
-  else
-    sed -i "s/YOUR_GITHUB_TEAM/${github_team}/g" ${app_name}.tf
   fi
 
   git add ${app_name}.tf

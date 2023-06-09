@@ -1,6 +1,6 @@
 # Overview
 
-This folder is hydrated into a repo called `terraform-modules` during the execution of the [`bootstrap.sh`][software-delivery-infra] script. The purpose of this repository is to store Terraform  modules used throughout the platform. `terraform-modules` contains the modules used by application and IaC pipelines.
+This folder is hydrated into a repo called `terraform-modules` during the execution of the [bootstraps.sh][bootstraps] script. The purpose of this repository is to store Terraform  modules used throughout the platform. `terraform-modules` contains the modules used by application and IaC pipelines.
 
 Terraform modules enable platform administrators to create shared configuration for infrastructure that encapsulate the best practices for their organization, establishing guardrails for self-service infrastructure.
 
@@ -29,22 +29,22 @@ target, so that the target can be used in a Cloud Deploy pipeline.
 
 ## Module catalog
 
-| Name                 | Description
-|----------------------| --------------
-| acm                  | Installs and configures [Anthos Config Managment][acm] (ACM). This module also creates base cluster and cluster selectors in the ACM repo.
-| app-group-admin-seed | Deploys the base project for an application group. This module does the minimum necessary to create the project and establish the IaC pipeline for that application group. The application IaC pipeline takes the responsibility of building out the remainder of the application admin project.
-| artifact-registry    | Creates [Artifact Registry][artifact-registry] for an application group.  This module also uses the render pattern to manage IAM access on the registry to allow multi-tenant GKE clusters service account.
-| cloud-deploy-targets | This module creates [Cloud Deploy targets][cloud-deploy-target] in application admin projects for use by the [Cloud Deploy pipeline][cloud-deploy-pipeline]. This module also includes a submodule that renders the Terraform to create the Cloud Deploy targets.
-| cloud-functions      | This module creates [Cloud Functions][cloud-function] in automation workflow project which will be invoked by Application Factory while creating the apps to provisions access for the apps.
-| github-triggers      | Creates [Cloud Build][cloud-build] triggers using the [GitHub application][cloud-build-github].
-| gke                  | Deploys [GKE][gke] clusters, typically used in the multi-tenant platform projects.
-| landing-zone         | Using the rendering pattern and ACM, this module creates a landing zone in the multi-tenant infrastructure including a namespace, workload identity and network policy.
-| manage-repos         | This module contains submodules to create the application and infrastructure as code repostories on GitHub. Additional source control providers could be added here.
-| manage-teams         | This modules manages teams and their members in GitHub.
-| mci                  | This module enables multi-cluser ingress and multi-cluster service on GKE cluser.
-| project              | Create Google Cloud projects and provides a variable to enabled additional Google Cloud APIs as need by the application teams.
-| vpc                  | Base module to create VPC networks.
-| webhooks             | Creates Cloud Build triggers using [webhooks][cloud-build-webhook].
+| Name                   | Description
+| ---------------------- | --------------
+| acm                    | Installs and configures [Anthos Config Managment][acm] (ACM). This module also creates base cluster and cluster selectors in the ACM repo.
+| app-group-admin-seed   | Deploys the base project for an application group. This module does the minimum necessary to create the project and establish the IaC pipeline for that application group. The application IaC pipeline takes the responsibility of building out the remainder of the application admin project.
+| app-group-copy-secrets | Helper module to streamline the copying of secrets from one project to another.
+| artifact-registry      | Creates [Artifact Registry][artifact-registry] for an application group.  This module also uses the render pattern to manage IAM access on the registry to allow multi-tenant GKE clusters service account.
+| cloud-deploy-targets   | This module creates [Cloud Deploy targets][cloud-deploy-target] in application admin projects for use by the [Cloud Deploy pipeline][cloud-deploy-pipeline]. This module also includes a submodule that renders the Terraform to create the Cloud Deploy targets.
+| github-triggers        | Creates [Cloud Build][cloud-build] triggers using the [GitHub application][cloud-build-github].
+| gke                    | Deploys [GKE][gke] clusters, typically used in the multi-tenant platform projects.
+| landing-zone           | Using the rendering pattern and ACM, this module creates a landing zone in the multi-tenant infrastructure including a namespace, workload identity and network policy.
+| manage-repos           | This module contains submodules to create the application and infrastructure as code repostories on GitHub. Additional source control providers could be added here.
+| manage-teams           | This modules manages teams and their members in GitHub.
+| project                | Create Google Cloud projects and provides a variable to enabled additional Google Cloud APIs as need by the application teams.
+| secrets                | Helper module to create and managed secrets in [Secret Manager][secret-manager].
+| vpc                    | Base module to create VPC networks.
+| webhooks               | Creates Cloud Build triggers using [webhooks][cloud-build-webhook].
 
 ## Example
 
@@ -131,7 +131,7 @@ agreement with Google.
 
 [contributing-guidelines]: CONTRIBUTING.md
 [code-of-conduct]: code-of-conduct.md
-[software-delivery-infra]: ../launch-scripts/bootstrap.sh
+[bootstraps]: ../launch-scripts/bootstraps.sh
 [acm]: https://cloud.google.com/anthos/config-management
 [artifact-registry]: https://cloud.google.com/artifact-registry
 [cloud-deploy]: https://cloud.google.com/deploy
@@ -142,4 +142,3 @@ agreement with Google.
 [cloud-build-webhook]: https://cloud.google.com/build/docs/automate-builds-webhook-events
 [gke]: https://cloud.google.com/kubernetes-engine
 [secret-manager]: https://cloud.google.com/secret-manager
-[cloud-function]: https://cloud.google.com/functions

@@ -22,20 +22,6 @@ locals{
   project_number = data.google_project.project_number.number
 }
 
-// Enable any extra APIs that are required for the admin project
-module "project-service-cloudresourcemanager" {
-  source  = "terraform-google-modules/project-factory/google//modules/project_services"
-  version = "4.0.0"
-
-  project_id = var.project_id
-
-  activate_apis = [
-    "artifactregistry.googleapis.com",
-    "clouddeploy.googleapis.com",
-    "container.googleapis.com"
-  ]
-}
-
 // Create GitHub webhook to invoke Cloud Build trigger
 module "app-web-hook" {
   count  = var.trigger_type == "webhook" ? 1 : 0
@@ -46,7 +32,7 @@ module "app-web-hook" {
   app_repo_name   = var.application_name
   project_id      = var.project_id
   service_account = var.cloudbuild_service_account
-  secret_project_id = var.secret_project_id
+  region          = var.region
 }
 
 //Create GitHub trigger to invoke Cloud Build trigger
@@ -62,26 +48,28 @@ module "app-github-trigger" {
 
 module "artifact-registry" {
   source = "git::https://github.com/YOUR_GITHUB_ORG/terraform-modules//artifact-registry"
-
   id          = var.application_name
   project_id  = var.project_id
   location    = var.region
   description = "Artifact registry for ${var.application_name} in ${var.project_id}"
 
-  depends_on = [
-    module.project-service-cloudresourcemanager
-  ]
 }
 
-module "cloud-deploy-targets" {
-  source = "git::https://github.com/YOUR_GITHUB_ORG/terraform-modules//cloud-deploy-targets"
-
-  service_account = var.clouddeploy_service_account
-  project         = var.project_id
-  location        = var.region
-  depends_on = [
-    module.project-service-cloudresourcemanager
-  ]
+data "google_secret_manager_secret_version" "dev-target" {
+  secret = "dev"
+  project = var.project_id
+}
+data "google_secret_manager_secret_version" "staging-target" {
+  secret = "staging"
+  project = var.project_id
+}
+data "google_secret_manager_secret_version" "prod1-target" {
+  secret = "prod1"
+  project = var.project_id
+}
+data "google_secret_manager_secret_version" "prod2-target" {
+  secret = "prod2"
+  project = var.project_id
 }
 
 resource "google_clouddeploy_delivery_pipeline" "primary" {
@@ -94,22 +82,22 @@ resource "google_clouddeploy_delivery_pipeline" "primary" {
   serial_pipeline {
     stages {
       profiles  = ["dev"]
-      target_id = module.cloud-deploy-targets.dev-target.target.name
+      target_id = data.google_secret_manager_secret_version.dev-target.secret_data
     }
 
     stages {
       profiles  = ["staging"]
-      target_id = module.cloud-deploy-targets.staging-target.target.name
+      target_id = data.google_secret_manager_secret_version.staging-target.secret_data
     }
 
     stages {
       profiles  = ["prod-1"]
-      target_id = module.cloud-deploy-targets.prod-1-target.target.name
+      target_id = data.google_secret_manager_secret_version.prod1-target.secret_data
     }
 
     stages {
       profiles  = ["prod-2"]
-      target_id = module.cloud-deploy-targets.prod-2-target.target.name
+      target_id = data.google_secret_manager_secret_version.prod2-target.secret_data
     }
 
   }
