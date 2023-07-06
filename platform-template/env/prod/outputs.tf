@@ -107,7 +107,7 @@ output "gke-service-account" {
 
 
 output "gke-cluster-2" {
-  value       = module.create_gke_2.name.name
+  value       = module.create_gke_2.cluster_name.name
   description = "The name of gke cluster 2"
 }
 
