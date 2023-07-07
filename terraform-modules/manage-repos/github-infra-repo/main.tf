@@ -103,7 +103,7 @@ resource "null_resource" "set-repo" {
   provisioner "local-exec" {
     command = "${path.module}/prep-infra-repo.sh ${var.org_name_to_clone_template_from} ${var.application_name} ${var.github_user} ${var.github_email} ${var.state_bucket} ${var.project_id} ${var.ci_sa} ${var.region} ${var.trigger_type}"
   }
-  depends_on = [github_repository.infrastructure_repo, github_branch.infrastructure_repo_prod, github_branch.infrastructure_repo_staging, module.infra-web-hook, module.infra-github-trigger]
+  depends_on = [github_repository.infrastructure_repo, github_branch.infrastructure_repo_prod, github_branch.infrastructure_repo_staging ]
 }
 
 module "infra-web-hook" {
