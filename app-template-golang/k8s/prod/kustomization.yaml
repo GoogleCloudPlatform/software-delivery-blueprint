@@ -19,7 +19,7 @@ resources:
 - mcs.yaml
 - mci.yaml
 patches:
-- deployment.yaml
+- path: deployment.yaml
 commonLabels:
   env: prod
 namePrefix: YOUR_APPLICATION-
