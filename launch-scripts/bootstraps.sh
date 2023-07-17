@@ -331,7 +331,7 @@ https://api.github.com/repos/$GITHUB_ORG/$ACM_REPO/branches/staging/protection \
       \\\"required_pull_request_reviews\\\" : {\\\"dismissal_restrictions\\\": {}, \
       \\\"dismiss_stale_reviews\\\": false,\\\"require_code_owner_reviews\\\": true,\
       \\\"required_approving_review_count\\\": 1,\\\"bypass_pull_request_allowances\\\": {}}, \
-      \\\"enforce_admins\\\": true
+      \\\"enforce_admins\\\": null
       }\" \
       "
 
@@ -342,7 +342,7 @@ https://api.github.com/repos/$GITHUB_ORG/$ACM_REPO/branches/prod/protection \
       \\\"required_pull_request_reviews\\\" : {\\\"dismissal_restrictions\\\": {}, \
       \\\"dismiss_stale_reviews\\\": false,\\\"require_code_owner_reviews\\\": true,\
       \\\"required_approving_review_count\\\": 1,\\\"bypass_pull_request_allowances\\\": {}}, \
-      \\\"enforce_admins\\\": true
+      \\\"enforce_admins\\\": null
       }\" \
       "
 
@@ -399,7 +399,7 @@ https://api.github.com/repos/$GITHUB_ORG/$INFRA_SETUP_REPO/branches/staging/prot
       \\\"required_pull_request_reviews\\\" : {\\\"dismissal_restrictions\\\": {}, \
       \\\"dismiss_stale_reviews\\\": false,\\\"require_code_owner_reviews\\\": true,\
       \\\"required_approving_review_count\\\": 1,\\\"bypass_pull_request_allowances\\\": {}}, \
-      \\\"enforce_admins\\\": true
+      \\\"enforce_admins\\\": null
       }\" \
       "
 
@@ -410,7 +410,7 @@ https://api.github.com/repos/$GITHUB_ORG/$INFRA_SETUP_REPO/branches/prod/protect
       \\\"required_pull_request_reviews\\\" : {\\\"dismissal_restrictions\\\": {}, \
       \\\"dismiss_stale_reviews\\\": false,\\\"require_code_owner_reviews\\\": true,\
       \\\"required_approving_review_count\\\": 1,\\\"bypass_pull_request_allowances\\\": {}}, \
-      \\\"enforce_admins\\\": true
+      \\\"enforce_admins\\\": null
       }\" \
       "
 #Setting up the infrastructure setup project
