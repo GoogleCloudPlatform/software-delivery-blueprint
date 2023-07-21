@@ -167,6 +167,7 @@ module "artifact-registry-iam-2" {
   git_repo              = "terraform-modules"
   cluster_name          = module.create_gke_2.cluster_name.name
   service_account_name  = module.create_gke_2.cluster_name.service_account
+  depends_on = [ module.artifact-registry-iam-1 ]
 }
 
 module "cloud-deploy-target-1" {
