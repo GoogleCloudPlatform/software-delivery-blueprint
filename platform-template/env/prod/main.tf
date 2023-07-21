@@ -139,6 +139,18 @@ module "artifact-registry-iam-1" {
   service_account_name  = module.create_gke_1.cluster_name.service_account
 }
 
+module "artifact-registry-iam-2" {
+  source                = "git::https://github.com/YOUR_GITHUB_ORG/terraform-modules.git//artifact-registry/render"
+  git_user              = var.github_user
+  git_email             = var.github_email
+  git_org               = var.github_org
+  github_token          = var.github_token
+  git_repo              = "terraform-modules"
+  cluster_name          = module.create_gke_2.cluster_name.name
+  service_account_name  = module.create_gke_2.cluster_name.service_account
+  depends_on = [ module.artifact-registry-iam-1 ]
+}
+
 module "cloud-deploy-target-1" {
   source                = "git::https://github.com/YOUR_GITHUB_ORG/terraform-modules.git//cloud-deploy-targets"
   location              = var.subnet_01_region
@@ -146,7 +158,7 @@ module "cloud-deploy-target-1" {
   cluster_name          = local.gke_cluster_id_1 //module.create_gke_1.cluster_name.name
   project               = var.project_id
   service_account       = data.google_secret_manager_secret_version.cloud-deploy.secret_data
-  depends_on            = [ module.artifact-registry-iam-1 ]
+  depends_on            = [ module.artifact-registry-iam-1, module.artifact-registry-iam-2 ]
 }
 
 module "cloud-deploy-target-2" {
@@ -156,7 +168,7 @@ module "cloud-deploy-target-2" {
   cluster_name          = local.gke_cluster_id_2 //module.create_gke_1.cluster_name.name
   project               = var.project_id
   service_account       = data.google_secret_manager_secret_version.cloud-deploy.secret_data
-  depends_on            = [ module.artifact-registry-iam-1  ]
+  depends_on            = [ module.artifact-registry-iam-1, module.artifact-registry-iam-2  ]
 }
 
 module "landing-zone-template" {
@@ -167,7 +179,7 @@ module "landing-zone-template" {
   tf_modules_repo       = "terraform-modules"
   cluster_name          = module.create_gke_1.cluster_name.name
   cluster_project_id    = var.project_id
-  depends_on            = [ module.artifact-registry-iam-1, module.cloud-deploy-target-1, module.cloud-deploy-target-2 ]
+  depends_on            = [ module.artifact-registry-iam-1, module.artifact-registry-iam-2, module.cloud-deploy-target-1, module.cloud-deploy-target-2 ]
   env                   = var.env
   index                 = 2
 }
