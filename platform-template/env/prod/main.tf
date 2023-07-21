@@ -158,6 +158,7 @@ module "cloud-deploy-target-1" {
   cluster_name          = local.gke_cluster_id_1 //module.create_gke_1.cluster_name.name
   project               = var.project_id
   service_account       = data.google_secret_manager_secret_version.cloud-deploy.secret_data
+  require_approval      = true
   depends_on            = [ module.artifact-registry-iam-1, module.artifact-registry-iam-2 ]
 }
 
@@ -168,6 +169,7 @@ module "cloud-deploy-target-2" {
   cluster_name          = local.gke_cluster_id_2 //module.create_gke_1.cluster_name.name
   project               = var.project_id
   service_account       = data.google_secret_manager_secret_version.cloud-deploy.secret_data
+  require_approval      = true
   depends_on            = [ module.artifact-registry-iam-1, module.artifact-registry-iam-2  ]
 }
 
