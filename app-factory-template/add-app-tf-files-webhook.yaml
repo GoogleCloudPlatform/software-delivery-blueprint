@@ -18,16 +18,16 @@ steps:
 - name: 'gcr.io/cloud-builders/git'
   id: 'clone platform-repos'
   entrypoint: /bin/sh
-  args: [ '-c', "git clone https://$$GITHUB_USER:$$GITHUB_TOKEN@github.com/$$GITHUB_ORG/${_REPO_NAME}" ]
-  secretEnv: ['GITHUB_TOKEN','GITHUB_USER','GITHUB_ORG']
+  args: [ '-c', "git clone https://$$GITHUB_USER:$$GITHUB_TOKEN@$$GITHUB_DNS/$$GITHUB_ORG/${_REPO_NAME}" ]
+  secretEnv: ['GITHUB_TOKEN','GITHUB_USER','GITHUB_ORG','GITHUB_DNS']
 
 
 #Initialize apps directory.Lookup app_runtimes_list.txt to find allowed runtimes and add a terraform module for each runtime under apps folder
 - name: 'gcr.io/cloud-builders/gcloud'
   id : 'Initialize dir structure'
   entrypoint: 'bash'
-  args: [ '-c',"./${_REPO_NAME}/setup/init.sh $$GITHUB_USER ${_REPO_NAME}" ]
-  secretEnv: ['GITHUB_TOKEN','GITHUB_USER','GITHUB_ORG']
+  args: [ '-c',"./${_REPO_NAME}/setup/init.sh $$GITHUB_URL $$GITHUB_USER ${_REPO_NAME}" ]
+  secretEnv: ['GITHUB_TOKEN','GITHUB_USER','GITHUB_ORG','GITHUB_URL']
 
 - name: 'gcr.io/cloud-builders/gcloud'
   id : 'Handling the variables that could be empty'
@@ -50,8 +50,8 @@ steps:
 - name: 'gcr.io/cloud-builders/gcloud'
   id: 'create tf file for app, commit it in github repo and push'
   entrypoint: 'bash'
-  args: [ '-c',"./${_REPO_NAME}/setup/generateAppTFCode.sh ${_APP_RUNTIME} ${_APP_NAME} ${_INFRA_PROJECT_ID} $$GITHUB_USER ${PROJECT_ID} `cat /workspace/folder` $$GITHUB_ORG ${_REPO_NAME} ${_TRIGGER_TYPE} ${_GITHUB_TEAM} `cat /workspace/github_team` ${_REGION}"  ]
-  secretEnv: ['GITHUB_TOKEN','GITHUB_USER','GITHUB_ORG']
+  args: [ '-c',"./${_REPO_NAME}/setup/generateAppTFCode.sh ${_APP_RUNTIME} ${_APP_NAME} ${_INFRA_PROJECT_ID} $$GITHUB_USER ${PROJECT_ID} `cat /workspace/folder` $$GITHUB_ORG ${_REPO_NAME} ${_TRIGGER_TYPE} ${_GITHUB_TEAM} `cat /workspace/github_team` ${_REGION} ${_SEC_REGION} $$GITHUB_URL"  ]
+  secretEnv: ['GITHUB_TOKEN','GITHUB_USER','GITHUB_ORG','GITHUB_URL']
 
 availableSecrets:
   secretManager:
@@ -61,3 +61,7 @@ availableSecrets:
     env: GITHUB_USER
   - versionName: projects/YOUR_SECRET_PROJECT_ID/secrets/github-org/versions/latest
     env: GITHUB_ORG
+  - versionName: projects/YOUR_SECRET_PROJECT_ID/secrets/github-url/versions/latest
+    env: GITHUB_URL
+  - versionName: projects/YOUR_SECRET_PROJECT_ID/secrets/github-dns/versions/latest
+    env: GITHUB_DNS

@@ -26,7 +26,6 @@ resource "github_repository" "infrastructure_repo" {
   allow_squash_merge     = true
   allow_rebase_merge     = true
   delete_branch_on_merge = false
-  vulnerability_alerts   = true
   template {
     owner      = "${var.org_name_to_clone_template_from}"
     repository = "infra-template"
@@ -101,7 +100,7 @@ resource "null_resource" "set-repo" {
     id = github_repository.infrastructure_repo.id
   }
   provisioner "local-exec" {
-    command = "${path.module}/prep-infra-repo.sh ${var.org_name_to_clone_template_from} ${var.application_name} ${var.github_user} ${var.github_email} ${var.org_id} ${var.billing_account} ${var.state_bucket} ${var.project_id} ${var.ci_sa} ${var.cd_sa} ${var.region} ${var.trigger_type} ${var.secret_project_id} ${var.folder_id}"
+    command = "${path.module}/prep-infra-repo.sh ${var.org_name_to_clone_template_from} ${var.application_name} ${var.github_user} ${var.github_email} ${var.org_id} ${var.billing_account} ${var.state_bucket} ${var.project_id} ${var.ci_sa} ${var.cd_sa} ${var.region} ${var.trigger_type} ${var.secret_project_id} ${var.sec_region} ${var.github_url} ${var.folder_id}"
   }
   depends_on = [github_repository.infrastructure_repo, github_branch.infrastructure_repo_prod, github_branch.infrastructure_repo_staging, module.infra-web-hook, module.infra-github-trigger]
 }

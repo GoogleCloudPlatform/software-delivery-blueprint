@@ -11,9 +11,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-user=${1}
+github_url=${1}
+user=${2}
 email="${user}@github.com"
-repo=${2}
+repo=${3}
 cd ${repo}
 base_dir="config/repositories-runtime-config"
 for app in `cat ${base_dir}/app_runtimes_list.txt`
@@ -22,8 +23,6 @@ for app in `cat ${base_dir}/app_runtimes_list.txt`
         echo "${app} is specified in app_runtimes_list.txt but corresponding folder was not found. Creating apps/${app}"
         mkdir apps/${app} || exit 1
         cp templates/variables.tf.tpl apps/${app}/variables.tf || exit 1
-        #cp templates/provider.tf.tpl apps/${app}/provider.tf || exit 1
-        #sed -i "s/YOUR_SA_TO_IMPERSONATE/${sa_to_impersonate}/g" apps/${app}/provider.tf || exit 1
         if [ $(grep "module \"${app}\"" apps/main.tf| wc -l) -eq 0 ]; then
           cat << EOF >> apps/main.tf
 module "${app}" {

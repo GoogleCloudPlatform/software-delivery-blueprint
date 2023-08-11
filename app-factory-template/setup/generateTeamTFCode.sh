@@ -14,14 +14,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-user=${1}
+github_url=${1}
+user=${2}
 email="${user}@github.com"
-org=${2}
-raw_team_name=${3}
-repo=${4}
+org=${3}
+raw_team_name=${4}
+repo=${5}
 teams_basedir="teams"
 configdir="config/teams-configs"
-teams_module="git::https://github.com/${org}/terraform-modules.git//manage-teams"
+teams_module="git::${github_url}/${org}/terraform-modules.git//manage-teams"
 
 cd ${repo}
 target_dir="teams"  #This is where all teams related tf files will be created

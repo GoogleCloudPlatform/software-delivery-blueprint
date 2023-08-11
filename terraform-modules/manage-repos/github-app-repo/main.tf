@@ -29,7 +29,6 @@ resource "github_repository" "application_repo" {
   allow_rebase_merge     = true
   delete_branch_on_merge = false
 
-  vulnerability_alerts = true
   template {
     owner      = "${var.org_name_to_clone_template_from}"
     repository = "app-template-${var.app_runtime}"
@@ -42,7 +41,7 @@ resource "null_resource" "set-repo" {
     id = github_repository.application_repo.id
   }
   provisioner "local-exec" {
-    command = "${path.module}/prep-app-repo.sh ${var.org_name_to_clone_template_from} ${var.application_name} ${var.github_user} ${var.github_email} ${var.namespace[var.env[count.index]]} ${var.ksa[var.env[count.index]]} ${var.env[count.index]} ${count.index} ${var.region} ${var.secret_project_id}"
+    command = "${path.module}/prep-app-repo.sh ${var.org_name_to_clone_template_from} ${var.application_name} ${var.github_user} ${var.github_email} ${var.namespace[var.env[count.index]]} ${var.app_suffix} ${var.env[count.index]} ${count.index} ${var.region} ${var.secret_project_id} ${var.github_url}"
   }
   depends_on = [github_repository.application_repo, module.app-github-trigger, module.app-web-hook]
 }

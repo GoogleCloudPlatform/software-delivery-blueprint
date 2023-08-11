@@ -70,13 +70,14 @@ resource "google_cloudbuild_trigger" "deploy-app" {
       echo $branch
       echo "###########"
       
-      git clone -b ${"$"}{branch} https://$$GITHUB_USER:$$GITHUB_TOKEN@github.com/$$GITHUB_ORG/${"$"}{_REPO}
+      git clone -b ${"$"}{branch} https://$$GITHUB_USER:$$GITHUB_TOKEN@$$GITHUB_DNS/$$GITHUB_ORG/${"$"}{_REPO}
   EOF
       ]
       secret_env = [
         "GITHUB_USER",
         "GITHUB_TOKEN",
-      "GITHUB_ORG"]
+      "GITHUB_ORG",
+      "GITHUB_DNS"]
     }
 
     step {
@@ -130,6 +131,10 @@ resource "google_cloudbuild_trigger" "deploy-app" {
       secret_manager {
         version_name = "projects/$PROJECT_ID/secrets/region/versions/latest"
         env          = "REGION"
+      }
+      secret_manager {
+        version_name = "projects/${var.secret_project_id}/secrets/github-dns/versions/latest"
+        env          = "GITHUB_DNS"
       }
 
     }

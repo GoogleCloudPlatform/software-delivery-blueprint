@@ -17,8 +17,8 @@ steps:
 - name: 'gcr.io/cloud-builders/git'
   id: 'clone repo'
   entrypoint: /bin/sh
-  args: [ '-c', 'git clone https://$$GITHUB_USER:$$GITHUB_TOKEN@github.com/$$GITHUB_ORG/${_REPO_NAME}' ]
-  secretEnv: ['GITHUB_TOKEN','GITHUB_USER','GITHUB_ORG']
+  args: [ '-c', 'git clone https://$$GITHUB_USER:$$GITHUB_TOKEN@$$GITHUB_DNS/$$GITHUB_ORG/${_REPO_NAME}' ]
+  secretEnv: ['GITHUB_TOKEN','GITHUB_USER','GITHUB_ORG','GITHUB_DNS']
 
 - id: 'tf init'
   name: 'hashicorp/terraform:1.0.0'
@@ -28,10 +28,10 @@ steps:
   - |
       echo ""
       echo "*************** TERRAFORM INIT ******************"
-      git config --global url."https://$$GITHUB_USER:$$GITHUB_TOKEN@github.com".insteadOf "https://github.com"
+      git config --global url."https://$$GITHUB_USER:$$GITHUB_TOKEN@$$GITHUB_DNS".insteadOf "https://$$GITHUB_DNS"
       cd ${_REPO_NAME}
       terraform init || exit 1
-  secretEnv: ['GITHUB_TOKEN','GITHUB_USER']
+  secretEnv: ['GITHUB_TOKEN','GITHUB_USER','GITHUB_DNS']
 
 - id: 'tf apply'
   name: 'hashicorp/terraform:1.0.0'
@@ -41,10 +41,10 @@ steps:
   - | 
       echo ""
       echo "*************** TERRAFOM APPLY ******************"
-      git config --global url."https://$$GITHUB_USER:$$GITHUB_TOKEN@github.com".insteadOf "https://github.com"
+      git config --global url."https://$$GITHUB_USER:$$GITHUB_TOKEN@$$GITHUB_DNS".insteadOf "https://$$GITHUB_DNS"
       cd ${_REPO_NAME}
       terraform apply -auto-approve || exit 1
-  secretEnv: ['GITHUB_TOKEN','GITHUB_USER']
+  secretEnv: ['GITHUB_TOKEN','GITHUB_USER','GITHUB_DNS']
 
 availableSecrets:
   secretManager:
@@ -54,4 +54,6 @@ availableSecrets:
     env: GITHUB_USER
   - versionName: projects/YOUR_SECRET_PROJECT_ID/secrets/github-org/versions/latest
     env: GITHUB_ORG
+  - versionName: projects/YOUR_SECRET_PROJECT_ID/secrets/github-dns/versions/latest
+    env: GITHUB_DNS
 timeout: 600s

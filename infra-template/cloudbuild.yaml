@@ -28,7 +28,7 @@ steps:
   args:
   - '-c'
   - |
-    git config --global url."https://$$GITHUB_USER:$$GITHUB_TOKEN@github.com".insteadOf "https://github.com"
+    git config --global url."https://$$GITHUB_USER:$$GITHUB_TOKEN@$$GITHUB_DNS".insteadOf "https://$$GITHUB_DNS"
     if [ -d "env/$BRANCH_NAME/" ]; then
       cd env/$BRANCH_NAME
       terraform init
@@ -49,6 +49,7 @@ steps:
   secretEnv:
   - GITHUB_TOKEN
   - GITHUB_USER
+  - GITHUB_DNS
 - id: 'tf plan'
   name: 'hashicorp/terraform:1.0.0'
   entrypoint: 'sh'
@@ -62,7 +63,7 @@ steps:
     export TF_VAR_org_id=$$GCP_ORG
     export TF_VAR_folder_id=$$GCP_FOLDER
     export TF_VAR_billing_account=$$GCP_BILLINGAC
-    git config --global url."https://$$GITHUB_USER:$$GITHUB_TOKEN@github.com".insteadOf "https://github.com"
+    git config --global url."https://$$GITHUB_USER:$$GITHUB_TOKEN@$$GITHUB_DNS".insteadOf "https://$$GITHUB_DNS"
     if [ -d "env/$BRANCH_NAME/" ]; then
       cd env/$BRANCH_NAME
       terraform plan
@@ -87,6 +88,7 @@ steps:
   - GCP_ORG
   - GCP_FOLDER
   - GCP_BILLINGAC
+  - GITHUB_DNS
 - id: 'tf apply'
   name: 'hashicorp/terraform:1.0.0'
   entrypoint: 'sh'
@@ -100,7 +102,7 @@ steps:
     export TF_VAR_org_id=$$GCP_ORG
     export TF_VAR_folder_id=$$GCP_FOLDER
     export TF_VAR_billing_account=$$GCP_BILLINGAC
-    git config --global url."https://$$GITHUB_USER:$$GITHUB_TOKEN@github.com".insteadOf "https://github.com"
+    git config --global url."https://$$GITHUB_USER:$$GITHUB_TOKEN@$$GITHUB_DNS".insteadOf "https://$$GITHUB_DNS"
     if [ -d "env/$BRANCH_NAME/" ]; then
       cd env/$BRANCH_NAME
       terraform apply -auto-approve -no-color
@@ -116,6 +118,7 @@ steps:
   - GCP_ORG
   - GCP_FOLDER
   - GCP_BILLINGAC
+  - GITHUB_DNS
 timeout: 1200s
 availableSecrets:
   secretManager:
@@ -127,6 +130,8 @@ availableSecrets:
     env: GITHUB_EMAIL
   - versionName: projects/YOUR_SECRET_PROJECT_ID/secrets/github-org/versions/latest
     env: GITHUB_ORG
+  - versionName: projects/YOUR_SECRET_PROJECT_ID/secrets/github-dns/versions/latest
+    env: GITHUB_DNS
   - versionName: projects/YOUR_SECRET_PROJECT_ID/secrets/gcp-org/versions/latest
     env: GCP_ORG
   - versionName: projects/YOUR_SECRET_PROJECT_ID/secrets/gcp-folder/versions/latest
