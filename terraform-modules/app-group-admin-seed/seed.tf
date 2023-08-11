@@ -76,17 +76,6 @@ resource "google_storage_bucket_iam_member" "bucket-members-2" {
   member = "serviceAccount:${google_service_account.iac-sa[0].email}"
 }
 
-//Grant IaC SA to read secrets in application factory
-resource "google_project_iam_member" "iac-sa-roles" {
-  project = var.app_factory_project
-  for_each = toset([
-    "roles/secretmanager.secretAccessor",
-    "roles/secretmanager.viewer"
-  ])
-  role   = each.key
-  member = "serviceAccount:${google_service_account.iac-sa[0].email}"
-}
-
 // Create a new service account for Cloud Build to be used for the application CI/CD pipeline
 resource "google_service_account" "cicd-sa" {
   count        = var.create_service_account ? 1 : 0
