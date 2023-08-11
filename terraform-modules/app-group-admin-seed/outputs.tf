@@ -59,7 +59,7 @@ output "clouddeploy_sa_email" {
   description = "The email for the service account created to run the Cloud Deploy pipeline."
 }
 
-output "workload_gsa" {
-  value       = google_service_account.workload-identity-sa
-  description = "The map containing env and the service account created for workload identity."
+output "app_suffix" {
+  value       = random_id.app-project-suffix.hex
+  description = "Suffix that will be applied to the application projects that will be created as IaC trigger of the application."
 }

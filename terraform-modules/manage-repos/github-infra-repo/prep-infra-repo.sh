@@ -27,8 +27,8 @@ cd_sa=${10}
 region=${11}
 trigger_type=${12}
 secret_project_id=${13}
-folder_id=${14}
-
+sec_region=${14}
+folder_id=${15}
 repo=${application_name}-infra
 for branch in "cicd-trigger"
 do
@@ -41,6 +41,7 @@ do
   find . -type f -name "*.tf" -exec  sed -i "s:YOUR_CD_SA:${cd_sa}:g" {} +
   find . -type f -name "*.tf" -exec  sed -i "s/YOUR_APP_ADMIN_PROJECT/${app_factory_project_id}/g" {} +
   find . -type f -name "*.tf" -exec  sed -i "s/YOUR_REGION/${region}/g" {} +
+  find . -type f -name "*.tf" -exec  sed -i "s/YOUR_SECONDARY_REGION/${sec_region}/g" {} +
   find . -type f -name "cloudbuild.yaml" -exec  sed -i "s:YOUR_CI_SA:${ci_sa}:g" {} +
   find . -type f -name "*.tf" -exec  sed -i "s/YOUR_TRIGGER_TYPE/${trigger_type}/g" {} +
   find . -type f -exec  sed -i "s/YOUR_SECRET_PROJECT_ID/${secret_project_id}/g" {} +

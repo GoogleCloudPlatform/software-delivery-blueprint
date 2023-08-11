@@ -50,7 +50,7 @@ steps:
 - name: 'gcr.io/cloud-builders/gcloud'
   id: 'create tf file for app, commit it in github repo and push'
   entrypoint: 'bash'
-  args: [ '-c',"./${_REPO_NAME}/setup/generateAppTFCode.sh ${_APP_RUNTIME} ${_APP_NAME} ${_INFRA_PROJECT_ID} $$GITHUB_USER ${PROJECT_ID} `cat /workspace/folder` $$GITHUB_ORG ${_REPO_NAME} ${_TRIGGER_TYPE} ${_GITHUB_TEAM} `cat /workspace/github_team` ${_REGION}"  ]
+  args: [ '-c',"./${_REPO_NAME}/setup/generateAppTFCode.sh ${_APP_RUNTIME} ${_APP_NAME} ${_INFRA_PROJECT_ID} $$GITHUB_USER ${PROJECT_ID} `cat /workspace/folder` $$GITHUB_ORG ${_REPO_NAME} ${_TRIGGER_TYPE} ${_GITHUB_TEAM} `cat /workspace/github_team` ${_REGION} ${_SEC_REGION}"  ]
   secretEnv: ['GITHUB_TOKEN','GITHUB_USER','GITHUB_ORG']
 
 availableSecrets:

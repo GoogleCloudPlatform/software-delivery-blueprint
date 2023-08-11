@@ -12,16 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+apiVersion: serving.knative.dev/v1
 kind: Service
-apiVersion: v1
 metadata:
-  name: app
+  name: YOUR_APPLICATION-app-dev
 spec:
-  selector:
-      app: YOUR_APPLICATION-app
-  type: ClusterIP
-  ports:
-  - name: http
-    port: 8080
-    targetPort: 8080
-    protocol: TCP
+  template:
+    metadata:
+      name: YOUR_APPLICATION-app-dev-1
+    spec:
+      serviceAccountName: SERVICEACCOUNT
+      containers:
+      - image: app
+        env:
+        - name: ENVIRONMENT
+          value: dev

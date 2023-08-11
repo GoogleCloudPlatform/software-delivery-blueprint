@@ -16,8 +16,7 @@
 
 // Create admin project
 module "admin-project" {
-  source                  = "terraform-google-modules/project-factory/google"
-  version                 = "11.3.0"
+  source                  = "../project-factory"
   random_project_id       = true
   billing_account         = var.billing_account
   name                    = var.project_name
@@ -32,7 +31,8 @@ module "admin-project" {
     "serviceusage.googleapis.com",
     "cloudbilling.googleapis.com",
     "cloudfunctions.googleapis.com",
-    "apikeys.googleapis.com"
+    "apikeys.googleapis.com",
+    "run.googleapis.com"
   ]
 }
 
@@ -75,6 +75,18 @@ resource "google_storage_bucket_iam_member" "bucket-members-2" {
   role   = each.key
   member = "serviceAccount:${google_service_account.iac-sa[0].email}"
 }
+
+//Grant IaC SA to read secrets in application factory
+resource "google_project_iam_member" "iac-sa-roles" {
+  project = var.app_factory_project
+  for_each = toset([
+    "roles/secretmanager.secretAccessor",
+    "roles/secretmanager.viewer"
+  ])
+  role   = each.key
+  member = "serviceAccount:${google_service_account.iac-sa[0].email}"
+}
+
 // Create a new service account for Cloud Build to be used for the application CI/CD pipeline
 resource "google_service_account" "cicd-sa" {
   count        = var.create_service_account ? 1 : 0
@@ -119,7 +131,8 @@ resource "google_project_iam_member" "cloud-deploy-roles" {
   for_each = toset([
     "roles/logging.logWriter",
     "roles/clouddeploy.jobRunner",
-    "roles/storage.objectViewer"
+    "roles/storage.objectViewer",
+    "roles/run.developer",
   ])
   role   = each.key
   member = "serviceAccount:${google_service_account.cloud-deploy[0].email}"
@@ -148,50 +161,6 @@ resource "google_secret_manager_secret_iam_member" "clouddeploy-sa-secret-access
   member    = "serviceAccount:${google_service_account.iac-sa[0].email}"
 }
 
-# Add CloudDeploy SA to GCS so the Cloud Function can provide it roles to deploy to GKE
-resource "google_storage_bucket_object" "gke-deploy" {
-  count = length(var.trigger_buckets_dep)
-  name   = "${var.app_name}-CloudDeploy-SA.txt"
-  content = google_service_account.cloud-deploy[0].email
-  bucket = var.trigger_buckets_dep[count.index]
-}
-
-# Add IaC and CICD SA to GCS so Cloud Function can provide it secret read roles
-resource "google_storage_bucket_object" "secret-read-iac" {
-  name   = "${var.app_name}-IaC-SA.txt"
-  content = google_service_account.iac-sa[0].email
-  bucket = var.trigger_bucket_sec
-}
-resource "time_sleep" "wait_20_seconds" {
-  create_duration = "20s"
-}
-resource "google_storage_bucket_object" "secret-read-cicd" {
-  name   = "${var.app_name}-CICD-SA.txt"
-  content = google_service_account.cicd-sa[0].email
-  bucket = var.trigger_bucket_sec
-  depends_on = [google_storage_bucket_object.secret-read-cicd,time_sleep.wait_20_seconds]
-}
-# Add IaC SA to GCS so Cloud Function can provide it billing and project creator roles
-resource "google_storage_bucket_object" "billing-user-iac" {
-  name   = "${var.app_name}-IaC-SA.txt"
-  content = google_service_account.iac-sa[0].email
-  bucket = var.trigger_bucket_billing
-}
-resource "google_storage_bucket_object" "project-creator-iac" {
-  name   = "${var.app_name}-IaC-SA.txt"
-  content = google_service_account.iac-sa[0].email
-  bucket = var.trigger_bucket_proj
-}
-
-
-//Allow Cloud Build IaC to impersonate cloud deploy SA to do the deployment
-//TODO : not needed
-//resource "google_service_account_iam_member" "iac-sa-impersonate-cd" {
-//  service_account_id = google_service_account.cloud-deploy[0].name
-//  role               = "roles/iam.serviceAccountUser"
-//  member             = "serviceAccount:${google_service_account.iac-sa[0].email}"
-//}
-
 //Allow Cloud Build IaC SA to impersonate Cloud Build CICD SA so the former can create a cloud build trigger and attach the latter to it,
 resource "google_service_account_iam_member" "iac-sa-impersonate-cicd" {
   service_account_id = google_service_account.cicd-sa[0].name
@@ -205,38 +174,73 @@ resource "google_service_account_iam_member" "cicd-sa-impersonate-cd" {
   role               = "roles/iam.serviceAccountUser"
   member             = "serviceAccount:${google_service_account.cicd-sa[0].email}"
 }
-
-// Create new service accounts per environment for workload identity
+/*
+// Create new service accounts per environment for service identity
 locals {
-  wi_roles = ["roles/secretmanager.secretAccessor", "roles/secretmanager.admin", "roles/storage.objectCreator", "roles/storage.objectViewer", "roles/storage.admin"]
-  wi_roles_perm_combo = [
-    for pair in setproduct(local.wi_roles, var.env) : {
+  si_roles = ["roles/secretmanager.secretAccessor", "roles/secretmanager.admin", "roles/storage.objectCreator", "roles/storage.objectViewer", "roles/storage.admin"]
+  si_roles_perm_combo = [
+    for pair in setproduct(local.si_roles, var.env) : {
       role        = pair[0]
-      member      = "serviceAccount:${google_service_account.workload-identity-sa[pair[1]].email}"
+      member      = "serviceAccount:${google_service_account.service-identity-sa[pair[1]].email}"
       environment = pair[1]
     }
   ]
-  wi_roles_mapping = {
-    for m in local.wi_roles_perm_combo : "${m.role} ${m.environment}" => m
+  si_roles_mapping = {
+    for m in local.si_roles_perm_combo : "${m.role} ${m.environment}" => m
   }
 }
-// Create a new service account for workload identity
-resource "google_service_account" "workload-identity-sa" {
+// Create a new service account for service identity
+resource "google_service_account" "service-identity-sa" {
   for_each     = toset(var.env)
   project      = module.admin-project.project_id
-  account_id   = "${each.key}-wi-${var.app_name}"
-  display_name = "Workload Identity SA for ${each.key} environment"
+  account_id   = "${each.key}-si-${var.app_name}"
+  display_name = "Service Identity SA for ${each.key} environment"
 }
 
-// Grant project level roles to the workload identity SA
-resource "google_project_iam_member" "workload-identity-sa-roles" {
+// Grant project level roles to the service identity SA
+resource "google_project_iam_member" "service-identity-sa-roles" {
   project  = module.admin-project.project_id
-  for_each = local.wi_roles_mapping
+  for_each = local.si_roles_mapping
   role     = each.value.role
   member   = each.value.member
 }
+// Allow CloudDeploy SA to impersonate the service identity accounts so it can deploy cloudrun services with the,
+resource "google_service_account_iam_member" "cd-impersonate-si" {
+  for_each           = toset(var.env)
+  service_account_id = google_service_account.service-identity-sa[each.key].name
+  role               = "roles/iam.serviceAccountUser"
+  member             = "serviceAccount:${google_service_account.cloud-deploy[0].email}"
+}
+*/
 
-//Following section creates new secrets in application seed/admin project
+// Generate a 4 digit random number that will be suffixed to application projects
+
+resource "random_id" "app-project-suffix" {
+  keepers = {
+    project_id = module.admin-project.project_id
+  }
+  byte_length = 2
+}
+
+//Following section creates new secrets in application admin project
+resource "google_secret_manager_secret" "app-suffix" {
+  secret_id = "app-suffix"
+  replication {
+    automatic = true
+  }
+  project = module.admin-project.project_id
+}
+resource "google_secret_manager_secret_version" "app-suffix-secret" {
+  secret      = google_secret_manager_secret.app-suffix.id
+  secret_data = random_id.app-project-suffix.hex
+}
+
+resource "google_secret_manager_secret_iam_member" "app-sfx-secret-access-1" {
+  secret_id = google_secret_manager_secret.app-suffix.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.iac-sa[0].email}"
+}
+
 resource "google_secret_manager_secret" "app-name" {
   secret_id = "app-name"
   replication {
@@ -269,6 +273,24 @@ resource "google_secret_manager_secret_version" "region-secret" {
 
 resource "google_secret_manager_secret_iam_member" "region-secret-access" {
   secret_id = google_secret_manager_secret.region.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.cicd-sa[0].email}"
+}
+
+resource "google_secret_manager_secret" "sec_region" {
+  secret_id = "sec_region"
+  replication {
+    automatic = true
+  }
+  project = module.admin-project.project_id
+}
+resource "google_secret_manager_secret_version" "sec_region-secret" {
+  secret      = google_secret_manager_secret.sec_region.id
+  secret_data = var.sec_region
+}
+
+resource "google_secret_manager_secret_iam_member" "sec_region-secret-access" {
+  secret_id = google_secret_manager_secret.sec_region.id
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${google_service_account.cicd-sa[0].email}"
 }

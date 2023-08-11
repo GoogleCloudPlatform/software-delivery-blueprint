@@ -14,6 +14,19 @@
  * limitations under the License.
  */
 
+variable "billing_account" {
+  default = "YOUR_BILLING_ACCOUNT"
+  description = "GCP billing account"
+}
+variable "org_id" {
+  default = "YOUR_ORG_ID"
+  description = "You GCP ORG ID"
+}
+
+variable "folder_id" {
+  default = "YOUR_FOLDER_ID"
+}
+
 variable "application_name" {
   type = string
   description = "Name of the application which will also be the name of the repo"
@@ -23,7 +36,7 @@ variable "application_name" {
 variable "org_name_to_clone_template_from" {
   type = string
   description = "github org where the repo will be created"
-  default = "YOUR_GITHUB_ORG"
+  default = "YOUR_GITHUB_REPO"
 }
 
 variable "trigger_type" {
@@ -54,6 +67,12 @@ variable "region" {
   type = string
   description = "Region where resources like Cloud Deploy and Artifact Registry should be created."
   default = "YOUR_REGION"
+}
+
+variable "sec_region" {
+  type = string
+  description = "Secondary region for application resiliency."
+  default = "YOUR_SECONDARY_REGION"
 }
 
 variable "secret_project_id" {
