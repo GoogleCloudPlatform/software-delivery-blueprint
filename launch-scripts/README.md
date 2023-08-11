@@ -1,128 +1,119 @@
 # Overview
 
-`launch-scripts` contains a shell script `bootstrap.sh` that is used to bootstrap the software delivery platform. This script is intended to be executed one time to initialize Application Factory and Multi-tenant Admin components of the blueprint. Once deployed updates to those components are expected to be made directly in the respective component.
+This folder is hydrated into a repo called `terraform-modules` during the execution of the [`bootstrap.sh`][software-delivery-infra] script. The purpose of this repository is to store Terraform  modules used throughout the platform. `terraform-modules` contains the modules used by application and IaC pipelines.
+
+Terraform modules enable platform administrators to create shared configuration for infrastructure that encapsulate the best practices for their organization, establishing guardrails for self-service infrastructure.
 
 ## Table of Contents
 
 - [Overview](#overview)
   - [Table of Contents](#table-of-contents)
-  - [bootstrap.sh](#bootstrapsh)
-    - [Prerequisites](#prerequisites)
-    - [Execute](#execute)
+  - [Rendering pattern](#rendering-pattern)
+  - [Module catalog](#module-catalog)
+  - [Example](#example)
+  - [Licensing](#licensing)
   - [Usage](#usage)
+  - [Contributing](#contributing)
 
-## bootstrap.sh
+## Rendering pattern
 
-`bootstrap.sh` is used to create:
-    
-1. The projects and infrastructure necessary to manage the multi-tenant infrastructure which includes:
+Some modules in this repository follow a rendering pattern. With that pattern
+the module generates some Terraform and commits it back into the
+`terraform-modules` repository. The rendered Terraform is typically consumed
+by downstream pipelines.
 
-   - Multi-tenant admin project
-     - Infrastructure as Code pipeline
-     - Automation workflow pipeline
-   - Automation workflow project
-     - Secrets
-   - Git repositories hydrated from:
-       - [acm-template][acm-template]
-       - [platform-template][platform-template]
-       - [terraform-modules][terraform-modules]
-       - [common-setup][common-setup]
+An example of this pattern is with [Cloud Deploy][cloud-deploy] targets. When
+provisioning a [Google Kubernetes Engine][gke] (GKE) cluster, it will generate
+Terraform that is then used by application projects to create a Cloud Deploy
+target, so that the target can be used in a Cloud Deploy pipeline.
 
-     ![multi-tenant-admin](../resources/multi-tenant-admin.png)
+## Module catalog
 
-       The above diagram depicts the resources deployed and their connections. For more details on the function of the Multi-tenant Admin Project refer to the [platform-template readme][platform-architecture] and [common-setup readme][common-setup-readme].
+| Name                 | Description
+|----------------------| --------------
+| acm                  | Installs and configures [Anthos Config Managment][acm] (ACM). This module also creates base cluster and cluster selectors in the ACM repo.
+| app-group-admin-seed | Deploys the base project for an application group. This module does the minimum necessary to create the project and establish the IaC pipeline for that application group. The application IaC pipeline takes the responsibility of building out the remainder of the application admin project.
+| artifact-registry    | Creates [Artifact Registry][artifact-registry] for an application group.  This module also uses the render pattern to manage IAM access on the registry to allow multi-tenant GKE clusters service account.
+| cloud-deploy-targets | This module creates [Cloud Deploy targets][cloud-deploy-target] in application admin projects for use by the [Cloud Deploy pipeline][cloud-deploy-pipeline]. This module also includes a submodule that renders the Terraform to create the Cloud Deploy targets.
+| cloud-functions      | This module creates [Cloud Functions][cloud-function] in automation workflow project which will be invoked by Application Factory while creating the apps to provisions access for the apps.
+| github-triggers      | Creates [Cloud Build][cloud-build] triggers using the [GitHub application][cloud-build-github].
+| gke                  | Deploys [GKE][gke] clusters, typically used in the multi-tenant platform projects.
+| landing-zone         | Using the rendering pattern and ACM, this module creates a landing zone in the multi-tenant infrastructure including a namespace, workload identity and network policy.
+| manage-repos         | This module contains submodules to create the application and infrastructure as code repostories on GitHub. Additional source control providers could be added here.
+| manage-teams         | This modules manages teams and their members in GitHub.
+| mci                  | This module enables multi-cluser ingress and multi-cluster service on GKE cluser.
+| project              | Create Google Cloud projects and provides a variable to enabled additional Google Cloud APIs as need by the application teams.
+| vpc                  | Base module to create VPC networks.
+| webhooks             | Creates Cloud Build triggers using [webhooks][cloud-build-webhook].
 
-2. The application factory, which automates the process of creating applications, teams and landing zones in the software delivery platform which includes:
+## Example
 
-   - Application factory project
-     - Cloud Build triggers:
-       - create a application
-       - manage GitHub teams
-       - plan/apply Terraform used to managed applications and teams
+```hcl
+module "cloud-deploy-target" {
+  source                = "git::https://github.com/GITHUB_ORG/terraform-modules.git//cloud-deploy-targets/render"
 
-   - Git repositories hydrated from:
-       - [app-factory-template][app-factory-template]
-       - [app-template-golang][app-template-golang]
-       - [app-template-java][app-template-java]
-       - [app-template-python][app-template-python]
-       - [infra-template][infra-template]
+  git_user              = var.github_user
+  git_email             = var.github_email
+  git_org               = var.github_org
+  github_token          = var.github_token
+  git_repo              = "terraform-modules"
+  cluster_name          = module.create_gke_1.cluster_name.name
+  cluster_path          = local.gke_cluster_id
+  location              = local.subnet1.region
+  require_approval      = "false"
 
-   ![app-factory-project](../resources/app-factory-project.png)
-
-     The above diagram depicts the resources deployed and their connections.  For more details on the function of the Application Factory refer to the [app-factory-template readme][app-factory-architecture].
-
-### Prerequisites
-
-
-1. The user executing the script requires the following IAM roles and permissions.
-
-    - Organization Administrator
-    - Project Creator
-    - Folder Admin; required only if you pass Folder Name to the script
-    - Billing Account Administrator (optional). If you do not have this access, you can still run the script and bootstrap the blueprint. You will manually need to grant billing.user role to CloudBuild Service Accounts in multi-tenant admin and Application factory projects later.
-
-2. The script will prompt for the following information.
-
-| Input Value                 | Description
-|-----------------------------| --------------------
-| Organization Name           | The name of your Google Cloud Organization.
-| Billing Account ID          | Your 18 character billing account ID in the format of xxxxxx-xxxxxx-xxxxxx.
-| Folder Name                 | Optional, folder that the multi-tenant admin project should be deployed in. Leave blank to deploy to the top-level of the organization. If the Folder Name provided does not exist, the script will create it first. 
-| Multi-tenant Admin Project  | Project name that should be used for the multi-tenant IaC pipeline, also called multi-tenant admin project.  The value provided will be appended with 6 random characters.
-| Multi-tenant IaC Repo       | Name of the git repository where the platform-template will be cloned and hydrated into.
-| Application Factory Project | Project name that should be used for Application Factory. The value provided will be appended with 6 random characters.
-| Application Factory Repo    | Name of the git repository where the app-factory-template will be cloned and hydrated into.
-| GitHub User                 | GitHub username that can be used throughout the blueprint for interacting with GitHub.
-| GitHub Access Token         | GitHub access token for the specified user, must have the following permissions: **repo:** Full control of private repositories, **delete_repo:** Delete reposistories, **admin:org:** Full control of orgs and teams, read and write org projects and **admin:repo_hook:** Full control of repository hooks.
-| GitHub Organization         | The name of your GitHub Organization.
-| Region                      | The region where the resources are created.
-| Secondary Region            | Secondary region for resources that are created in multiple regions.
-| Cloud Build Trigger Type    | Options: **webhook** or **github**. This specifies which type of Cloud Build triggers should be created in the multi-tenant admin and application factory projects.
-
-
-### Execute
-
-1.  Open cloudshell or any terminal that has gcloud installed.
-2.  Authenticate:
-    - `gcloud auth login --no-launch-browser`
-    - The above command will generate a link, click on it, enter password if needed and you will get an access code.
-    - Go back to cloudshell/terminal and enter the access code to authenticate.
-3.  Clone the repo blueprint repo.
-
-    `git clone https://github.com/GoogleCloudPlatform/software-delivery-blueprint.git`
-
-4.  `cd software-delivery-blueprint/launch-scripts`
-5.  `./bootstrap.sh` the script will prompt for the inputs listed in the prerequistes section. Alternatively, you can provide these inputs in  [vars.sh][vars.sh] under launch-script directory by copying the following text and replacing the placeholders. Then run `./bootstrap.sh`. The script sources vars.sh so it will fetch the inputs from there.
-```
-export INFRA_SETUP_PROJECT=<Project name that should be used for the multi-tenant IaC pipeline, also called multi-tenant admin project>
-export INFRA_SETUP_REPO=<Name of the git repository where the platform-template will be cloned and hydrated into>
-export APP_SETUP_PROJECT=<Project name that should be used for Application Factory>
-export APP_SETUP_REPO=<Name of the git repository where the app-factory-template will be cloned and hydrated into>
-export BILLING_ACCOUNT_ID=<Your 18 character billing account ID>
-export ORG_NAME=<The name of your Google Cloud Organization>
-export FOLDER_NAME=<Optional, folder that the multi-tenant admin project should be deployed in>
-export GITHUB_USER=<GitHub username>
-export TOKEN=<GitHub access token, must have the following permissions: **repo:** Full control of private repositories, **delete_repo:** Delete reposistories, **admin:org:** Full control of orgs and teams, read and write org projects and **admin:repo_hook:** Full control of repository hooks.>
-export GITHUB_ORG=<The name of your GitHub Organization>
-export REGION=<The region where the resources are created>
-export SEC_REGION=<Secondary region for resources that are created in multiple regions>
-export TRIGGER_TYPE=<webhook or github>
+  depends_on            = [ module.artifact-registry-iam ]
+}
 ```
 
-Once the script is completed, you will see the output in the following format at the end :
+```hcl
+module "cloud-deploy-targets" {
+  source = "git::https://github.com/<GITHUB_ORG>/terraform-modules//cloud-deploy-targets"
+
+  service_account = var.clouddeploy_service_account
+  project         = var.project_id
+
+  depends_on = [
+    module.project-service-cloudresourcemanager
+  ]
+}
 ```
-Multi-tenant admin project  : XXXXXX
-Automation workflow project : XXXXXX
-Application Factory project : XXXXXX
+
+```hcl
+module "devops" {
+    source = "git::https://github.com/<GITHUB_ORG>/terraform-modules.git//manage-teams"
+
+    name = "engineering"
+    description = "Team for engineering"
+    privacy = "closed"
+    parent_team_id = "engineering"
+    members = ["github_user1", "github_user2"]
+    maintainers = ["github_maint"]
+    admin_repositories = ["app-template-java"]
+    maintain_repositories = ["app-template-java"]
+    push_repositories = ["app-template-java"]
+    triage_repositories = ["app-template-java"]
+    pull_repositories = ["app-template-golang"]
+}
 ```
-- Switch to the multi-tenant admin project in GCP console and you will see two Cloud Build pipelines running. 
-  - These two pipelines will be corresponding to `create-infra` and `common-setup` Cloud Build triggers respectively.
-  - When `create-infra` pipeline finishes, a dev deployment of the multi-tenant infrastructure will be completed after the pipeline completes. To deploy the remaining environments follow the workflow from the [platform-template readme][platform-template-pipeline].
-  - When `common-setup` pipeline finishes, three Cloud Functions will be deployed along with GCS buckets in Automation workflow project. For details about this pipeline, see [common-setup readme][common-setup-pipeline]
-- Switch to Automation workflow project after the `common-setup` pipeline is completed in multi-tenant admin project. 
-  - You should see three Cloud Functions created.
-  - There will be two GCS buckets corresponding to each Cloud Function in the same project, one to hold the code of the function and another to act as a trigger to the function.
-- Switch to Application factory project and you will see four Cloud Build triggers connected to Application factory repo. 
+
+## Licensing
+
+```lang-none
+Copyright 2022 Google LLC
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+```
 
 ## Usage
 
@@ -131,20 +122,24 @@ for production use and provided as-is, without warranty or representation for
 any use or purpose. Your use of it is discretionary and subject to your
 agreement with Google.
 
+## Contributing
+
+*   [Contributing guidelines][contributing-guidelines]
+*   [Code of conduct][code-of-conduct]
+
 <!-- LINKS: https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[acm-template]: ../acm-template/
-[app-factory-template]: ../app-factory-template/
-[app-factory-architecture]: ../app-factory-template/README.md#application-factory-architecture
-[app-template-golang]: ../app-template-golang/
-[app-template-java]: ../app-template-java/
-[app-template-python]: ../app-template-python/
-[external-accounts]: https://support.google.com/a/answer/9007750?hl=en&ref_topic=25840
-[infra-template]: ../infra-template/
-[platform-template]: ../platform-template/
-[platform-architecture]: ../platform-template/README.md#architecture
-[platform-template-pipeline]: ../platform-template/README.md#infrastructure-pipeline
-[terraform-modules]:../terraform-modules/
-[common-setup]:../common-setup/
-[common-setup-readme]: ../common-setup/README.md
-[common-setup-pipeline]: ../common-setup/README.md#automation-workflows
-[vars.sh]: ./vars.sh
+
+[contributing-guidelines]: CONTRIBUTING.md
+[code-of-conduct]: code-of-conduct.md
+[software-delivery-infra]: ../launch-scripts/bootstrap.sh
+[acm]: https://cloud.google.com/anthos/config-management
+[artifact-registry]: https://cloud.google.com/artifact-registry
+[cloud-deploy]: https://cloud.google.com/deploy
+[cloud-deploy-target]: https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/clouddeploy_target
+[cloud-deploy-pipeline]: https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/clouddeploy_delivery_pipeline
+[cloud-build]: https://cloud.google.com/build/docs/overview
+[cloud-build-github]: https://cloud.google.com/build/docs/automating-builds/github/connect-repo-github
+[cloud-build-webhook]: https://cloud.google.com/build/docs/automate-builds-webhook-events
+[gke]: https://cloud.google.com/kubernetes-engine
+[secret-manager]: https://cloud.google.com/secret-manager
+[cloud-function]: https://cloud.google.com/functions

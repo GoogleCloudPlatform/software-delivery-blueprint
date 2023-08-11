@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-terraform {
-  required_providers {
-    github = {
-      source = "hashicorp/github"
-      version = "4.3.0"
-    }
-  }
-}
+//terraform {
+//  required_providers {
+//    github = {
+//      source = "hashicorp/github"
+//      version = "4.3.0"
+//    }
+//  }
+//}

@@ -14,13 +14,9 @@
  * limitations under the License.
  */
 
-data "google_secret_manager_secret_version" "github-token" {
-  secret = "github-token"
-  project = "YOUR_SECRET_PROJECT_ID"
-}
-
 provider "github" {
-  organization = "YOUR_GITHUB_ORG"
-  token = data.google_secret_manager_secret_version.github-token.secret_data
+  #token = var.github_token
+  base_url = "YOUR_GITHUB_URL/"
+  owner = "YOUR_GITHUB_ORG"
 }
 

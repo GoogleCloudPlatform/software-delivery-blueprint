@@ -22,9 +22,9 @@ steps:
   - |
       echo ""
       echo "*************** TERRAFORM INIT ******************"
-      git config --global url."https://$$GITHUB_USER:$$GITHUB_TOKEN@github.com".insteadOf "https://github.com"
+      git config --global url."https://$$GITHUB_USER:$$GITHUB_TOKEN@$$GITHUB_DNS".insteadOf "https://$$GITHUB_DNS"
       terraform init || exit 1
-  secretEnv: ['GITHUB_TOKEN','GITHUB_USER']
+  secretEnv: ['GITHUB_TOKEN','GITHUB_USER','GITHUB_DNS']
       
 - id: 'tf plan'
   name: 'hashicorp/terraform:1.0.0'
@@ -35,9 +35,9 @@ steps:
       echo ""
       echo "*************** TERRAFOM PLAN ******************"
 
-      git config --global url."https://$$GITHUB_USER:$$GITHUB_TOKEN@github.com".insteadOf "https://github.com"
+      git config --global url."https://$$GITHUB_USER:$$GITHUB_TOKEN@$$GITHUB_DNS".insteadOf "https://$$GITHUB_DNS"
       terraform plan || exit 1
-  secretEnv: ['GITHUB_TOKEN','GITHUB_USER']
+  secretEnv: ['GITHUB_TOKEN','GITHUB_USER','GITHUB_DNS']
 
 
 availableSecrets:
@@ -46,4 +46,5 @@ availableSecrets:
     env: GITHUB_TOKEN
   - versionName: projects/YOUR_SECRET_PROJECT_ID/secrets/github-user/versions/latest
     env: GITHUB_USER
-
+  - versionName: projects/YOUR_SECRET_PROJECT_ID/secrets/github-dns/versions/latest
+    env: GITHUB_DNS
