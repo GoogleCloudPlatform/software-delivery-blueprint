@@ -96,6 +96,12 @@ variable "region" {
   description = "Region where the application related resources will be created."
 }
 
+variable "sec_region" {
+  type        = string
+  description = "For resilient application."
+}
+
+
 variable "secret_project_id" {
   type = string
   description = "ID of the project that holds common secrets."

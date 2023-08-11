@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: skaffold/v2beta29
+apiVersion: skaffold/v3alpha1
 kind: Config
 build:
   artifacts:
@@ -21,23 +21,24 @@ build:
 profiles:
 - name: dev
   activation:
-    - command: dev
-  deploy:
+  - command: dev
+  manifests:
     kustomize:
       paths:
       - k8s/dev
-- name: staging
   deploy:
+    cloudrun: {}
+- name: staging
+  manifests:
     kustomize:
       paths:
       - k8s/staging
-- name: prod-2
   deploy:
+    cloudrun: {}
+- name: prod
+  manifests:
     kustomize:
       paths:
       - k8s/prod
-- name: prod-1
   deploy:
-    kustomize:
-      paths:
-      - k8s/prod
+    cloudrun: {}

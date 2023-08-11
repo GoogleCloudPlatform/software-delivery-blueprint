@@ -41,15 +41,15 @@ variable "region" {
   description = "The region that the IaC bucket should reside in."
 }
 
+variable "sec_region" {
+  type        = string
+  description = "Secondary region for app deployment."
+}
+
 variable "create_service_account" {
   type        = bool
   default     = true
   description = "If set to true, Terraform will create the service accounts for Cloud Build IaC and CICD and Cloud Deploy and grant required permissions to them."
-}
-
-variable "app_factory_cb_service_account" {
-  type        = string
-  description = "Cloud Build service account of application factory."
 }
 
 variable "app_name" {
@@ -62,21 +62,7 @@ variable "env" {
   description = "environment list for the application."
 }
 
-variable "trigger_buckets_dep" {
-  type        = list
-  description = "bucket that will trigger cloud function to add GKE deploy permissions on CD SA."
-}
-
-variable "trigger_bucket_sec" {
-  type        = string
-  description = "bucket that will trigger cloud function to add secrets read permission for CICD and IaC SA."
-}
-variable "trigger_bucket_billing" {
-  type        = string
-  description = "bucket that will trigger cloud function to add billing user permission for IaC SA."
-}
-
-variable "trigger_bucket_proj" {
-  type        = string
-  description = "bucket that will trigger cloud function to add project creator permission IaC SA."
+variable "app_factory_project" {
+  type = string
+  description = "project id of the application factory"
 }
