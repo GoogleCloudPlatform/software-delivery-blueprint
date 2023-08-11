@@ -19,11 +19,12 @@ application_name=${2}
 github_user=${3}
 github_email=${4}
 namespace=${5}
-ksa=${6}
+app_suffix=${6}
 env=${7}
 index=${8}
 region=${9}
 secret_project_id=${10}
+github_url=${11}
 repo=${application_name}
 #The following code is to avoid race condition to the commits done to acm repo in different folders by this script
 sleep_time=20
@@ -32,11 +33,12 @@ sleep_total=$((${sleep_time}*${sleep_index}))
 sleep $sleep_total
 for branch in "main"
 do
-  git clone -b ${branch} https://github.com/${github_org}/${repo} ${repo}
+  git clone -b ${branch} ${github_url}/${github_org}/${repo} ${repo}
   cd ${repo}
+  service_identity_sa="${env}-si-${application_name}@${application_name}-${env}-${app_suffix}.iam.gserviceaccount.com"
   find . -type f -name "*.yaml" -exec  sed -i "s/YOUR_APPLICATION/${application_name}/g" {} +
   find ./k8s/${env} -type f -name "*.yaml" -exec  sed -i "s/NAMESPACE/${namespace}/g" {} +
-  find ./k8s/${env} -type f -name "*.yaml" -exec  sed -i "s/SERVICEACCOUNT/${ksa}/g" {} +
+  find ./k8s/${env} -type f -name "*.yaml" -exec  sed -i "s/SERVICEACCOUNT/${service_identity_sa}/g" {} +
   find . -type f -name "cloudbuild.yaml" -exec  sed -i "s/YOUR_REGION/${region}/g" {} +
   find . -type f -name "cloudbuild.yaml" -exec  sed -i "s/YOUR_SECRET_PROJECT_ID/${secret_project_id}/g" {} +
   git add .

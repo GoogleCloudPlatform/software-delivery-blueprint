@@ -64,7 +64,7 @@ resource "google_cloudbuild_trigger" "deploy-infra" {
         "-c",
         <<-EOF
       branch=`echo "${"$"}{_REF}" | cut -d "/" -f3`
-      git clone https://$$GITHUB_USER:$$GITHUB_TOKEN@github.com/$$GITHUB_ORG/${"$"}{_REPO}
+      git clone https://$$GITHUB_USER:$$GITHUB_TOKEN@$$GITHUB_DNS/$$GITHUB_ORG/${"$"}{_REPO}
       cd ${"$"}{_REPO}
       git checkout $branch
       echo "***********************"
@@ -75,7 +75,8 @@ resource "google_cloudbuild_trigger" "deploy-infra" {
       secret_env = [
         "GITHUB_USER",
         "GITHUB_TOKEN",
-        "GITHUB_ORG"]
+        "GITHUB_ORG",
+        "GITHUB_DNS"]
     }
     step {
       id         = "tf-init"
@@ -86,7 +87,7 @@ resource "google_cloudbuild_trigger" "deploy-infra" {
         <<-EOF
       branch=`echo "${"$"}{_REF}" | cut -d "/" -f3`
       cd ${"$"}{_REPO}
-      git config --global url."https://$$GITHUB_USER:$$GITHUB_TOKEN@github.com".insteadOf "https://github.com"
+      git config --global url."https://$$GITHUB_USER:$$GITHUB_TOKEN@$$GITHUB_DNS".insteadOf "https://$$GITHUB_DNS"
       if [ -d "env/$branch/" ]; then
         cd env/$branch
         terraform init -no-color || exit 1
@@ -108,7 +109,8 @@ resource "google_cloudbuild_trigger" "deploy-infra" {
       ]
       secret_env = [
         "GITHUB_USER",
-        "GITHUB_TOKEN"]
+        "GITHUB_TOKEN",
+        "GITHUB_DNS"]
 
     }
     step {
@@ -127,7 +129,7 @@ resource "google_cloudbuild_trigger" "deploy-infra" {
       export TF_VAR_org_id=$$GCP_ORG
       export TF_VAR_folder_id=$$GCP_FOLDER
       export TF_VAR_billing_account=$$GCP_BILLINGAC
-      git config --global url."https://$$GITHUB_USER:$$GITHUB_TOKEN@github.com".insteadOf "https://github.com"
+      git config --global url."https://$$GITHUB_USER:$$GITHUB_TOKEN@$$GITHUB_DNS".insteadOf "https://$$GITHUB_DNS"
       if [ -d "env/$branch/" ]; then
         cd env/$branch
         terraform plan -no-color || exit 1
@@ -154,7 +156,8 @@ resource "google_cloudbuild_trigger" "deploy-infra" {
         "GITHUB_EMAIL",
         "GCP_ORG",
         "GCP_FOLDER",
-        "GCP_BILLINGAC"]
+        "GCP_BILLINGAC",
+        "GITHUB_DNS"]
     }
     step {
       id         = "tf-apply"
@@ -172,7 +175,7 @@ resource "google_cloudbuild_trigger" "deploy-infra" {
       export TF_VAR_org_id=$$GCP_ORG
       export TF_VAR_folder_id=$$GCP_FOLDER
       export TF_VAR_billing_account=$$GCP_BILLINGAC
-      git config --global url."https://$$GITHUB_USER:$$GITHUB_TOKEN@github.com".insteadOf "https://github.com"
+      git config --global url."https://$$GITHUB_USER:$$GITHUB_TOKEN@$$GITHUB_DNS".insteadOf "https://$$GITHUB_DNS"
       git checkout $branch
       if [ -d "env/$branch/" ]; then
         cd env/$branch
@@ -191,7 +194,8 @@ resource "google_cloudbuild_trigger" "deploy-infra" {
         "GITHUB_EMAIL",
         "GCP_ORG",
         "GCP_FOLDER",
-        "GCP_BILLINGAC"]
+        "GCP_BILLINGAC",
+        "GITHUB_DNS"]
     }
     available_secrets {
       secret_manager {
@@ -221,6 +225,10 @@ resource "google_cloudbuild_trigger" "deploy-infra" {
       secret_manager {
         version_name = "projects/${var.secret_project_id}/secrets/gcp-billingac/versions/latest"
         env          = "GCP_BILLINGAC"
+      }
+      secret_manager {
+        version_name = "projects/${var.secret_project_id}/secrets/github-dns/versions/latest"
+        env          = "GITHUB_DNS"
       }
     }
 

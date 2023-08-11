@@ -79,6 +79,12 @@ while [ -z ${APP_SETUP_REPO} ]
     read -p "$(echo -e "Please provide the name for App factory repo: ")" APP_SETUP_REPO
     done
 
+# Ensure github enterprise URL is defined
+while [ -z ${GITHUB_DNS} ]
+    do
+    read -p "$(echo -e "Please provide your github DNS: my.example.com ")" GITHUB_DNS
+    done
+
 # Ensure github user is defined
 while [ -z ${GITHUB_USER} ]
     do
@@ -136,6 +142,7 @@ APP_INFRA_TEMPLATE="infra-template"
 TIMESTAMP=$(date "+%Y%m%d%H%M%S")
 CUSTOM_SA_BILLING="billing-assign"
 CUSTOM_SA_PROJECT="project-creator-assign"
+GITHUB_URL="https://${GITHUB_DNS}"
 
 if [[ -z ${APP_SETUP_PROJECT_ID} ]]; then
     APP_SETUP_PROJECT_ID=${APP_SETUP_PROJECT}-${PROJECT_ID_SUFFIX}
@@ -235,7 +242,7 @@ create_webhook () {
     if [ "${trigger}" = "${TEAM_TRIGGER_NAME}" ]; then
         print_and_execute "gcloud alpha builds triggers create webhook --name=\"${TEAM_TRIGGER_NAME}\"  --inline-config=\"${TEMP_DIR}/${repo}/add-team-tf-files-webhook.yaml\" --secret=${SECRET_PATH} --substitutions='_REPO_NAME=${repo},_TEAM_NAME=\$(body.message.team)'"
     elif [ "${trigger}" = "${APP_TRIGGER_NAME}" ]; then
-        print_and_execute "gcloud alpha builds triggers create webhook --name=\"${APP_TRIGGER_NAME}\"  --inline-config=\"${TEMP_DIR}/${repo}/add-app-tf-files-webhook.yaml\" --secret=${SECRET_PATH} --substitutions='_REPO_NAME=${repo},_APP_NAME=\$(body.message.app),_APP_RUNTIME=\$(body.message.runtime),_INFRA_PROJECT_ID=${project_id},_REGION=${REGION},_TRIGGER_TYPE=\$(body.message.trigger_type),_GITHUB_TEAM=\$(body.message.github_team),_FOLDER_ID=${FOLDER_ID}'"
+        print_and_execute "gcloud alpha builds triggers create webhook --name=\"${APP_TRIGGER_NAME}\"  --inline-config=\"${TEMP_DIR}/${repo}/add-app-tf-files-webhook.yaml\" --secret=${SECRET_PATH} --substitutions='_REPO_NAME=${repo},_APP_NAME=\$(body.message.app),_APP_RUNTIME=\$(body.message.runtime),_INFRA_PROJECT_ID=${project_id},_REGION=${REGION},_SEC_REGION=${SEC_REGION},_TRIGGER_TYPE=\$(body.message.trigger_type),_GITHUB_TEAM=\$(body.message.github_team),_FOLDER_ID=${FOLDER_ID}'"
     elif [ "${trigger}" = "${PLAN_TRIGGER_NAME}" ]; then
         print_and_execute "gcloud alpha builds triggers create webhook --name=\"${PLAN_TRIGGER_NAME}\"  --inline-config=\"${TEMP_DIR}/${repo}/tf-plan-webhook.yaml\" --secret=${SECRET_PATH} --substitutions='_REPO_NAME=${repo}'"
     elif [ "${trigger}" = "${APPLY_TRIGGER_NAME}" ]; then
@@ -252,7 +259,7 @@ create_webhook () {
 
         print_and_execute "curl -H \"Authorization: token ${TOKEN}\" \
          -d '{\"config\": {\"url\": \"${WEBHOOK_URL}\", \"content_type\": \"json\"},\"active\": true,\"events\": [\"push\"]}' \
-         -X POST https://api.github.com/repos/$GITHUB_ORG/${repo}/hooks"
+         -X POST https://${GITHUB_DNS}/api/v3/repos/$GITHUB_ORG/${repo}/hooks"
     fi
 
 }
@@ -278,7 +285,7 @@ fi
 
 # Creating terraform modules repo in your org and committing the code from template to it
 title_no_wait "Checking if ${TF_MODULES} already exists..."
-repo_id_exists=$(curl -s -H "Authorization: token ${TOKEN}" -H "Accept: application/json" "https://api.github.com/repos/${GITHUB_ORG}/${TF_MODULES}" | jq '.id')
+repo_id_exists=$(curl -s -H "Authorization: token ${TOKEN}" -H "Accept: application/json" "https://${GITHUB_DNS}/api/v3/repos/${GITHUB_ORG}/${TF_MODULES}" | jq '.id')
 if [ ${repo_id_exists} = "null" ]; then
     title_no_wait "${TF_MODULES} does not exist. Creating it..."
     print_and_execute "repo_id=$(curl -s -H "Authorization: token ${TOKEN}" -H "Accept: application/json" \
@@ -286,7 +293,7 @@ if [ ${repo_id_exists} = "null" ]; then
             \"name\": \"${TF_MODULES}\", \
             \"private\": true \
         }" \
-    -X POST https://api.github.com/orgs/${GITHUB_ORG}/repos | jq '.id')"
+    -X POST https://${GITHUB_DNS}/api/v3/orgs/${GITHUB_ORG}/repos | jq '.id')"
 
     sleep 5
     if [ ${repo_id} = "null" ]; then
@@ -299,13 +306,13 @@ else
     echo "The repo ${TF_MODULES} already exists, not creating it"
 fi
 title_no_wait "Cloning recently created terraform-modules repo..."
-print_and_execute "rm -rf ${TEMP_DIR}/${TF_MODULES} && git clone  https://${GITHUB_USER}:${TOKEN}@github.com/${GITHUB_ORG}/${TF_MODULES} ${TEMP_DIR}/${TF_MODULES}"
+print_and_execute "rm -rf ${TEMP_DIR}/${TF_MODULES} && git clone  https://${GITHUB_USER}:${TOKEN}@${GITHUB_DNS}/${GITHUB_ORG}/${TF_MODULES} ${TEMP_DIR}/${TF_MODULES}"
 if [[ -d ${BASE_DIR}/${TEMPLATE_TF_MODULES} ]]; then
     print_and_execute "cd ${TEMP_DIR}/${TF_MODULES}"
     print_and_execute "git checkout main 2>/dev/null || git checkout -b main"
     print_and_execute "cp -r ${BASE_DIR}/${TF_MODULES}/* ."
-    print_and_execute "find cloud-functions/src -type f -exec  sed -i \"s/YOUR_SECRET_PROJECT_ID/${SECRET_PROJECT_ID}/g\" {} +"
-    print_and_execute "find cloud-functions/src -type f -exec  sed -i \"s/YOUR_GCP_ORG_ID/${ORG_ID}/g\" {} +"
+    #print_and_execute "find cloud-functions/src -type f -exec  sed -i \"s/YOUR_SECRET_PROJECT_ID/${SECRET_PROJECT_ID}/g\" {} +"
+    #print_and_execute "find cloud-functions/src -type f -exec  sed -i \"s/YOUR_GCP_ORG_ID/${ORG_ID}/g\" {} +"
     print_and_execute "git add . && git commit -m \"Adding repo\""
     print_and_execute "git push -u origin main"
 else
@@ -347,7 +354,7 @@ print_and_execute "git config --global user.email ${GITHUB_USER}@github.com"
 print_and_execute "git config --global user.name ${GITHUB_USER}"
 # Creating github repos in your org and committing the code from templates
 title_no_wait "Checking if ${APP_SETUP_REPO} already exists..."
-repo_id_exists=$(curl -s -H "Authorization: token ${TOKEN}" -H "Accept: application/json" "https://api.github.com/repos/${GITHUB_ORG}/${APP_SETUP_REPO}" | jq '.id')
+repo_id_exists=$(curl -s -H "Authorization: token ${TOKEN}" -H "Accept: application/json" "https://${GITHUB_DNS}/api/v3/repos/${GITHUB_ORG}/${APP_SETUP_REPO}" | jq '.id')
 if [ ${repo_id_exists} = "null" ]; then
     title_no_wait "${APP_SETUP_REPO} does not exist. Creating it..."
     title_no_wait "Creating app setup repo ${APP_SETUP_REPO} in ${GITHUB_ORG}..."
@@ -356,7 +363,7 @@ if [ ${repo_id_exists} = "null" ]; then
             \"name\": \"${APP_SETUP_REPO}\", \
             \"private\": true \
         }" \
-    -X POST https://api.github.com/orgs/${GITHUB_ORG}/repos | jq '.id')"
+    -X POST https://${GITHUB_DNS}/api/v3/orgs/${GITHUB_ORG}/repos | jq '.id')"
     sleep 5
     if [ ${repo_id} = "null" ]; then
         echo "Unable to create git repo.Exiting"
@@ -368,13 +375,13 @@ else
     echo "The repo ${APP_SETUP_REPO} already exists, not creating it"
 fi
 title_no_wait "Cloning recently created app factory repo..."
-print_and_execute "rm -rf ${TEMP_DIR}/${APP_SETUP_REPO} && git clone  https://${GITHUB_USER}:${TOKEN}@github.com/${GITHUB_ORG}/${APP_SETUP_REPO} ${TEMP_DIR}/${APP_SETUP_REPO}"
+print_and_execute "rm -rf ${TEMP_DIR}/${APP_SETUP_REPO} && git clone  https://${GITHUB_USER}:${TOKEN}@${GITHUB_DNS}/${GITHUB_ORG}/${APP_SETUP_REPO} ${TEMP_DIR}/${APP_SETUP_REPO}"
 if [[ -d ${BASE_DIR}/${TEMPLATE_APP_REPO} ]]; then
     print_and_execute "cd ${TEMP_DIR}/${APP_SETUP_REPO}"
     print_and_execute "git checkout main 2>/dev/null || git checkout -b main"
     print_and_execute "cp -r ${BASE_DIR}/${TEMPLATE_APP_REPO}/* ."
     print_and_execute "find . -type f -exec  sed -i "s/YOUR_PROJECT_ID/${PROJECT_ID}/g" {} +"
-    print_and_execute "find . -type f -exec  sed -i \"s/YOUR_SECRET_PROJECT_ID/${SECRET_PROJECT_ID}/g\" {} +"
+    print_and_execute "find . -type f -exec  sed -i \"s/YOUR_SECRET_PROJECT_ID/${APP_SETUP_PROJECT_ID}/g\" {} +"
     print_and_execute "git add . && git commit -m \"Adding repo\""
     print_and_execute "git push -u origin main"
 else
@@ -386,7 +393,7 @@ title_no_wait "Creating other templates..."
 for REPO in ${APP_TEMPLATES} ${APP_INFRA_TEMPLATE}
 do
     title_no_wait "Checking if ${REPO} already exists in ${GITHUB_ORG}..."
-    repo_id_exists=$(curl -s -H "Authorization: token ${TOKEN}" -H "Accept: application/json" "https://api.github.com/repos/${GITHUB_ORG}/${REPO}" | jq '.id')
+    repo_id_exists=$(curl -s -H "Authorization: token ${TOKEN}" -H "Accept: application/json" "${GITHUB_URL}/api/v3/repos/${GITHUB_ORG}/${REPO}" | jq '.id')
     if [ ${repo_id_exists} = "null" ]; then
         title_no_wait "${REPO} does not exist. Creating it..."
         title_no_wait "Creating app setup repo ${REPO} in ${GITHUB_ORG}..."
@@ -396,7 +403,7 @@ do
                 \"private\": true, \
                 \"is_template\" : true \
             }" \
-        -X POST https://api.github.com/orgs/${GITHUB_ORG}/repos | jq '.id')"
+        -X POST ${GITHUB_URL}/api/v3/orgs/${GITHUB_ORG}/repos | jq '.id')"
         sleep 5
         if [ ${repo_id} = "null" ]; then
             echo "Unable to create git repo.Exiting"
@@ -406,13 +413,14 @@ do
         echo "The repo ${REPO} already exists, not creating it"
     fi
     title_no_wait "Cloning recently created repo ${REPO}..."
-    print_and_execute "rm -rf ${TEMP_DIR}/${REPO} && git clone  https://${GITHUB_USER}:${TOKEN}@github.com/${GITHUB_ORG}/${REPO} ${TEMP_DIR}/${REPO}"
+    print_and_execute "rm -rf ${TEMP_DIR}/${REPO} && git clone  https://${GITHUB_USER}:${TOKEN}@${GITHUB_DNS}/${GITHUB_ORG}/${REPO} ${TEMP_DIR}/${REPO}"
     if [[ -d ${BASE_DIR}/${REPO} ]]; then
         print_and_execute "cd ${TEMP_DIR}/${REPO}"
         if [ ${REPO} = "infra-template" ]; then
             print_and_execute "git checkout cicd-trigger 2>/dev/null || git checkout -b cicd-trigger"
             print_and_execute "cp -r ${BASE_DIR}/${REPO}/* ."
             print_and_execute "find . -type f -exec  sed -i "s/YOUR_GITHUB_ORG/${GITHUB_ORG}/g" {} +"
+            print_and_execute "find . -type f -exec  sed -i "s?YOUR_GITHUB_URL?${GITHUB_URL}?g" {} +"
 
             print_and_execute "git add . && git commit -m \"Adding repo\""
             print_and_execute "git push -u origin cicd-trigger"
@@ -444,10 +452,12 @@ print_and_execute "printf ${TOKEN} | gcloud secrets create github-token --data-f
 print_and_execute "printf ${GITHUB_USER} | gcloud secrets create github-user --data-file=-"
 print_and_execute "printf ${GITHUB_USER}@github.com | gcloud secrets create github-email --data-file=-"
 print_and_execute "printf ${GITHUB_ORG} | gcloud secrets create github-org --data-file=-"
+print_and_execute "printf ${GITHUB_URL} | gcloud secrets create github-url --data-file=-"
+print_and_execute "printf ${GITHUB_DNS} | gcloud secrets create github-dns --data-file=-"
 print_and_execute "printf ${BILLING_ACCOUNT_ID} | gcloud secrets create gcp-billingac --data-file=-"
 print_and_execute "printf ${ORG_ID} | gcloud secrets create gcp-org --data-file=-"
-print_and_execute "printf ${REGION} | gcloud secrets create infra-region --data-file=-"
-print_and_execute "printf ${SEC_REGION} | gcloud secrets create infra-sec-region --data-file=-"
+print_and_execute "printf ${REGION} | gcloud secrets create region --data-file=-"
+print_and_execute "printf ${SEC_REGION} | gcloud secrets create sec-region --data-file=-"
 if [[ -n ${FOLDER_ID} ]]; then
     print_and_execute "printf ${FOLDER_ID} | gcloud secrets create gcp-folder --data-file=-"
 else
@@ -461,7 +471,9 @@ title_no_wait "Add Cloud build service account as billing account user on the bi
 print_and_execute "gcloud beta billing accounts get-iam-policy ${BILLING_ACCOUNT_ID} --format=json > ${LOG_DIR}/app_cloudbuild_billing-iam-policy-input.json"
 ${PYTHON} ${SCRIPT_DIR}/parsePolicy.py ${LOG_DIR}/app_cloudbuild_billing-iam-policy-input.json ${LOG_DIR}/app_cloudbuild_billing-iam-policy-output.json billing.user ${APP_PROJECT_NUMBER}@cloudbuild.gserviceaccount.com
 print_and_execute "gcloud beta billing accounts set-iam-policy ${BILLING_ACCOUNT_ID} ${LOG_DIR}/app_cloudbuild_billing-iam-policy-output.json"
-print_and_execute "gcloud projects add-iam-policy-binding ${INFRA_SETUP_PROJECT_ID}  --member=serviceAccount:${APP_PROJECT_NUMBER}@cloudbuild.gserviceaccount.com --role=roles/secretmanager.viewer"
+
+print_and_execute "gcloud projects add-iam-policy-binding ${APP_SETUP_PROJECT_ID}  --member=serviceAccount:${APP_PROJECT_NUMBER}@cloudbuild.gserviceaccount.com --role=roles/secretmanager.secretAccessor"
+print_and_execute "gcloud projects add-iam-policy-binding ${APP_SETUP_PROJECT_ID}  --member=serviceAccount:${APP_PROJECT_NUMBER}@cloudbuild.gserviceaccount.com --role=roles/secretmanager.viewer"
 title_no_wait "Give cloudbuild service account projectCreator role at Org level..."
 print_and_execute "gcloud organizations add-iam-policy-binding ${ORG_ID}  --member=serviceAccount:${APP_PROJECT_NUMBER}@cloudbuild.gserviceaccount.com --role=roles/resourcemanager.projectCreator --condition=None"
 
@@ -474,8 +486,9 @@ title_no_wait "Replacing tf bucket in backend.tf in ${APP_SETUP_REPO}..."
 sed -i "s/YOUR_APP_INFRA_TERRAFORM_STATE_BUCKET/${APP_TF_BUCKET}/" backend.tf
 title_no_wait "Replacing github org in github.tf in ${APP_SETUP_REPO}..."
 sed -i "s/YOUR_GITHUB_ORG/${GITHUB_ORG}/" github.tf
+sed -i "s?YOUR_GITHUB_URL?${GITHUB_URL}?" github.tf
 git config --global user.name ${GITHUB_USER}
-git config --global user.email "${GITHUB_USER}github.com"
+git config --global user.email "${GITHUB_USER}@github.com"
 git add backend.tf github.tf
 git commit -m "Replacing github org and GCS bucket"
 git push origin
@@ -505,19 +518,19 @@ elif [[ "${TRIGGER_TYPE,,}" == "github" ]]; then
     "
 
     title_no_wait "Creating Cloud Build trigger to add terraform files to create github team..."
-    print_and_execute "gcloud alpha builds triggers create manual --name=\"${TEAM_TRIGGER_NAME}\" --repo=\"https://github.com/${GITHUB_ORG}/${APP_SETUP_REPO}\" --build-config=\"add-team-tf-files-github-trigger.yaml\" --branch=\"main\" \
+    print_and_execute "gcloud alpha builds triggers create manual --name=\"${TEAM_TRIGGER_NAME}\" --repo=\"${GITHUB_URL}/${GITHUB_ORG}/${APP_SETUP_REPO}\" --build-config=\"add-team-tf-files-github-trigger.yaml\" --branch=\"main\" \
     --repo-type=\"GITHUB\" --substitutions \"_TEAM_NAME\"=\"\" "
 
     title_no_wait "Creating Cloud Build trigger to add terraform files to create application..."
-    print_and_execute "gcloud alpha builds triggers create manual --name=\"${APP_TRIGGER_NAME}\" --repo=\"https://github.com/${GITHUB_ORG}/${APP_SETUP_REPO}\" --build-config=\"add-app-tf-files-github-trigger.yaml\" --branch=\"main\" \
-    --repo-type=\"GITHUB\" --substitutions \"_APP_NAME\"=\"\",\"_APP_RUNTIME\"=\"\",\"_FOLDER_ID\"=\"${FOLDER_ID}\",\"_INFRA_PROJECT_ID\"=\"${INFRA_SETUP_PROJECT_ID}\",\"_REGION\"=\"${REGION}\",\"_TRIGGER_TYPE\"=\"webhook\",\"_GITHUB_TEAM\"=\"\""
+    print_and_execute "gcloud alpha builds triggers create manual --name=\"${APP_TRIGGER_NAME}\" --repo=\"${GITHUB_URL}/${GITHUB_ORG}/${APP_SETUP_REPO}\" --build-config=\"add-app-tf-files-github-trigger.yaml\" --branch=\"main\" \
+    --repo-type=\"GITHUB\" --substitutions \"_APP_NAME\"=\"\",\"_APP_RUNTIME\"=\"\",\"_FOLDER_ID\"=\"${FOLDER_ID}\",\"_INFRA_PROJECT_ID\"=\"${INFRA_SETUP_PROJECT_ID}\",\"_REGION\"=\"${REGION}\",\"_SEC_REGION\"=\"${SEC_REGION}\",\"_TRIGGER_TYPE\"=\"webhook\",\"_GITHUB_TEAM\"=\"\""
 
     title_no_wait "Creating Cloud Build trigger for tf-plan..."
-    print_and_execute "gcloud alpha builds triggers create manual --name=\"${PLAN_TRIGGER_NAME}\" --repo=\"https://github.com/${GITHUB_ORG}/${APP_SETUP_REPO}\" --branch=\"main\" --build-config=\"tf-plan-github-trigger.yaml\" \
+    print_and_execute "gcloud alpha builds triggers create manual --name=\"${PLAN_TRIGGER_NAME}\" --repo=\"${GITHUB_URL}/${GITHUB_ORG}/${APP_SETUP_REPO}\" --branch=\"main\" --build-config=\"tf-plan-github-trigger.yaml\" \
     --repo-type=\"GITHUB\" "
 
     title_no_wait "Creating Cloud Build trigger for tf-apply..."
-    print_and_execute "gcloud alpha builds triggers create manual --name=\"${APPLY_TRIGGER_NAME}\" --repo=\"https://github.com/${GITHUB_ORG}/${APP_SETUP_REPO}\" --branch=\"main\" --build-config=\"tf-apply-github-trigger.yaml\" \
+    print_and_execute "gcloud alpha builds triggers create manual --name=\"${APPLY_TRIGGER_NAME}\" --repo=\"${GITHUB_URL}/${GITHUB_ORG}/${APP_SETUP_REPO}\" --branch=\"main\" --build-config=\"tf-apply-github-trigger.yaml\" \
     --repo-type=\"GITHUB\" "
 fi
 

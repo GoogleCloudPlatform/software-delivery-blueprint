@@ -26,6 +26,8 @@ repo=${8}
 trigger_type=${9}
 github_team=${10}
 region=${11}
+sec_region=${12}
+github_url=${13}
 cd ${repo}
 
 if [ -z $(find apps -maxdepth 1 -type d -name ${app_runtime}) ]; then
@@ -39,11 +41,15 @@ if [ ! -f apps/${app_runtime}/${app_name}.tf ]; then
   sed -i "s/YOUR_APP_PROJECT_NAME/${app_name}-project/g" ${app_name}.tf
   sed -i "s/YOUR_APP_PROJECT/${app_name}-tf-project/g" ${app_name}.tf
   sed -i "s/YOUR_SEED_PROJECT_ID/${seed_project_id}/g" ${app_name}.tf
-  sed -i "s/YOUR_INFRA_PROJECT_ID/${infra_project_id}/g" ${app_name}.tf
+  #sed -i "s/YOUR_INFRA_PROJECT_ID/${infra_project_id}/g" ${app_name}.tf
   sed -i "s/GITHUB_ORG_TO_CLONE_TEMPLATES_FROM/${github_org_to_clone_templates_from}/g" ${app_name}.tf
   sed -i "s/YOUR_TRIGGER_TYPE/${trigger_type}/g" ${app_name}.tf
   sed -i "s/YOUR_GITHUB_TEAM/${github_team}/g" ${app_name}.tf
   sed -i "s/YOUR_REGION/${region}/g" ${app_name}.tf
+  sed -i "s/YOUR_SECONDARY_REGION/${sec_region}/g" ${app_name}.tf
+  sed -i "s?YOUR_GITHUB_URL?${github_url}?g" ${app_name}.tf
+
+
 
   if [ ${folder_id} = "null" ]; then
     sed -i '/YOUR_GCP_FOLDER_ID/d' ${app_name}.tf

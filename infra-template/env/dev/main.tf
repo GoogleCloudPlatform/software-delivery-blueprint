@@ -29,7 +29,7 @@ locals {
 }
 
 module "create-gcp-project" {
-  source = "git::https://github.com/YOUR_GITHUB_ORG/terraform-modules.git//project/"
+  source = "git::YOUR_GITHUB_URL/YOUR_GITHUB_ORG/terraform-modules.git//project/"
   base_project_name = var.base_project_name
   billing_account = var.billing_account
   org_id = var.org_id
@@ -40,7 +40,7 @@ module "create-gcp-project" {
 }
 
 module "create-vpc" {
-  source = "git::https://github.com/YOUR_GITHUB_ORG/terraform-modules.git//vpc/"
+  source = "git::YOUR_GITHUB_URL/YOUR_GITHUB_ORG/terraform-modules.git//vpc/"
   project_id   = module.create-gcp-project.project.project_id
   network_name    = var.network_name
   routing_mode    = var.routing_mode

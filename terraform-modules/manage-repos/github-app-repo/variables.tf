@@ -60,15 +60,20 @@ variable "github_email" {
   description = "GitHub user email."
 }
 
+variable "github_url" {
+  type        = string
+  description = "GitHub domain."
+}
+
 variable "namespace" {
   type        = map
   description = "K8s namespace to be added in the kubernetes files in app repo."
 }
 
-variable "ksa" {
-  type        = map
-  description = "K8s service account to be added in the kubernetes files in app repo."
-}
+//variable "ksa" {
+//  type        = map
+//  description = "K8s service account to be added in the kubernetes files in app repo."
+//}
 
 variable "env" {
   type        = list
@@ -83,4 +88,9 @@ variable "region" {
 variable "secret_project_id" {
   type = string
   description = "ID of the project that holds common secrets."
+}
+
+variable "app_suffix" {
+  type = string
+  description = "Suffix that will be applied to the application projects that will be created as IaC trigger of the application."
 }
