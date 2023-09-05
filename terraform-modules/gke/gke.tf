@@ -50,7 +50,7 @@ module "gke" {
   enable_private_nodes       = true
   cluster_resource_labels    = { "environ" : local.env, "region" : local.region }
   master_ipv4_cidr_block     = var.master_ipv4_cidr_block
-  master_authorized_networks = [{ "cidr_block" : local.network, "display_name" : "vpc-cidr" }]
+  master_authorized_networks = [{ "cidr_block" : var.subnet.ip_cidr_range, "display_name" : "vpc-cidr" }]
   node_pools = [
     {
       name           = "node-pool-01"
