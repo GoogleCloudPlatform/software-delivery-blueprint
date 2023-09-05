@@ -17,7 +17,6 @@
 // Create admin project
 module "admin-project" {
   source                  = "../project-factory"
-  version                 = "11.3.0"
   random_project_id       = true
   billing_account         = var.billing_account
   name                    = var.project_name
