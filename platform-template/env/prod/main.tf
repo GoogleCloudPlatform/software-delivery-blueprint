@@ -97,6 +97,7 @@ module "create_gke_2" {
   env               = var.env
   project_number    = module.create-gcp-project.project.project_number
   depends_on        = [ module.create-vpc ]
+  master_ipv4_cidr_block = "172.16.1.32/28"
 }
 
 module "deploy-cloud-function" {
