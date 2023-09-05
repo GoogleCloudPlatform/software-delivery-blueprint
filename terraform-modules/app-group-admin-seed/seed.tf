@@ -16,7 +16,7 @@
 
 // Create admin project
 module "admin-project" {
-  source                  = "terraform-google-modules/project-factory/google"
+  source                  = "../project-factory"
   version                 = "11.3.0"
   random_project_id       = true
   billing_account         = var.billing_account
