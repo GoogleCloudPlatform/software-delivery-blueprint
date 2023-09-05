@@ -31,7 +31,7 @@ locals {
 
 
 module "gke" {
-  source                     = "../beta-public-cluster"
+  source                     = "../beta-private-cluster"
   project_id                 = var.project_id
   name                       = "gke-${local.env}-${local.region}"
   regional                   = false
