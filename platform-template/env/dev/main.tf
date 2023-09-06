@@ -32,7 +32,7 @@ locals {
 }
 
 module "create-gcp-project" {
-  source = "git::https://github.com/YOUR_GITHUB_ORG/terraform-modules.git//project/"
+  source = "git::https://github.com/YOUR_GITHUB_ORG/terraform-modules.git//project-factory/"
   base_project_name = var.base_project_name
   billing_account = var.billing_account
   org_id = var.org_id
@@ -45,7 +45,11 @@ module "create-gcp-project" {
     "containerregistry.googleapis.com",
     "gkehub.googleapis.com",
     "cloudfunctions.googleapis.com",
-    "anthosconfigmanagement.googleapis.com"]
+    "anthosconfigmanagement.googleapis.com",
+    "connectgateway.googleapis.com",
+    "anthos.googleapis.com",
+    "gkeconnect.googleapis.com",
+    "cloudresourcemanager.googleapis.com"]
 }
 
 module "create-vpc" {
@@ -93,6 +97,20 @@ module "deploy-cloud-function" {
   function_name         = "add-deploy-permission-${var.env}"
   function_gcs          = "add-deploy-permission-${var.env}-src"
   trigger_gcs           = "add-deploy-permission-${var.env}-trg"
+  region                = var.subnet_01_region
+  app_factory_project   = var.app_factory_project_num
+  secrets_project_id    = var.secrets_project_id
+  infra_project_id      = var.project_id
+  env                   = var.env
+  depends_on            = [ module.create_gke_1 ]
+}
+
+module "gkehub-cloud-function" {
+  source                = "git::https://github.com/YOUR_GITHUB_ORG/terraform-modules.git//cloud-functions/grant-gkrhub-access"
+  project_id            = module.create-gcp-project.project.project_id
+  function_name         = "add-gkehub-permission-${var.env}"
+  function_gcs          = "add-gkehub-permission-${var.env}-src"
+  trigger_gcs           = "add-gkehub-permission-${var.env}-trg"
   region                = var.subnet_01_region
   app_factory_project   = var.app_factory_project_num
   secrets_project_id    = var.secrets_project_id

@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-output "project" {
-  value       = module.gcp-project
-  description = "Object containing details of the GCP project."
+terraform {
+  required_providers {
+    google = {
+      source = "hashicorp/google"
+      version = ">= 4.28.0"
+    }
+  }
 }

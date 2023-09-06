@@ -33,7 +33,7 @@ locals {
 }
 
 module "create-gcp-project" {
-  source = "git::https://github.com/YOUR_GITHUB_ORG/terraform-modules.git//project/"
+  source = "git::https://github.com/YOUR_GITHUB_ORG/terraform-modules.git//project-factory/"
   base_project_name = var.base_project_name
   billing_account = var.billing_account
   org_id = var.org_id
@@ -46,7 +46,11 @@ module "create-gcp-project" {
     "containerregistry.googleapis.com",
     "gkehub.googleapis.com",
     "cloudfunctions.googleapis.com",
-    "anthosconfigmanagement.googleapis.com"]
+    "anthosconfigmanagement.googleapis.com",
+    "connectgateway.googleapis.com",
+    "anthos.googleapis.com",
+    "gkeconnect.googleapis.com",
+    "cloudresourcemanager.googleapis.com"]
 }
 
 module "create-vpc" {

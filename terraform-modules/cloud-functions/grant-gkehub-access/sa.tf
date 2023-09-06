@@ -14,11 +14,19 @@
  * limitations under the License.
  */
 
-terraform {
-  required_providers {
-    google = {
-      source  = "hashicorp/google"
-      version = ">= 4.28.0"
-    }
-  }
+# Create custom SA for cloud function
+resource "google_service_account" "function-sa" {
+  project      = var.project_id
+  account_id   = "gkehub-function-sa-${var.env}"
+  display_name = "Cloud Function service account"
+}
+
+resource "google_project_iam_member" "function-sa-roles" {
+  project = var.project_id
+  for_each = toset([
+    "roles/resourcemanager.projectIamAdmin",
+    "roles/storage.objectViewer"
+  ])
+  role   = each.key
+  member = "serviceAccount:${google_service_account.function-sa.email}"
 }
