@@ -106,7 +106,7 @@ module "deploy-cloud-function" {
 }
 
 module "gkehub-cloud-function" {
-  source                = "git::https://github.com/YOUR_GITHUB_ORG/terraform-modules.git//cloud-functions/grant-gkrhub-access"
+  source                = "git::https://github.com/YOUR_GITHUB_ORG/terraform-modules.git//cloud-functions/grant-gkehub-access"
   project_id            = module.create-gcp-project.project.project_id
   function_name         = "add-gkehub-permission-${var.env}"
   function_gcs          = "add-gkehub-permission-${var.env}-src"
