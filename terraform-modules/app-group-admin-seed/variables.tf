@@ -64,7 +64,7 @@ variable "env" {
 
 variable "trigger_buckets_dep" {
   type        = list
-  description = "bucket that will trigger cloud function to add GKE deploy permissions on CD SA."
+  description = "list of buckets that will trigger cloud function to add GKE deploy permissions on CD SA."
 }
 
 variable "trigger_bucket_sec" {
@@ -79,4 +79,9 @@ variable "trigger_bucket_billing" {
 variable "trigger_bucket_proj" {
   type        = string
   description = "bucket that will trigger cloud function to add project creator permission IaC SA."
+}
+
+variable "trigger_buckets_connect" {
+  type        = list
+  description = "list of buckets that will trigger cloud function to add GKE connect permission on CD SA."
 }

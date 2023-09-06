@@ -24,9 +24,9 @@ variable "name" {
   description = "Name of the Cloud Deploy target."
 }
 
-variable "cluster" {
+variable "membership" {
   type        = string
-  description = "GKE cluster name."
+  description = "Hub membership name."
 }
 
 variable "require_approval" {

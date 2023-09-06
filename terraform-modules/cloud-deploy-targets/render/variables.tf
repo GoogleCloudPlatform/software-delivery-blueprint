@@ -19,9 +19,9 @@ variable "cluster_name" {
   description = "GKE cluster name."
 }
 
-variable "cluster_path" {
+variable "membership" {
   type        = string
-  description = "GKE cluster path."
+  description = "Hub membership name."
 }
 
 variable "require_approval" {

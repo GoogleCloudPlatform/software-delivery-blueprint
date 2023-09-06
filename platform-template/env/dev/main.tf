@@ -151,7 +151,7 @@ module "cloud-deploy-target" {
   github_token          = var.github_token
   git_repo              = "terraform-modules"
   cluster_name          = module.create_gke_1.cluster_name.name
-  cluster_path          = local.gke_cluster_id
+  membership            = module.acm.membership_id
   //location              = local.subnet1.region
   require_approval      = "false"
   env_name              = var.env

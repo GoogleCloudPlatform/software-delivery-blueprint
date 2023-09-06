@@ -198,7 +198,7 @@ module "cloud-deploy-target-1" {
   github_token          = var.github_token
   git_repo              = "terraform-modules"
   cluster_name          = module.create_gke_1.cluster_name.name
-  cluster_path          = local.gke_cluster_id_1
+  membership            = module.acm-1.membership_id
   require_approval      = "false"
   depends_on            = [ module.artifact-registry-iam-1, module.artifact-registry-iam-2]
   env_name              = "prod-1"
@@ -212,7 +212,7 @@ module "cloud-deploy-target-2" {
   github_token          = var.github_token
   git_repo              = "terraform-modules"
   cluster_name          = module.create_gke_2.cluster_name.name
-  cluster_path          = local.gke_cluster_id_2
+  membership            = module.acm-2.membership_id
   require_approval      = "false"
   depends_on            = [ module.artifact-registry-iam-1, module.artifact-registry-iam-2,module.cloud-deploy-target-1 ]
   env_name              = "prod-2"

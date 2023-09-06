@@ -91,6 +91,13 @@ data "google_secret_manager_secret_version" "YOUR_APPLICATION_NAME_trigger-bucke
   project = "YOUR_SECRET_PROJECT_ID"
 }
 
+#Looking up the bucket name that is used to trigger cloud function to add GKE connect gateway permissions to the application's CICD service account
+data "google_secret_manager_secret_version" "YOUR_APPLICATION_NAME_trigger-bucket-connect" {
+  count = length(local.YOUR_APPLICATION_NAME_environments)
+  secret = local.YOUR_APPLICATION_NAME_trigger_bucket_connect[local.YOUR_APPLICATION_NAME_environments[count.index]]
+  project = "YOUR_SECRET_PROJECT_ID"
+}
+
 locals {
     YOUR_APPLICATION_NAME_environments = ["dev", "staging", "prod"]
     YOUR_APPLICATION_NAME_namespace = zipmap(local.YOUR_APPLICATION_NAME_environments,[for env in local.YOUR_APPLICATION_NAME_environments : "YOUR_APPLICATION_NAME"])
@@ -99,6 +106,7 @@ locals {
     YOUR_APPLICATION_NAME_trigger_bucket_sec = "secret-permission-fn-trg-bucket"
     YOUR_APPLICATION_NAME_trigger_bucket_billing = "billing-permission-fn-trg-bucket"
     YOUR_APPLICATION_NAME_trigger_bucket_proj = "project-permission-fn-trg-bucket"
+    YOUR_APPLICATION_NAME_trigger_buckets_connect = zipmap(local.YOUR_APPLICATION_NAME_environments,[for env in local.YOUR_APPLICATION_NAME_environments : "gkehub-permission-fn-trg-bucket-${env}"])
 }
 
 //Create application seed/admin project and cloud build service accounts for iac and cicd
@@ -118,6 +126,7 @@ module "YOUR_APPLICATION_NAME-admin-seed" {
   trigger_bucket_sec = data.google_secret_manager_secret_version.YOUR_APPLICATION_NAME_trigger-bucket-sec.secret_data
   trigger_bucket_billing = data.google_secret_manager_secret_version.YOUR_APPLICATION_NAME_trigger-bucket-billing.secret_data
   trigger_bucket_proj = data.google_secret_manager_secret_version.YOUR_APPLICATION_NAME_trigger-bucket-proj.secret_data
+  trigger_buckets_connect = data.google_secret_manager_secret_version.YOUR_APPLICATION_NAME_trigger-bucket-connect.*.secret_data
 }
 
 module "YOUR_APPLICATION_NAME-iac-pipeline" {

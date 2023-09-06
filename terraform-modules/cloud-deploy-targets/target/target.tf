@@ -18,8 +18,8 @@ resource "google_clouddeploy_target" "target" {
   location = var.location
   name     = var.name
 
-  gke {
-    cluster = var.cluster
+  anthos_cluster {
+    membership = var.membership
   }
 
   require_approval = var.require_approval
