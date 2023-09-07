@@ -116,7 +116,7 @@ module "gkehub-cloud-function" {
   secrets_project_id    = var.secrets_project_id
   infra_project_id      = var.project_id
   env                   = var.env
-  depends_on            = [ module.create_gke_1 ]
+  depends_on            = [ module.create_gke_1, module.deploy-cloud-function ]
 }
 
 module "acm" {
