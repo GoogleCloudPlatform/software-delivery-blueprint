@@ -14,7 +14,7 @@ def update_permissions(event, context):
   """
   sa_list = []
   validated_sa_list = []
-  roles = ['roles/gkehub.gatewayeditor']
+  roles = ['roles/gkehub.gatewayEditor']
   project_id = os.environ['GCP_PROJECT']
   print('Printing the payload.\n')
   print('EVENT:' , event)

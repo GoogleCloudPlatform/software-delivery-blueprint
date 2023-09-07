@@ -126,7 +126,7 @@ module "YOUR_APPLICATION_NAME-admin-seed" {
   trigger_bucket_sec = data.google_secret_manager_secret_version.YOUR_APPLICATION_NAME_trigger-bucket-sec.secret_data
   trigger_bucket_billing = data.google_secret_manager_secret_version.YOUR_APPLICATION_NAME_trigger-bucket-billing.secret_data
   trigger_bucket_proj = data.google_secret_manager_secret_version.YOUR_APPLICATION_NAME_trigger-bucket-proj.secret_data
-  trigger_buckets_connect = data.google_secret_manager_secret_version.YOUR_APPLICATION_NAME_trigger-bucket-connect.*.secret_data
+  trigger_bucket_connect = data.google_secret_manager_secret_version.YOUR_APPLICATION_NAME_trigger-bucket-connect.*.secret_data
 }
 
 module "YOUR_APPLICATION_NAME-iac-pipeline" {
