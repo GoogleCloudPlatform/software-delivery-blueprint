@@ -106,7 +106,7 @@ locals {
     YOUR_APPLICATION_NAME_trigger_bucket_sec = "secret-permission-fn-trg-bucket"
     YOUR_APPLICATION_NAME_trigger_bucket_billing = "billing-permission-fn-trg-bucket"
     YOUR_APPLICATION_NAME_trigger_bucket_proj = "project-permission-fn-trg-bucket"
-    YOUR_APPLICATION_NAME_trigger_buckets_connect = zipmap(local.YOUR_APPLICATION_NAME_environments,[for env in local.YOUR_APPLICATION_NAME_environments : "gkehub-permission-fn-trg-bucket-${env}"])
+    YOUR_APPLICATION_NAME_trigger_bucket_connect = zipmap(local.YOUR_APPLICATION_NAME_environments,[for env in local.YOUR_APPLICATION_NAME_environments : "gkehub-permission-fn-trg-bucket-${env}"])
 }
 
 //Create application seed/admin project and cloud build service accounts for iac and cicd

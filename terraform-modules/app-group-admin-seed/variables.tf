@@ -81,7 +81,7 @@ variable "trigger_bucket_proj" {
   description = "bucket that will trigger cloud function to add project creator permission IaC SA."
 }
 
-variable "trigger_buckets_connect" {
+variable "trigger_bucket_connect" {
   type        = list
   description = "list of buckets that will trigger cloud function to add GKE connect permission on CD SA."
 }

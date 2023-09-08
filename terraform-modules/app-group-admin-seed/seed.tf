@@ -157,10 +157,10 @@ resource "google_storage_bucket_object" "gke-deploy" {
 
 # Add CloudDeploy SA to GCS so the Cloud Function can provide it roles to use connect gateway
 resource "google_storage_bucket_object" "gkehub-connect" {
-  count = length(var.trigger_buckets_connect)
+  count = length(var.trigger_bucket_connect)
   name   = "${var.app_name}-CloudDeploy-SA.txt"
   content = google_service_account.cloud-deploy[0].email
-  bucket = var.trigger_buckets_connect[count.index]
+  bucket = var.trigger_bucket_connect[count.index]
 }
 
 # Add IaC and CICD SA to GCS so Cloud Function can provide it secret read roles

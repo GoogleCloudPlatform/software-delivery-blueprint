@@ -164,7 +164,7 @@ module "acm-2" {
 module "cloud-nat-1" {
   source                = "git::https://github.com/YOUR_GITHUB_ORG/terraform-modules.git//cloud-nat"
   project_id            = module.create-gcp-project.project_id
-  region                = (local.subnet1.region ==  var.subnet_01_region) ? local.subnet1 : local.subnet2
+  region                = (local.subnet1.region ==  var.subnet_01_region) ? local.subnet1.region : local.subnet2.region
   name                  = "nat-for-acm-${var.env}-1"
   network               = module.create-vpc.network.network_name
   create_router         = true
@@ -175,7 +175,7 @@ module "cloud-nat-1" {
 module "cloud-nat-2" {
   source                = "git::https://github.com/YOUR_GITHUB_ORG/terraform-modules.git//cloud-nat"
   project_id            = module.create-gcp-project.project_id
-  region                = (local.subnet2.region ==  var.subnet_02_region) ? local.subnet2 : local.subnet1
+  region                = (local.subnet2.region ==  var.subnet_02_region) ? local.subnet2.region : local.subnet1.region
   name                  = "nat-for-acm-${var.env}-2"
   network               = module.create-vpc.network.network_name
   create_router         = true
