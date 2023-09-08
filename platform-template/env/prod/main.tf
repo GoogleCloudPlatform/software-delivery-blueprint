@@ -161,6 +161,27 @@ module "acm-2" {
   depends_on            = [module.acm-1]
 }
 
+module "cloud-nat-1" {
+  source                = "git::https://github.com/YOUR_GITHUB_ORG/terraform-modules.git//cloud-nat"
+  project_id            = module.create-gcp-project.project_id
+  region                = (local.subnet1.region ==  var.subnet_01_region) ? local.subnet1 : local.subnet2
+  name                  = "nat-for-acm-${var.env}-1"
+  network               = module.create-vpc.network.network_name
+  create_router         = true
+  router                = "router-for-acm-${var.env}-1"
+  depends_on            = [ module.create-vpc ]
+}
+
+module "cloud-nat-2" {
+  source                = "git::https://github.com/YOUR_GITHUB_ORG/terraform-modules.git//cloud-nat"
+  project_id            = module.create-gcp-project.project_id
+  region                = (local.subnet2.region ==  var.subnet_02_region) ? local.subnet2 : local.subnet1
+  name                  = "nat-for-acm-${var.env}-2"
+  network               = module.create-vpc.network.network_name
+  create_router         = true
+  router                = "router-for-acm-${var.env}-2"
+  depends_on            = [ module.create-vpc ]
+}
 module "mci" {
   source                = "git::https://github.com/YOUR_GITHUB_ORG/terraform-modules.git//mci/"
   membership_id         = module.acm-1.membership_id

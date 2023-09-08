@@ -104,6 +104,18 @@ module "acm" {
   acm_repo              = var.acm_repo
 }
 
+module "cloud-nat" {
+  source                = "git::https://github.com/YOUR_GITHUB_ORG/terraform-modules.git//cloud-nat"
+  project_id            = module.create-gcp-project.project_id
+  region                = var.subnet_01_region
+  name                  = "nat-for-acm-${var.env}"
+  network               = module.create-vpc.network.network_name
+  create_router         = true
+  router                = "router-for-acm-${var.env}"
+  depends_on            = [ module.create-vpc ]
+}
+
+
 module "deploy-cloud-function" {
   source                = "git::https://github.com/YOUR_GITHUB_ORG/terraform-modules.git//cloud-functions/grant-deploy-access"
   project_id            = module.create-gcp-project.project_id
