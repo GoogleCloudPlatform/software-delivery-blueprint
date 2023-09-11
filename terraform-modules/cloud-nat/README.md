@@ -2,21 +2,10 @@
 
 This module handles opinionated Google Cloud Platform Cloud NAT creation and configuration.
 
-**NOTE**: It is recommended to use the
-[Cloud Router](https://github.com/terraform-google-modules/terraform-google-cloud-router/blob/master/examples/nat/main.tf)
-module instead of this module. The Cloud Router module is more flexible and can be used to manage resources in addition
-to NATs such as interconnects.
-
 ## Compatibility
 This module is meant for use with Terraform 0.13+ and tested using Terraform 1.0+. If you find incompatibilities using Terraform >=0.13, please open an issue.
- If you haven't
-[upgraded](https://www.terraform.io/upgrade-guides/0-13.html) and need a Terraform
-0.12.x-compatible version of this module, the last released version
-intended for Terraform 0.12.x is [v1.4.0](https://registry.terraform.io/modules/terraform-google-modules/-cloud-nat/google/v1.4.0).
 
 ## Usage
-
-There are multiple examples included in the [examples](./examples/) folder but simple usage is as follows:
 
 ```hcl
 module "cloud-nat" {

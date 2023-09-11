@@ -12,14 +12,8 @@ To include G Suite integration for creating groups and adding Service Accounts i
 
 ## Compatibility
 
-This module is meant for use with Terraform 0.13. If you haven't
-[upgraded][terraform-0.13-upgrade] and need a Terraform
-0.12.x-compatible version of this module, the last released version
-intended for Terraform 0.12.x is [9.2.0].
+This module is meant for use with Terraform 0.13.
 
-## Upgrading
-
-See the [docs](./docs) for detailed instructions on upgrading between major releases of the module.
 
 ## Usage
 
@@ -27,7 +21,7 @@ There are multiple examples included in the [examples](./examples/) folder but s
 
 ```hcl
 module "project-factory" {
-  source  = "terraform-google-modules/project-factory/google"
+  source  = "./project-factory"
   version = "~> 10.1"
 
   name                 = "pf-test-1"
@@ -188,11 +182,6 @@ determining that location is as follows:
 -   [terraform-provider-google-beta] plugin >= 3.1, < 4.0
 -   [terraform-provider-gsuite] plugin 0.1.x if GSuite functionality is desired
 
-#### `terraform-provider-google` version 2.x
-
-Starting with version `6.3.0` of this module, `google_billing_budget` resources can now be created. This increases the minimum `terraform-provider-google` version to `3.1.0`
-
-To continue to use a version `>= 2.1, < 3.1` of the google provider pin this module to `6.2.1`. Or use the `core_project_factory` submodule directly.
 
 ```hcl
 module "project-factory" {
@@ -372,6 +361,4 @@ binary here:
 [terraform-provider-gsuite]: https://github.com/DeviaVir/terraform-provider-gsuite
 [glossary]: /docs/GLOSSARY.md
 [application-default-credentials]: https://cloud.google.com/docs/authentication/production#providing_credentials_to_your_application
-
-[9.2.0]: https://registry.terraform.io/modules/terraform-google-modules/project-factory/google/9.2.0
 [terraform-0.13-upgrade]: https://www.terraform.io/upgrade-guides/0-13.html

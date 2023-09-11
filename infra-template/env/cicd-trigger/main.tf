@@ -18,7 +18,7 @@ data "google_project" "project_number" {
   project_id = var.project_id
 }
 
-locals{
+locals {
   project_number = data.google_project.project_number.number
 }
 

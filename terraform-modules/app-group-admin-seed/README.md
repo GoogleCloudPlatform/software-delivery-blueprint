@@ -15,9 +15,9 @@
 
 ## Modules
 
-| Name | Source | Version |
-|------|--------|---------|
-| <a name="module_admin-project"></a> [admin-project](#module\_admin-project) | terraform-google-modules/project-factory/google | 11.3.0 |
+| Name | Source              | Version |
+|------|---------------------|---------|
+| <a name="module_admin-project"></a> [admin-project](#module\_admin-project) | ../project-factory |
 
 ## Inputs
 

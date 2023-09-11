@@ -3,7 +3,7 @@
 `acm-template` contains the [Anthos Config Management (ACM)][acm] starting point configuration for the multi-tenant platform. The `acm-template` folder is hydrated into a repository during the execution of the [`bootstrap.sh`][software-delivery-infra]
 script.
 
-The Anthos Config Management repo contains the k8s configuration for the multi-tenant [Google Kubernetes Engine (GKE)][gke] clusters. After the GKE clusters in multi-tenant infrastructure are created, they are associated with this repo for config management. In this blueprint we have choosen to store cluster configuration (Cluster, ClusterSelector, etc), policies, and application landing zones (Namespace, NetworkPolicy, Workload Identity, etc.) all of which should be deployed fleet wide or at the granularity of clusters. Deploying the cluster configuration equally to all environments to helps maintain consistency between environments. In some places [ClusterSelectors][cluster-selectors] are used to apply manifests to subset of clusters or environments. Application configuration (Service, ReplicaSet, ConfigMap, HPA, etc.) is deployed with [Cloud Deploy][cloud-deploy]. Typically, application config has a higher velocity of change and more variation within an individual cluster for example canary deployments.
+The Anthos Config Management repo contains the k8s configuration for the multi-tenant [Google Kubernetes Engine (GKE)][gke] clusters. After the GKE clusters in multi-tenant infrastructure are created, they are associated with this repo for config management. In this blueprint we have chosen to store cluster configuration (Cluster, ClusterSelector, etc), policies, and application landing zones (Namespace, RBAC, NetworkPolicy, Workload Identity, etc.) all of which should be deployed fleet wide or at the granularity of clusters. Deploying the cluster configuration equally to all environments to helps maintain consistency between environments. In some places [ClusterSelectors][cluster-selectors] are used to apply manifests to subset of clusters or environments. Application configuration (Service, ReplicaSet, ConfigMap, HPA, etc.) is deployed with [Cloud Deploy][cloud-deploy]. Typically, application config has a higher velocity of change and more variation within an individual cluster for example canary deployments.
 
 This repo contains three branches dev, staging and prod corresponding to the environments in the multi-tenant infrastructure. Changes can only be pushed to the default branch i.e. dev, in order to push the code to higher branches, use pull requests and merge changes into the higher environment branches.
 
@@ -36,6 +36,7 @@ The `apps` directory contains the foundational configuration or landing zone for
 -   [Namespace][namespace]
 -   [Network policy][network-policies]
 -   Service account for [workload identity][workload-identity]
+-   [RBAC][rbac] for the application deployment service account
 
 Landing zone manifests are hydrated from the `_namespace-template` by the Application Factory when creating an application.
 
@@ -104,3 +105,4 @@ agreement with Google.
 [workload-identity]: https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity
 [namespace]: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
 [network-policies]: https://kubernetes.io/docs/concepts/services-networking/network-policies/
+[rbac]: https://kubernetes.io/docs/reference/access-authn-authz/rbac/

@@ -18,22 +18,9 @@ For details on configuring private clusters with this module, check the [trouble
 This module is meant for use with Terraform 0.13+ and tested using Terraform 1.0+.
 If you find incompatibilities using Terraform `>=0.13`, please open an issue.
 
-If you haven't [upgraded][terraform-0.13-upgrade] and need a Terraform
-0.12.x-compatible version of this module, the last released version
-intended for Terraform 0.12.x is [12.3.0].
-
 ## Usage
-There are multiple examples included in the [examples](https://github.com/terraform-google-modules/terraform-google-kubernetes-engine/tree/master/examples) folder but simple usage is as follows:
 
 ```hcl
-# google_client_config and kubernetes provider must be explicitly specified like the following.
-data "google_client_config" "default" {}
-
-provider "kubernetes" {
-  host                   = "https://${module.gke.endpoint}"
-  token                  = data.google_client_config.default.access_token
-  cluster_ca_certificate = base64decode(module.gke.ca_certificate)
-}
 
 module "gke" {
   source                     = "terraform-google-modules/kubernetes-engine/google//modules/beta-private-cluster"
@@ -325,7 +312,7 @@ Before this module can be used on a project, you must ensure that the following 
 3. The Compute Engine and Kubernetes Engine APIs are [active](#enable-apis) on the project you will launch the cluster in.
 4. If you are using a Shared VPC, the APIs must also be activated on the Shared VPC host project and your service account needs the proper permissions there.
 
-The [project factory](https://github.com/terraform-google-modules/terraform-google-project-factory) can be used to provision projects with the correct APIs active and the necessary Shared VPC connections.
+The [project factory](../project-factory) can be used to provision projects with the correct APIs active and the necessary Shared VPC connections.
 
 ### Software Dependencies
 #### Kubectl
@@ -358,5 +345,4 @@ In order to operate with the Service Account you must activate the following API
 - Kubernetes Engine API - container.googleapis.com
 
 [terraform-provider-google-beta]: https://github.com/terraform-providers/terraform-provider-google-beta
-[12.3.0]: https://registry.terraform.io/modules/terraform-google-modules/kubernetes-engine/google/12.3.0
 [terraform-0.13-upgrade]: https://www.terraform.io/upgrade-guides/0-13.html
