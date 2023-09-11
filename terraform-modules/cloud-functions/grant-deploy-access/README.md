@@ -53,6 +53,9 @@ module "deploy-cloud-function" {
 ## Workflow
 This module is called from [multi-tenant platform repo][muti-tenant-platform-repo] that stands up multi-tenant infrastructure for [dev][dev-multi-tenant], [staging][staging-multi-tenant] and [prod][prod-multi-tenant] environments.
 This module creates a [Cloud Function][cloud-function] and two [Cloud Storage][cloud-storage] buckets, one for storing the function's code and the other to trigger the function when an object is added to it.
+1. This [Cloud Function][cloud-function] is used to provide container developer permission to application CD service account on the GKE cluster so that the service account can perform the deployment.
+2. The [Cloud Function][cloud-function] is triggered when an object arrives in the GCS bucket `permission-fun-trg-bucket-${var.env}`.
+3. The Application Factory while creating a new application writes the service account that needs this access to the GCS bucket `permission-fun-trg-bucket-${var.env}` as an object. This invokes the Cloud Function that provides the service account the required access.
 
 ## License
 

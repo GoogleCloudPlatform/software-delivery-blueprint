@@ -16,8 +16,7 @@
 
 // Create admin project
 module "admin-project" {
-  source                  = "terraform-google-modules/project-factory/google"
-  version                 = "11.3.0"
+  source                  = "../project-factory"
   random_project_id       = true
   billing_account         = var.billing_account
   name                    = var.project_name
@@ -155,6 +154,19 @@ resource "google_storage_bucket_object" "gke-deploy" {
   content = google_service_account.cloud-deploy[0].email
   bucket = var.trigger_buckets_dep[count.index]
 }
+resource "time_sleep" "wait_for_20_seconds" {
+  create_duration = "20s"
+  depends_on = [google_storage_bucket_object.gke-deploy]
+}
+
+# Add CloudDeploy SA to GCS so the Cloud Function can provide it roles to use connect gateway
+resource "google_storage_bucket_object" "gkehub-connect" {
+  count = length(var.trigger_bucket_connect)
+  name   = "${var.app_name}-CloudDeploy-SA.txt"
+  content = google_service_account.cloud-deploy[0].email
+  bucket = var.trigger_bucket_connect[count.index]
+  depends_on = [google_storage_bucket_object.gke-deploy,time_sleep.wait_for_20_seconds]
+}
 
 # Add IaC and CICD SA to GCS so Cloud Function can provide it secret read roles
 resource "google_storage_bucket_object" "secret-read-iac" {
@@ -164,23 +176,26 @@ resource "google_storage_bucket_object" "secret-read-iac" {
 }
 resource "time_sleep" "wait_20_seconds" {
   create_duration = "20s"
+  depends_on = [google_storage_bucket_object.secret-read-iac]
 }
 resource "google_storage_bucket_object" "secret-read-cicd" {
   name   = "${var.app_name}-CICD-SA.txt"
   content = google_service_account.cicd-sa[0].email
   bucket = var.trigger_bucket_sec
-  depends_on = [google_storage_bucket_object.secret-read-cicd,time_sleep.wait_20_seconds]
+  depends_on = [google_storage_bucket_object.secret-read-iac,time_sleep.wait_20_seconds]
 }
 # Add IaC SA to GCS so Cloud Function can provide it billing and project creator roles
 resource "google_storage_bucket_object" "billing-user-iac" {
   name   = "${var.app_name}-IaC-SA.txt"
   content = google_service_account.iac-sa[0].email
   bucket = var.trigger_bucket_billing
+  depends_on = [google_storage_bucket_object.secret-read-cicd]
 }
 resource "google_storage_bucket_object" "project-creator-iac" {
   name   = "${var.app_name}-IaC-SA.txt"
   content = google_service_account.iac-sa[0].email
   bucket = var.trigger_bucket_proj
+  depends_on = [google_storage_bucket_object.billing-user-iac]
 }
 
 

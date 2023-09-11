@@ -10,7 +10,7 @@
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_gke"></a> [gke](#module\_gke) | terraform-google-modules/kubernetes-engine/google//modules/beta-public-cluster | 23.1.0 |
+| <a name="module_gke"></a> [gke](#module\_gke) | ../beta-private-cluster
 
 
 ## Inputs

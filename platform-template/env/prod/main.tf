@@ -28,30 +28,34 @@ locals {
   self_link = [for item in module.create-vpc.network.subnets : item.self_link]
   subnet1 = {description = local.description[0] , gateway_address = local.gateway_address[0], id = local.id[0] ,ip_cidr_range = local.ip_cidr_range[0], name = local.name[0] , network = local.network[0] , private_ip_google_access = local.private_ip_google_access[0] , project = local.project[0] , region = local.region[0] , self_link = local.self_link[0] , secondary_ip_range = local.secondary_ip_range[0]  }
   subnet2 = {description = local.description[1] , gateway_address = local.gateway_address[1], id = local.id[1] ,ip_cidr_range = local.ip_cidr_range[1], name = local.name[1] , network = local.network[1] , private_ip_google_access = local.private_ip_google_access[1] , project = local.project[1] , region = local.region[1] , self_link = local.self_link[1] , secondary_ip_range = local.secondary_ip_range[1]  }
-  gke_cluster_id_1 = format("projects/%s/locations/%s/clusters/%s",module.create-gcp-project.project.project_id,module.create_gke_1.cluster_name.location,module.create_gke_1.cluster_name.name)
-  gke_cluster_id_2 = format("projects/%s/locations/%s/clusters/%s",module.create-gcp-project.project.project_id,module.create_gke_2.cluster_name.location,module.create_gke_2.cluster_name.name)
+  gke_cluster_id_1 = format("projects/%s/locations/%s/clusters/%s",module.create-gcp-project.project_id,module.create_gke_1.cluster_name.location,module.create_gke_1.cluster_name.name)
+  gke_cluster_id_2 = format("projects/%s/locations/%s/clusters/%s",module.create-gcp-project.project_id,module.create_gke_2.cluster_name.location,module.create_gke_2.cluster_name.name)
 }
 
 module "create-gcp-project" {
-  source = "git::https://github.com/YOUR_GITHUB_ORG/terraform-modules.git//project/"
-  base_project_name = var.base_project_name
+  source = "git::https://github.com/YOUR_GITHUB_ORG/terraform-modules.git//project-factory/"
+  name = "${var.base_project_name}-${var.env}"
+  random_project_id       = true
   billing_account = var.billing_account
   org_id = var.org_id
   folder_id = var.folder_id
-  env = var.env
-  addtl_apis = [
+  activate_apis = [
     "compute.googleapis.com",
     "container.googleapis.com",
     "cloudbuild.googleapis.com",
     "containerregistry.googleapis.com",
     "gkehub.googleapis.com",
     "cloudfunctions.googleapis.com",
-    "anthosconfigmanagement.googleapis.com"]
+    "anthosconfigmanagement.googleapis.com",
+    "connectgateway.googleapis.com",
+    "anthos.googleapis.com",
+    "gkeconnect.googleapis.com",
+    "cloudresourcemanager.googleapis.com"]
 }
 
 module "create-vpc" {
   source = "git::https://github.com/YOUR_GITHUB_ORG/terraform-modules.git//vpc/"
-  project_id   = module.create-gcp-project.project.project_id
+  project_id   = module.create-gcp-project.project_id
   network_name    = var.network_name
   routing_mode    = var.routing_mode
   subnet_01_name      = var.subnet_01_name
@@ -80,28 +84,29 @@ module "create-vpc" {
 module "create_gke_1" {
   source            = "git::https://github.com/YOUR_GITHUB_ORG/terraform-modules.git//gke/"
   subnet            = (local.subnet1.region ==  var.subnet_01_region) ? local.subnet1 : local.subnet2
-  project_id        = module.create-gcp-project.project.project_id
+  project_id        = module.create-gcp-project.project_id
   suffix            = "1"
   zone              = ["a","b","c"]
   env               = var.env
-  project_number    = module.create-gcp-project.project.project_number
+  project_number    = module.create-gcp-project.project_number
   depends_on        = [ module.create-vpc ]
 }
 
 module "create_gke_2" {
   source            = "git::https://github.com/YOUR_GITHUB_ORG/terraform-modules.git//gke/"
   subnet            = (local.subnet2.region ==  var.subnet_02_region) ? local.subnet2 : local.subnet1
-  project_id        = module.create-gcp-project.project.project_id
+  project_id        = module.create-gcp-project.project_id
   suffix            = "2"
   zone              = ["a","b","c"]
   env               = var.env
-  project_number    = module.create-gcp-project.project.project_number
+  project_number    = module.create-gcp-project.project_number
   depends_on        = [ module.create-vpc ]
+  master_ipv4_cidr_block = "172.16.1.32/28"
 }
 
 module "deploy-cloud-function" {
   source                = "git::https://github.com/YOUR_GITHUB_ORG/terraform-modules.git//cloud-functions/grant-deploy-access"
-  project_id            = module.create-gcp-project.project.project_id
+  project_id            = module.create-gcp-project.project_id
   function_name         = "add-deploy-permission-${var.env}"
   function_gcs          = "add-deploy-permission-${var.env}-src"
   trigger_gcs           = "add-deploy-permission-${var.env}-trg"
@@ -113,12 +118,27 @@ module "deploy-cloud-function" {
   depends_on            = [ module.create_gke_1,module.create_gke_2 ]
 }
 
+module "gkehub-cloud-function" {
+  source                = "git::https://github.com/YOUR_GITHUB_ORG/terraform-modules.git//cloud-functions/grant-gkehub-access"
+  project_id            = module.create-gcp-project.project_id
+  function_name         = "add-gkehub-permission-${var.env}"
+  function_gcs          = "add-gkehub-permission-${var.env}-src"
+  trigger_gcs           = "add-gkehub-permission-${var.env}-trg"
+  region                = var.subnet_01_region
+  app_factory_project   = var.app_factory_project_num
+  secrets_project_id    = var.secrets_project_id
+  infra_project_id      = var.project_id
+  env                   = var.env
+  depends_on            = [ module.create_gke_1, module.deploy-cloud-function ]
+}
+
+
 module "acm-1" {
   source                = "git::https://github.com/YOUR_GITHUB_ORG/terraform-modules.git//acm/"
   gke_cluster_id        = local.gke_cluster_id_1
   gke_cluster_name      = module.create_gke_1.cluster_name.name
   env                   = var.env
-  project_id            = module.create-gcp-project.project.project_id
+  project_id            = module.create-gcp-project.project_id
   git_user              = var.github_user
   git_email             = var.github_email
   git_org               = var.github_org
@@ -131,7 +151,7 @@ module "acm-2" {
   gke_cluster_id        = local.gke_cluster_id_2
   gke_cluster_name      = module.create_gke_2.cluster_name.name
   env                   = var.env
-  project_id            = module.create-gcp-project.project.project_id
+  project_id            = module.create-gcp-project.project_id
   git_user              = var.github_user
   git_email             = var.github_email
   git_org               = var.github_org
@@ -141,10 +161,31 @@ module "acm-2" {
   depends_on            = [module.acm-1]
 }
 
+module "cloud-nat-1" {
+  source                = "git::https://github.com/YOUR_GITHUB_ORG/terraform-modules.git//cloud-nat"
+  project_id            = module.create-gcp-project.project_id
+  region                = (local.subnet1.region ==  var.subnet_01_region) ? local.subnet1.region : local.subnet2.region
+  name                  = "nat-for-acm-${var.env}-1"
+  network               = module.create-vpc.network.network_name
+  create_router         = true
+  router                = "router-for-acm-${var.env}-1"
+  depends_on            = [ module.create-vpc ]
+}
+
+module "cloud-nat-2" {
+  source                = "git::https://github.com/YOUR_GITHUB_ORG/terraform-modules.git//cloud-nat"
+  project_id            = module.create-gcp-project.project_id
+  region                = (local.subnet2.region ==  var.subnet_02_region) ? local.subnet2.region : local.subnet1.region
+  name                  = "nat-for-acm-${var.env}-2"
+  network               = module.create-vpc.network.network_name
+  create_router         = true
+  router                = "router-for-acm-${var.env}-2"
+  depends_on            = [ module.create-vpc ]
+}
 module "mci" {
   source                = "git::https://github.com/YOUR_GITHUB_ORG/terraform-modules.git//mci/"
   membership_id         = module.acm-1.membership_id
-  project_id            = module.create-gcp-project.project.project_id
+  project_id            = module.create-gcp-project.project_id
 }
 
 module "artifact-registry-iam-1" {
@@ -178,7 +219,7 @@ module "cloud-deploy-target-1" {
   github_token          = var.github_token
   git_repo              = "terraform-modules"
   cluster_name          = module.create_gke_1.cluster_name.name
-  cluster_path          = local.gke_cluster_id_1
+  membership            = module.acm-1.membership_id
   require_approval      = "false"
   depends_on            = [ module.artifact-registry-iam-1, module.artifact-registry-iam-2]
   env_name              = "prod-1"
@@ -192,7 +233,7 @@ module "cloud-deploy-target-2" {
   github_token          = var.github_token
   git_repo              = "terraform-modules"
   cluster_name          = module.create_gke_2.cluster_name.name
-  cluster_path          = local.gke_cluster_id_2
+  membership            = module.acm-2.membership_id
   require_approval      = "false"
   depends_on            = [ module.artifact-registry-iam-1, module.artifact-registry-iam-2,module.cloud-deploy-target-1 ]
   env_name              = "prod-2"
@@ -204,7 +245,7 @@ module "landing-zone-template" {
   git_org               = var.github_org
   tf_modules_repo       = "terraform-modules"
   cluster_name          = module.create_gke_1.cluster_name.name
-  cluster_project_id    = module.create-gcp-project.project.project_id
+  cluster_project_id    = module.create-gcp-project.project_id
   depends_on            = [ module.artifact-registry-iam-1, module.artifact-registry-iam-2, module.cloud-deploy-target-1, module.cloud-deploy-target-2 ]
   env                   = var.env
   index                 = 2

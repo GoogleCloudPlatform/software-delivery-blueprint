@@ -7,13 +7,13 @@ Terraform modules enable platform administrators to create shared configuration 
 ## Table of Contents
 
 - [Overview](#overview)
-  - [Table of Contents](#table-of-contents)
-  - [Rendering pattern](#rendering-pattern)
-  - [Module catalog](#module-catalog)
-  - [Example](#example)
-  - [Licensing](#licensing)
-  - [Usage](#usage)
-  - [Contributing](#contributing)
+    - [Table of Contents](#table-of-contents)
+    - [Rendering pattern](#rendering-pattern)
+    - [Module catalog](#module-catalog)
+    - [Example](#example)
+    - [Licensing](#licensing)
+    - [Usage](#usage)
+    - [Contributing](#contributing)
 
 ## Rendering pattern
 

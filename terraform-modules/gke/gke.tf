@@ -31,8 +31,7 @@ locals {
 
 
 module "gke" {
-  source                     = "terraform-google-modules/kubernetes-engine/google//modules/beta-public-cluster"
-  version                    = "23.1.0"
+  source                     = "../beta-private-cluster"
   project_id                 = var.project_id
   name                       = "gke-${local.env}-${local.region}"
   regional                   = false
@@ -47,8 +46,11 @@ module "gke" {
   remove_default_node_pool   = true
   horizontal_pod_autoscaling = true
   http_load_balancing        = true
+  enable_private_endpoint    = true
+  enable_private_nodes       = true
   cluster_resource_labels    = { "environ" : local.env, "region" : local.region }
-
+  master_ipv4_cidr_block     = var.master_ipv4_cidr_block
+  master_authorized_networks = [{ "cidr_block" : var.subnet.ip_cidr_range, "display_name" : "vpc-cidr" }]
   node_pools = [
     {
       name           = "node-pool-01"

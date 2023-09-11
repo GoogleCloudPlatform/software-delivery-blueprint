@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-module "gcp-project" {
-  source                  = "terraform-google-modules/project-factory/google"
-  version                 = "13.1.0"
-  random_project_id       = true
-  billing_account         = var.billing_account
-  name                    = format("%s-%s", var.base_project_name, var.env)
-  org_id                  = var.org_id
-  default_service_account = "keep"
-  folder_id               = var.folder_id
-  activate_apis = concat([
-    "iam.googleapis.com",
-    "cloudresourcemanager.googleapis.com",
-    "secretmanager.googleapis.com",
-    "serviceusage.googleapis.com"
-  ], var.addtl_apis)
+# Create custom SA for cloud function
+resource "google_service_account" "function-sa" {
+  project      = var.project_id
+  account_id   = "gkehub-function-sa-${var.env}"
+  display_name = "Cloud Function service account"
+}
+
+resource "google_project_iam_member" "function-sa-roles" {
+  project = var.project_id
+  for_each = toset([
+    "roles/resourcemanager.projectIamAdmin",
+    "roles/storage.objectViewer"
+  ])
+  role   = each.key
+  member = "serviceAccount:${google_service_account.function-sa.email}"
 }

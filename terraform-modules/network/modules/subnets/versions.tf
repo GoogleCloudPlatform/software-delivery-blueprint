@@ -1,11 +1,11 @@
 /**
- * Copyright 2022 Google LLC
+ * Copyright 2019 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     https://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,10 +15,16 @@
  */
 
 terraform {
+  required_version = ">= 0.13.0"
+
   required_providers {
     google = {
       source  = "hashicorp/google"
-      version = ">= 4.28.0"
+      version = "<5.0,>= 2.12"
     }
+  }
+
+  provider_meta "google" {
+    module_name = "blueprints/terraform/terraform-google-network:subnets/v5.2.0"
   }
 }

@@ -31,19 +31,20 @@ locals {
 }
 
 module "create-gcp-project" {
-  source = "git::https://github.com/YOUR_GITHUB_ORG/terraform-modules.git//project/"
-  base_project_name = var.base_project_name
+  source = "git::https://github.com/YOUR_GITHUB_ORG/terraform-modules.git//project-factory/"
+  name = "${var.base_project_name}-${var.env}"
+  random_project_id       = true
   billing_account = var.billing_account
   org_id = var.org_id
   folder_id = var.folder_id
-  env = var.env
-  addtl_apis = [
+  activate_apis = [
     "compute.googleapis.com"]
 }
 
+
 module "create-vpc" {
   source = "git::https://github.com/YOUR_GITHUB_ORG/terraform-modules.git//vpc/"
-  project_id   = module.create-gcp-project.project.project_id
+  project_id   = module.create-gcp-project.project_id
   network_name    = var.network_name
   routing_mode    = var.routing_mode
   subnet_01_name      = var.subnet_01_name

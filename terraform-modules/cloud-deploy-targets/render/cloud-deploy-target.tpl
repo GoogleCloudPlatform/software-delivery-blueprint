@@ -17,7 +17,7 @@
 module "CLUSTER_NAME" {
   source           = "./target"
   name             = "CLUSTER_NAME"
-  cluster          = "CLUSTER_PATH"
+  membership       = "MEMBERSHIP"
   require_approval = REQ_APPROVAL
   location         = var.location
   project          = var.project

@@ -19,7 +19,7 @@ tf_modules_repo=${2}
 github_user=${3}
 github_email=${4}
 cluster_name=${5}
-cluster_path=${6}
+membership=${6}
 require_approval=${7}
 env_name=${8}
 
@@ -32,7 +32,7 @@ if [ ! -f ${cluster_name}.tf ]; then
   cp render/cloud-deploy-target.tpl ./${cluster_name}.tf
 
   find . -type f -name ${cluster_name}.tf -exec  sed -i "s/CLUSTER_NAME/${cluster_name}/g" {} +
-  find . -type f -name ${cluster_name}.tf -exec  sed -i "s:CLUSTER_PATH:${cluster_path}:g" {} +
+  find . -type f -name ${cluster_name}.tf -exec  sed -i "s:MEMBERSHIP:${membership}:g" {} +
   find . -type f -name ${cluster_name}.tf -exec  sed -i "s/LOCATION/${location}/g" {} +
   find . -type f -name ${cluster_name}.tf -exec  sed -i "s/REQ_APPROVAL/${require_approval}/g" {} +
   find . -type f -name ${cluster_name}.tf -exec  sed -i "s/ENV_NAME/${env_name}/g" {} +

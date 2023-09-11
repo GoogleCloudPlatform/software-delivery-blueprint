@@ -150,7 +150,8 @@ The next sections will outline common workflows in the software delivery platfor
 -   Run the `tf-plan` trigger to verify the actions Terraform will take.
 -   Run the `tf-apply` trigger, which will create the new application on the platform.
 
-The trigger will generate the Terraform code to spin up a new application and save it in a .tf file with the same name as the application under the runtime language folder. For example, if you run `create-app` trigger to create an application with name as **booking** and **golang** as the runtime language, the trigger will create a file named **booking.tf** under **apps/golang** folder.
+The `create-app` trigger will generate the Terraform code to spin up a new application and save it in a .tf file with the same name as the application under the runtime language folder. For example, if you run `create-app` trigger to create an application with name as **booking** and **golang** as the runtime language, the trigger will create a file named **booking.tf** under **apps/golang** folder.
+Then, running `tf-apply` trigger will take the latest TF code and apply it.
 
 ### Create a new GitHub team
 
@@ -161,7 +162,8 @@ The trigger will generate the Terraform code to spin up a new application and sa
 -   Run the `tf-plan` trigger to verify the actions Terraform will take.
 -   Run the `tf-apply` trigger, which will create the new team in your GitHub organization.
 
-The trigger will create Terraform code to describing the GitHub team and save it as .tf file under `teams` folder in this repo.
+The trigger `add-team-files` will create Terraform code to describing the GitHub team and save it as .tf file under `teams` folder in this repo.
+Then, running `tf-apply` trigger will take the latest TF code and apply it.
 
 ### Delete an application
 

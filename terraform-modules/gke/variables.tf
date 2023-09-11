@@ -58,3 +58,9 @@ variable "project_number" {
   type        = string
   description = "Project number where GKE cluster is to be created."
 }
+
+variable "master_ipv4_cidr_block" {
+  type = string
+  description = "The IP range in CIDR notation to use for the hosted master network"
+  default = "172.16.0.32/28"
+}

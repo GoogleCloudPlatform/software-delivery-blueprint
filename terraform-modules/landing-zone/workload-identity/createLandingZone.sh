@@ -24,6 +24,7 @@ app_name=${6}
 gsa=${7}
 env=${8}
 kubernetes_sa=${9}
+cicd_sa=${10}
 
 random=$(echo $RANDOM | md5sum | head -c 20; echo)
 local_acm_repo="${acm_repo}-${random}"
@@ -34,12 +35,14 @@ if [ ! -d "manifests/apps/${app_name}" ] ; then
   mkdir manifests/apps/${app_name}
   echo "copying the templates"
   cp templates/_namespace-template/namespace.yaml manifests/apps/${app_name}/namespace.yaml
+  cp templates/_namespace-template/rbac.yaml manifests/apps/${app_name}/rbac.yaml
   cp templates/_namespace-template/network-policy.yaml manifests/apps/${app_name}/network-policy.yaml
   cp templates/_namespace-template/serviceaccount.yaml manifests/apps/${app_name}/serviceaccount-${env}.yaml
   cd manifests/apps/${app_name}
   find . -type f -name "*.yaml" -exec  sed -i "s?APP_NAME?${app_name}?g" {} +
   find . -type f -name "*.yaml" -exec  sed -i "s?GOOGLE_SERVICE_ACCOUNT?${gsa}?g" {} +
   find . -type f -name "*.yaml" -exec  sed -i "s?KUBERNETES_SERVICE_ACCOUNT?${kubernetes_sa}?g" {} +
+  find . -type f -name "*.yaml" -exec  sed -i "s?CICD_SA?${cicd_sa}?g" {} +
   find . -type f -name "serviceaccount-${env}.yaml" -exec  sed -i "s?ENV?${env}?g" {} +
   git config --global user.name ${github_user}
   git config --global user.email ${github_email}
