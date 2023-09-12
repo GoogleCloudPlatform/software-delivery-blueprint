@@ -208,7 +208,7 @@ module "artifact-registry-iam-2" {
   git_repo              = "terraform-modules"
   cluster_name          = module.create_gke_2.cluster_name.name
   service_account_name  = module.create_gke_2.cluster_name.service_account
-  depends_on = [ module.artifact-registry-iam-1 ]
+  depends_on            = [ module.artifact-registry-iam-1 ]
 }
 
 module "landing-zone-template" {
@@ -219,7 +219,8 @@ module "landing-zone-template" {
   tf_modules_repo       = "terraform-modules"
   cluster_name          = module.create_gke_1.cluster_name.name
   cluster_project_id    = module.create-gcp-project.project_id
-  depends_on            = [ module.artifact-registry-iam-1, module.artifact-registry-iam-2, module.cloud-deploy-target-1, module.cloud-deploy-target-2 ]
+  #depends_on            = [ module.artifact-registry-iam-1, module.artifact-registry-iam-2, module.cloud-deploy-target-1, module.cloud-deploy-target-2 ]
+  depends_on            = [ module.artifact-registry-iam-2, module.cloud-deploy-target-2 ]
   env                   = var.env
   index                 = 2
 }
@@ -246,6 +247,7 @@ module "cloudbuild-private-pool-2" {
   private_pool_vpc_name     = "cloudbuild-peered-vpc-${var.env}-${var.subnet_02_region}"
   worker_address            = "10.10.0.0"
   worker_range_name         = "gke-private-pool-worker-range-${var.env}-${var.subnet_02_region}"
+  depends_on                = [ module.cloudbuild-private-pool-1 ]
 }
 
 module "cloud-deploy-target-1" {
@@ -259,7 +261,7 @@ module "cloud-deploy-target-1" {
   membership            = module.acm-1.membership_id
   require_approval      = "false"
   private_pool          = module.cloudbuild-private-pool-1.workerpool_id
-  depends_on            = [ module.artifact-registry-iam-1, module.artifact-registry-iam-2, module.cloudbuild-private-pool-1, module.cloudbuild-private-pool-2]
+  depends_on            = [ module.artifact-registry-iam-2, module.cloudbuild-private-pool-2 ]
   env_name              = "prod-1"
 }
 
@@ -274,6 +276,7 @@ module "cloud-deploy-target-2" {
   membership            = module.acm-2.membership_id
   require_approval      = "false"
   private_pool          = module.cloudbuild-private-pool-2.workerpool_id
-  depends_on            = [ module.artifact-registry-iam-1, module.artifact-registry-iam-2,module.cloud-deploy-target-1, module.cloudbuild-private-pool-1, module.cloudbuild-private-pool-2 ]
+  #depends_on            = [ module.artifact-registry-iam-1, module.artifact-registry-iam-2,module.cloud-deploy-target-1, module.cloudbuild-private-pool-1, module.cloudbuild-private-pool-2 ]
+  depends_on            = [ module.cloud-deploy-target-1 ]
   env_name              = "prod-2"
 }
