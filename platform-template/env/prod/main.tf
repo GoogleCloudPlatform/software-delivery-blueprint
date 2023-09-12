@@ -231,7 +231,7 @@ module "cloudbuild-private-pool-1" {
   location                  = var.subnet_01_region
   worker_pool_name          = "cloudbuild-private-worker-pool-${var.env}-${var.subnet_01_region}"
   create_cloudbuild_network = true
-  private_pool_vpc_name     = "cloudbuild-peered-vpc-${var.env}"
+  private_pool_vpc_name     = "cloudbuild-peered-vpc-${var.env}-${var.subnet_01_region}"
   worker_address            = "10.37.0.0"
   worker_range_name         = "gke-private-pool-worker-range-${var.env}-${var.subnet_01_region}"
 }
@@ -243,7 +243,7 @@ module "cloudbuild-private-pool-2" {
   location                  = var.subnet_02_region
   worker_pool_name          = "cloudbuild-private-worker-pool-${var.env}-${var.subnet_02_region}"
   create_cloudbuild_network = true
-  private_pool_vpc_name     = "cloudbuild-peered-vpc-${var.env}"
+  private_pool_vpc_name     = "cloudbuild-peered-vpc-${var.env}-${var.subnet_01_region}"
   worker_address            = "10.10.0.0"
   worker_range_name         = "gke-private-pool-worker-range-${var.env}-${var.subnet_02_region}"
 }
