@@ -44,3 +44,8 @@ variable "service_account" {
   type        = string
   description = "Service Account that will be used to deploy to the Cloud Deploy target."
 }
+
+variable "private_pool" {
+  type        = string
+  description = "Id of the private pool."
+}

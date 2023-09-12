@@ -22,6 +22,7 @@ module "CLUSTER_NAME" {
   location         = var.location
   project          = var.project
   service_account  = var.service_account
+  private_pool     = PRIVATE_POOL
 }
 
 output "ENV_NAME-target" {

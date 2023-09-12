@@ -211,6 +211,43 @@ module "artifact-registry-iam-2" {
   depends_on = [ module.artifact-registry-iam-1 ]
 }
 
+module "landing-zone-template" {
+  source                = "git::https://github.com/YOUR_GITHUB_ORG/terraform-modules.git//landing-zone/render"
+  git_user              = var.github_user
+  git_email             = var.github_email
+  git_org               = var.github_org
+  tf_modules_repo       = "terraform-modules"
+  cluster_name          = module.create_gke_1.cluster_name.name
+  cluster_project_id    = module.create-gcp-project.project_id
+  depends_on            = [ module.artifact-registry-iam-1, module.artifact-registry-iam-2, module.cloud-deploy-target-1, module.cloud-deploy-target-2 ]
+  env                   = var.env
+  index                 = 2
+}
+
+module "cloudbuild-private-pool-1" {
+  source = "git::https://github.com/YOUR_GITHUB_ORG/terraform-modules.git//cloudbuild-private-pool"
+  project_id                = module.create-gcp-project.project_id
+  network_project_id        = module.create-gcp-project.project_id
+  location                  = var.subnet_01_region
+  worker_pool_name          = "cloudbuild-private-worker-pool-${var.env}-${var.subnet_01_region}"
+  create_cloudbuild_network = true
+  private_pool_vpc_name     = "cloudbuild-peered-vpc-${var.env}"
+  worker_address            = "10.37.0.0"
+  worker_range_name         = "gke-private-pool-worker-range-${var.env}-${var.subnet_01_region}"
+}
+
+module "cloudbuild-private-pool-2" {
+  source = "git::https://github.com/YOUR_GITHUB_ORG/terraform-modules.git//cloudbuild-private-pool"
+  project_id                = module.create-gcp-project.project_id
+  network_project_id        = module.create-gcp-project.project_id
+  location                  = var.subnet_02_region
+  worker_pool_name          = "cloudbuild-private-worker-pool-${var.env}-${var.subnet_02_region}"
+  create_cloudbuild_network = true
+  private_pool_vpc_name     = "cloudbuild-peered-vpc-${var.env}"
+  worker_address            = "10.10.0.0"
+  worker_range_name         = "gke-private-pool-worker-range-${var.env}-${var.subnet_02_region}"
+}
+
 module "cloud-deploy-target-1" {
   source                = "git::https://github.com/YOUR_GITHUB_ORG/terraform-modules.git//cloud-deploy-targets/render"
   git_user              = var.github_user
@@ -221,7 +258,8 @@ module "cloud-deploy-target-1" {
   cluster_name          = module.create_gke_1.cluster_name.name
   membership            = module.acm-1.membership_id
   require_approval      = "false"
-  depends_on            = [ module.artifact-registry-iam-1, module.artifact-registry-iam-2]
+  private_pool          = module.cloudbuild-private-pool-1.workerpool_id
+  depends_on            = [ module.artifact-registry-iam-1, module.artifact-registry-iam-2, module.cloudbuild-private-pool-1, module.cloudbuild-private-pool-2]
   env_name              = "prod-1"
 }
 
@@ -235,18 +273,7 @@ module "cloud-deploy-target-2" {
   cluster_name          = module.create_gke_2.cluster_name.name
   membership            = module.acm-2.membership_id
   require_approval      = "false"
-  depends_on            = [ module.artifact-registry-iam-1, module.artifact-registry-iam-2,module.cloud-deploy-target-1 ]
+  private_pool          = module.cloudbuild-private-pool-2.workerpool_id
+  depends_on            = [ module.artifact-registry-iam-1, module.artifact-registry-iam-2,module.cloud-deploy-target-1, module.cloudbuild-private-pool-1, module.cloudbuild-private-pool-2 ]
   env_name              = "prod-2"
-}
-module "landing-zone-template" {
-  source                = "git::https://github.com/YOUR_GITHUB_ORG/terraform-modules.git//landing-zone/render"
-  git_user              = var.github_user
-  git_email             = var.github_email
-  git_org               = var.github_org
-  tf_modules_repo       = "terraform-modules"
-  cluster_name          = module.create_gke_1.cluster_name.name
-  cluster_project_id    = module.create-gcp-project.project_id
-  depends_on            = [ module.artifact-registry-iam-1, module.artifact-registry-iam-2, module.cloud-deploy-target-1, module.cloud-deploy-target-2 ]
-  env                   = var.env
-  index                 = 2
 }

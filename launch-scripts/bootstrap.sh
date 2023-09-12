@@ -573,7 +573,8 @@ apikeys.googleapis.com \
 cloudidentity.googleapis.com \
 gkehub.googleapis.com \
 cloudfunctions.googleapis.com \
-anthosconfigmanagement.googleapis.com"
+anthosconfigmanagement.googleapis.com \
+servicenetworking.googleapis.com"
 
 print_and_execute "sleep 10"
 title_no_wait "Getting project number for ${INFRA_SETUP_PROJECT}"
