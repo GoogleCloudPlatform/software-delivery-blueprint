@@ -109,6 +109,6 @@ resource "google_secret_manager_secret" "private-pool" {
 resource "google_secret_manager_secret_version" "private-pool-secret" {
   count       = var.store_to_secret_mngr ? 1 : 0
   provider    = google
-  secret      = google_secret_manager_secret.private-pool.id
+  secret      = google_secret_manager_secret.private-pool[count.index].id
   secret_data = google_cloudbuild_worker_pool.pool.id
 }
