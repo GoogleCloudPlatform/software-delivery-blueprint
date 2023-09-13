@@ -176,10 +176,10 @@ resource "time_sleep" "wait_20_seconds_4" {
 # Add default Cloud Build SA to GCS so the Cloud Function can provide it roles to use private pool
 # need acess to only dev private pool since CB only be running the builds and not deployments.
 resource "google_storage_bucket_object" "private-pool-cb" {
-  count = length(var.trigger_bucket_connect)
+  count = length(var.trigger_bucket_pool)
   name   = "${var.app_name}-CloudBuild-Default-SA.txt"
   content = format("%s@cloudbuild.gserviceaccount.com", module.admin-project.project_number)
-  bucket = var.trigger_bucket_connect[count.index]
+  bucket = var.trigger_bucket_pool[count.index]
   depends_on = [google_storage_bucket_object.gkehub-connect,time_sleep.wait_20_seconds_4]
 }
 
@@ -190,10 +190,10 @@ resource "time_sleep" "wait_20_seconds_5" {
 
 # Add Cloud Deploy service agent to GCS so the Cloud Function can provide it roles to use private pool
 resource "google_storage_bucket_object" "private-pool-cd" {
-  count = length(var.trigger_bucket_connect)
+  count = length(var.trigger_bucket_pool)
   name   = "${var.app_name}-CloudDeploy-Serive-Agent.txt"
   content = format("service-%s@gcp-sa-clouddeploy.iam.gserviceaccount.com", module.admin-project.project_number)
-  bucket = var.trigger_bucket_connect[count.index]
+  bucket = var.trigger_bucket_pool[count.index]
   depends_on = [google_storage_bucket_object.private-pool-cb,time_sleep.wait_20_seconds_5]
 }
 
