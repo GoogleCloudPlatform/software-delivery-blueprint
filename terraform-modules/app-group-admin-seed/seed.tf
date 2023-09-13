@@ -154,7 +154,7 @@ resource "google_storage_bucket_object" "gke-deploy" {
   content = google_service_account.cloud-deploy[0].email
   bucket = var.trigger_buckets_dep[count.index]
 }
-resource "time_sleep" "wait_for_20_seconds" {
+resource "time_sleep" "wait_20_seconds_1" {
   create_duration = "20s"
   depends_on = [google_storage_bucket_object.gke-deploy]
 }
@@ -165,7 +165,36 @@ resource "google_storage_bucket_object" "gkehub-connect" {
   name   = "${var.app_name}-CloudDeploy-SA.txt"
   content = google_service_account.cloud-deploy[0].email
   bucket = var.trigger_bucket_connect[count.index]
-  depends_on = [google_storage_bucket_object.gke-deploy,time_sleep.wait_for_20_seconds]
+  depends_on = [google_storage_bucket_object.gke-deploy,time_sleep.wait_20_seconds_1]
+}
+
+resource "time_sleep" "wait_20_seconds_4" {
+  create_duration = "20s"
+  depends_on = [google_storage_bucket_object.gkehub-connect]
+}
+
+# Add default Cloud Build SA to GCS so the Cloud Function can provide it roles to use private pool
+# need acess to only dev private pool since CB only be running the builds and not deployments.
+resource "google_storage_bucket_object" "private-pool-cb" {
+  count = length(var.trigger_bucket_connect)
+  name   = "${var.app_name}-CloudBuild-Default-SA.txt"
+  content = format("%s@cloudbuild.gserviceaccount.com", module.admin-project.project_number)
+  bucket = var.trigger_bucket_connect[count.index]
+  depends_on = [google_storage_bucket_object.gkehub-connect,time_sleep.wait_20_seconds_4]
+}
+
+resource "time_sleep" "wait_20_seconds_5" {
+  create_duration = "20s"
+  depends_on = [google_storage_bucket_object.private-pool-cb]
+}
+
+# Add Cloud Deploy service agent to GCS so the Cloud Function can provide it roles to use private pool
+resource "google_storage_bucket_object" "private-pool-cd" {
+  count = length(var.trigger_bucket_connect)
+  name   = "${var.app_name}-CloudDeploy-Serive-Agent.txt"
+  content = format("service-%s@gcp-sa-clouddeploy.iam.gserviceaccount.com", module.admin-project.project_number)
+  bucket = var.trigger_bucket_connect[count.index]
+  depends_on = [google_storage_bucket_object.private-pool-cb,time_sleep.wait_20_seconds_5]
 }
 
 # Add IaC and CICD SA to GCS so Cloud Function can provide it secret read roles
@@ -174,7 +203,7 @@ resource "google_storage_bucket_object" "secret-read-iac" {
   content = google_service_account.iac-sa[0].email
   bucket = var.trigger_bucket_sec
 }
-resource "time_sleep" "wait_20_seconds" {
+resource "time_sleep" "wait_20_seconds_2" {
   create_duration = "20s"
   depends_on = [google_storage_bucket_object.secret-read-iac]
 }
@@ -182,8 +211,9 @@ resource "google_storage_bucket_object" "secret-read-cicd" {
   name   = "${var.app_name}-CICD-SA.txt"
   content = google_service_account.cicd-sa[0].email
   bucket = var.trigger_bucket_sec
-  depends_on = [google_storage_bucket_object.secret-read-iac,time_sleep.wait_20_seconds]
+  depends_on = [google_storage_bucket_object.secret-read-iac,time_sleep.wait_20_seconds_2]
 }
+
 # Add IaC SA to GCS so Cloud Function can provide it billing and project creator roles
 resource "google_storage_bucket_object" "billing-user-iac" {
   name   = "${var.app_name}-IaC-SA.txt"
@@ -191,11 +221,17 @@ resource "google_storage_bucket_object" "billing-user-iac" {
   bucket = var.trigger_bucket_billing
   depends_on = [google_storage_bucket_object.secret-read-cicd]
 }
+
+resource "time_sleep" "wait_20_seconds_3" {
+  create_duration = "20s"
+  depends_on = [google_storage_bucket_object.billing-user-iac]
+}
+
 resource "google_storage_bucket_object" "project-creator-iac" {
   name   = "${var.app_name}-IaC-SA.txt"
   content = google_service_account.iac-sa[0].email
   bucket = var.trigger_bucket_proj
-  depends_on = [google_storage_bucket_object.billing-user-iac]
+  depends_on = [google_storage_bucket_object.billing-user-iac,time_sleep.wait_20_seconds_3]
 }
 
 

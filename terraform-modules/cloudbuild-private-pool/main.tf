@@ -95,3 +95,20 @@ resource "google_cloudbuild_worker_pool" "pool" {
   }
   depends_on = [google_service_networking_connection.worker_pool_connection]
 }
+
+//Store the private pool name in secrets manager
+resource "google_secret_manager_secret" "private-pool" {
+  count = var.store_to_secret_mngr ? 1 : 0
+  secret_id = var.secret_name
+  replication {
+    automatic = true
+  }
+  project = var.secret_project_id
+}
+
+resource "google_secret_manager_secret_version" "private-pool-secret" {
+  count       = var.store_to_secret_mngr ? 1 : 0
+  provider    = google
+  secret      = google_secret_manager_secret.private-pool.id
+  secret_data = google_cloudbuild_worker_pool.pool.id
+}

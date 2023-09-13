@@ -85,3 +85,8 @@ variable "trigger_bucket_connect" {
   type        = list
   description = "list of buckets that will trigger cloud function to add GKE connect permission on CD SA."
 }
+
+variable "trigger_bucket_pool" {
+  type        = list
+  description = "list of buckets that will trigger cloud function to add WorkerPool User permission on CD service agent and CB default SA."
+}

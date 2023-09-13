@@ -24,6 +24,7 @@ env=${7}
 index=${8}
 region=${9}
 secret_project_id=${10}
+private_pool=${11}
 repo=${application_name}
 #The following code is to avoid race condition to the commits done to acm repo in different folders by this script
 sleep_time=20
@@ -39,6 +40,7 @@ do
   find ./k8s/${env} -type f -name "*.yaml" -exec  sed -i "s/SERVICEACCOUNT/${ksa}/g" {} +
   find . -type f -name "cloudbuild.yaml" -exec  sed -i "s/YOUR_REGION/${region}/g" {} +
   find . -type f -name "cloudbuild.yaml" -exec  sed -i "s/YOUR_SECRET_PROJECT_ID/${secret_project_id}/g" {} +
+  find . -type f -name "cloudbuild.yaml" -exec  sed -i "s:YOUR_PRIVATE_POOL:${private_pool}:g" {} +
   git add .
   git config --global user.name ${github_user}
   git config --global user.email ${github_email}

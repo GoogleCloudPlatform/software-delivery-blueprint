@@ -81,3 +81,22 @@ variable "machine_type" {
     error_message = "Valid machine types for Cloud Build private pools are: e2-medium, e2-standard-2, e2-standard-4, e2-standard-8, e2-standard-16, e2-standard-32, e2-highmem-2, e2-highmem-4, e2-highmem-8, e2-highmem-16, e2-highcpu-2, e2-highcpu-4, e2-highcpu-8, e2-highcpu-16, e2-highcpu-32."
   }
 }
+
+variable "store_to_secret_mngr" {
+  type        = bool
+  description = "Flag to store the private pool name in the secret managers in secret project"
+  default     = false
+}
+
+variable "secret_name" {
+  type        = string
+  description = "Name of the Secret"
+  default     = "none"
+}
+
+variable "secret_project_id" {
+  type        = string
+  description = "Secret project where the secret will be created for storing private pool"
+  default     = "none"
+}
+

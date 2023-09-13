@@ -144,6 +144,20 @@ module "gkehub-cloud-function" {
   depends_on            = [ module.create_gke_1, module.deploy-cloud-function ]
 }
 
+module "privatepool-cloud-function" {
+  source                = "git::https://github.com/YOUR_GITHUB_ORG/terraform-modules.git//cloud-functions/grant-privatepool-access"
+  project_id            = module.create-gcp-project.project_id
+  function_name         = "add-privatepool-permission-${var.env}"
+  function_gcs          = "add-privatepool-permission-${var.env}-src"
+  trigger_gcs           = "add-privatepool-permission-${var.env}-trg"
+  region                = var.subnet_01_region
+  app_factory_project   = var.app_factory_project_num
+  secrets_project_id    = var.secrets_project_id
+  infra_project_id      = var.project_id
+  env                   = var.env
+  depends_on            = [ module.create_gke_1, module.gkehub-cloud-function ]
+}
+
 module "artifact-registry-iam" {
   source                = "git::https://github.com/YOUR_GITHUB_ORG/terraform-modules.git//artifact-registry/render"
   git_user              = var.github_user
