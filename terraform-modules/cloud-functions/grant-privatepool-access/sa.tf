@@ -17,7 +17,7 @@
 # Create custom SA for cloud function
 resource "google_service_account" "function-sa" {
   project      = var.project_id
-  account_id   = "privatepool-function-sa-${var.env}"
+  account_id   = "privatepool-fn-sa-${var.env}"
   display_name = "Cloud Function service account"
 }
 
