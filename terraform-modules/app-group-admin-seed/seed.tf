@@ -31,7 +31,8 @@ module "admin-project" {
     "serviceusage.googleapis.com",
     "cloudbilling.googleapis.com",
     "cloudfunctions.googleapis.com",
-    "apikeys.googleapis.com"
+    "apikeys.googleapis.com",
+    "clouddeploy.googleapis.com"
   ]
 }
 
@@ -180,7 +181,7 @@ resource "google_storage_bucket_object" "private-pool-cb" {
   name   = "${var.app_name}-CloudBuild-Default-SA.txt"
   content = format("%s@cloudbuild.gserviceaccount.com", module.admin-project.project_number)
   bucket = var.trigger_bucket_pool[count.index]
-  depends_on = [time_sleep.wait_20_seconds_4]
+  depends_on = [module.admin-project, time_sleep.wait_20_seconds_4]
 }
 
 resource "time_sleep" "wait_20_seconds_5" {
