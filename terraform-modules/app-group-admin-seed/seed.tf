@@ -29,12 +29,31 @@ module "admin-project" {
     "cloudbuild.googleapis.com",
     "secretmanager.googleapis.com",
     "serviceusage.googleapis.com",
+    "clouddeploy.googleapis.com",
     "cloudbilling.googleapis.com",
     "cloudfunctions.googleapis.com",
-    "apikeys.googleapis.com",
-    "clouddeploy.googleapis.com"
+    "apikeys.googleapis.com"
   ]
 }
+
+// This target is created because we are providing permission to the Cloud Deploy service agent to the private pool later in this code.
+// The service agent is created only when we use Cloud Deploy API for the first time. So the intention of creating this target is just to create service agent for cloud deploy.
+// If you don't want to create this unnecessary target, remove this section of code. But, then you will need to manually provide workerPool user permission
+// to the cloud deploy service agent otherwise, CD pipelines will not kick off.
+resource "google_clouddeploy_target" "delete" {
+  location = var.region
+  name     = "can-be-deleted"
+  deploy_parameters = {}
+  description       = "This target is created to enable service agent creation while creating the app via application factory."
+  execution_configs {
+    usages            = ["RENDER","DEPLOY"]
+    execution_timeout = "3600s"
+  }
+  project          = module.admin-project.project_id
+  require_approval = false
+  provider = google-beta
+}
+
 
 // Create a new service account for Cloud Build to be used for the IaC pipeline
 resource "google_service_account" "iac-sa" {
@@ -181,7 +200,7 @@ resource "google_storage_bucket_object" "private-pool-cb" {
   name   = "${var.app_name}-CloudBuild-Default-SA.txt"
   content = format("%s@cloudbuild.gserviceaccount.com", module.admin-project.project_number)
   bucket = var.trigger_bucket_pool[count.index]
-  depends_on = [module.admin-project, time_sleep.wait_20_seconds_4]
+  depends_on = [google_clouddeploy_target.delete, time_sleep.wait_20_seconds_4]
 }
 
 resource "time_sleep" "wait_20_seconds_5" {
