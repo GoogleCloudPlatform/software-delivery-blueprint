@@ -860,6 +860,8 @@ print_and_execute "printf ${APP_SETUP_PROJECT_ID} | gcloud secrets create applic
 title_no_wait "Give secret manager admin access to Cloud Build account"
 print_and_execute "gcloud projects add-iam-policy-binding ${APP_SETUP_PROJECT_ID} --member=serviceAccount:${APP_PROJECT_NUMBER}@cloudbuild.gserviceaccount.com --role=roles/secretmanager.admin"
 
+title_no_wait "Give workerpool user access on multi tenant project so app factory cloudbuild can use it"
+print_and_execute "gcloud projects add-iam-policy-binding ${INFRA_SETUP_PROJECT_ID} --member=serviceAccount:${APP_PROJECT_NUMBER}@cloudbuild.gserviceaccount.com --role=roles/cloudbuild.workerPoolUser"
 title_no_wait "Add Cloud build service account as billing account user on the billing account"
 print_and_execute "gcloud beta billing accounts get-iam-policy ${BILLING_ACCOUNT_ID} --format=json > ${LOG_DIR}/app_cloudbuild_billing-iam-policy-input.json"
 ${PYTHON} ${SCRIPT_DIR}/parsePolicy.py ${LOG_DIR}/app_cloudbuild_billing-iam-policy-input.json ${LOG_DIR}/app_cloudbuild_billing-iam-policy-output.json billing.user ${APP_PROJECT_NUMBER}@cloudbuild.gserviceaccount.com
