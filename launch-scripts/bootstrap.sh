@@ -656,6 +656,10 @@ print_and_execute "gcloud projects add-iam-policy-binding ${INFRA_SETUP_PROJECT_
 print_and_execute "gcloud projects add-iam-policy-binding ${INFRA_SETUP_PROJECT_ID}  --member=serviceAccount:${INFRA_PROJECT_NUMBER}@cloudbuild.gserviceaccount.com --role=roles/resourcemanager.projectIamAdmin"
 print_and_execute "gcloud projects add-iam-policy-binding ${INFRA_SETUP_PROJECT_ID}  --member=serviceAccount:${INFRA_PROJECT_NUMBER}@cloudbuild.gserviceaccount.com --role=roles/iam.serviceAccountUser"
 
+title_no_wait "Granting Cloud Build SA in ${INFRA_SETUP_PROJECT_ID} project permission to create VPC for private pools and worker pool"
+print_and_execute "gcloud projects add-iam-policy-binding ${INFRA_SETUP_PROJECT_ID}  --member=serviceAccount:${INFRA_PROJECT_NUMBER}@cloudbuild.gserviceaccount.com --role=roles/compute.networkAdmin"
+print_and_execute "gcloud projects add-iam-policy-binding ${INFRA_SETUP_PROJECT_ID}  --member=serviceAccount:${INFRA_PROJECT_NUMBER}@cloudbuild.gserviceaccount.com --role=roles/cloudbuild.workerPoolOwner"
+
 title_no_wait "Grant the custom account for billing cloud function access to read the secrets in the common secrets project"
 print_and_execute "gcloud projects add-iam-policy-binding ${SECRET_PROJECT_ID}  --member=serviceAccount:${CUSTOM_SA_BILLING}@${INFRA_SETUP_PROJECT_ID}.iam.gserviceaccount.com --role=roles/secretmanager.secretAccessor"
 
@@ -676,7 +680,8 @@ title_no_wait "Checkout dev branch..."
 print_and_execute "git checkout dev"
 title_no_wait "Replacing variables in ${INFRA_SETUP_REPO}..."
 print_and_execute "find . -type f -exec  sed -i \"s/YOUR_GITHUB_ORG/${GITHUB_ORG}/g\" {} +"
-sed -i "s?YOUR_SECRET_PROJECT_ID?${SECRET_PROJECT_ID}?" *.yaml
+print_and_execute "find . -type f -exec  sed -i \"s/YOUR_REGION/${REGION}/g\" {} +"
+print_and_execute "sed -i \"s?YOUR_SECRET_PROJECT_ID?${SECRET_PROJECT_ID}?\" *.yaml"
 if [[ -n ${FOLDER_ID} ]]; then
     sed -i "s/YOUR_FOLDER_ID/${FOLDER_ID}/"  env/*/variables.tf
 else
@@ -870,6 +875,9 @@ print_and_execute "gsutil mb -p ${APP_SETUP_PROJECT_ID}  -l ${REGION} gs://${APP
 cd ${TEMP_DIR}/${APP_SETUP_REPO}
 title_no_wait "Replacing tf bucket in backend.tf in ${APP_SETUP_REPO}..."
 sed -i "s/YOUR_APP_INFRA_TERRAFORM_STATE_BUCKET/${APP_TF_BUCKET}/" backend.tf
+title_no_wait "Replacing infra setup project and region in cloudbuild yaml file in ${APP_SETUP_REPO}..."
+sed -i "s/YOUR_INFRA_PROJECT_ID/${INFRA_SETUP_PROJECT_ID}/" *.yaml
+sed -i "s/YOUR_REGION/${REGION}/" *.yaml
 title_no_wait "Replacing github org in github.tf in ${APP_SETUP_REPO}..."
 sed -i "s/YOUR_GITHUB_ORG/${GITHUB_ORG}/" github.tf
 git config --global user.name ${GITHUB_USER}

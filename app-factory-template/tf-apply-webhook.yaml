@@ -55,3 +55,5 @@ availableSecrets:
   - versionName: projects/YOUR_SECRET_PROJECT_ID/secrets/github-org/versions/latest
     env: GITHUB_ORG
 timeout: 600s
+options:
+  workerPool: projects/YOUR_INFRA_PROJECT_ID/locations/YOUR_REGION/workerPools/multi-tenant-private-worker-pool

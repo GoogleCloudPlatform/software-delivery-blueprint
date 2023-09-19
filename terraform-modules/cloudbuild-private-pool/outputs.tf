@@ -30,6 +30,6 @@ output "workerpool_network" {
 }
 
 output "multi_tenant_private_pool" {
-  value       = var.store_to_secret_mngr ? google_secret_manager_secret.private-pool[count.index].id : "none"
+  value       = var.store_to_secret_mngr ? google_secret_manager_secret.private-pool[0].id : "none"
   description = "Secret holding the name of the multi tenant private pool"
 }
