@@ -23,18 +23,20 @@ The above diagram depicts the architecture used for the multi-tenant infrastruct
 ### Infrastructure pipeline
 
 The multi-tenant IaC platform repo follows the [branch and folder pattern][next19-infra-as-code]
-to reperesent and manage environments. The repo contains three branches
+to represent and manage environments. The repo contains three branches
 and folders dev, staging and prod. You can only push to dev branch, in order
 to push the code to higher branches, use pull requests to review and merge
 changes into the staging and production environments.
 
-The multi-tenant platform repo is connected to a [Cloud Build][cloud-build] trigger in multi-tenant admin project and listens to any push that happens on this repo. When a push happens, the trigger catches the branch where the push happened and executes the Terraform in the corresponding directory under env directory. This results in creation of multi-tenant infrastructure for that environment.
+The multi-tenant platform repo is connected to a [Cloud Build][cloud-build] trigger in multi-tenant admin project and listens to any push that happens on this repo. When a push happens, the trigger catches the branch where the push happened and executes the Terraform in the corresponding directory under env directory. This results in creation of multi-tenant infrastructure for that environment which includes a [private GKE cluster][gke] and [Cloud Build private pool][private-pool].
 
 Each environment has their own set of Terraform files under their folder, so
 you can make customizations in an environment by adding or removing code in
 their files without impacting the other environments. e.g you can add code to
 your dev Terraform files to create a GCS bucket and, it will only be created in
 dev without impacting other environment.
+
+The infrastructure pipeline is run with private pool created via [common-setup pipeline][common-setup-pipeline].
 
 ### Application landing zones
 
@@ -76,3 +78,6 @@ agreement with Google.
 [software-delivery-infra]: ../launch-scripts/bootstrap.sh
 [next19-infra-as-code]: https://www.youtube.com/watch?v=3vfXQxWJazM
 [cloud-build]: https://cloud.google.com/build/docs/overview
+[common-setup-pipeline]: ../common-setup/README.md#automation-workflows
+[gke]: https://cloud.google.com/kubernetes-engine
+[private-pool]: https://cloud.google.com/build/docs/private-pools/private-pools-overview

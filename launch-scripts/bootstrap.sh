@@ -949,7 +949,7 @@ cd ${TEMP_DIR}/${INFRA_SETUP_REPO}
 git add .
 git config --global user.name ${GITHUB_USER}
 git config --global user.email "${GITHUB_USER}github.com"
-git commit -m "IGNOE: Initial setup"
+git commit -m "IGNORE: Initial setup"
 git push
 title_no_wait "The push to the ${INFRA_SETUP_REPO} has started the cloudbuild trigger. Go to https://console.cloud.google.com/cloud-build/builds?project=${INFRA_SETUP_PROJECT_ID} ."
 title_no_wait "Removing temp directory"

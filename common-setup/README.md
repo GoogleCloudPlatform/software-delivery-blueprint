@@ -25,19 +25,24 @@ The `common-setup` repo is connected to a [Cloud Build][cloud-build] trigger in 
 
 ### Automation Workflows
 
-When the [Cloud Build][cloud-build] trigger in multi-tenant admin project that is connected to `common-setup` repo runs, it creates three [Cloud Functions][cloud-function]:
-1. add-secret-permission
-   1. This [Cloud Function][cloud-function] is used to provide read permission on secrets stored in secretmanager to application service accounts. 
-   2. The [Cloud Function][cloud-function] is triggered when an object arrives in the GCS bucket `add-secret-permission-trg`. 
-   3. The Application Factory while creating a new application writes the service account that needs this access to the GCS bucket `add-secret-permission-trg` as an object. This invokes the Cloud Function that provides the service account the required access.
-2. add-billing-permission
-   1. This [Cloud Function][cloud-function] is used to provide billing user role to application service accounts so that they can create new projects.
-   2. The [Cloud Function][cloud-function] is triggered when an object arrives in the GCS bucket `add-billing-permission-trg`.
-   3. The Application Factory while creating a new application writes the service account that needs this access to the GCS bucket `add-billing-permission-trg` as an object. This invokes the Cloud Function that provides the service account the required access.
-3. add-project-permission
-   1. This [Cloud Function][cloud-function] is used to provide project creator role to application service accounts so that they can create new projects.
-   2. The [Cloud Function][cloud-function] is triggered when an object arrives in the GCS bucket `add-project-permission-trg`.
-   3. The Application Factory while creating a new application writes the service account that needs this access to the GCS bucket `add-project-permission-trg` as an object. This invokes the Cloud Function that provides the service account the required access.
+When the [Cloud Build][cloud-build] trigger in multi-tenant admin project that is connected to `common-setup` repo runs, it creates:
+
+- Three [Cloud Functions][cloud-function] and [GCS buckets][gcs]:
+   1. add-secret-permission function in automation workflow project.
+      1. This [Cloud Function][cloud-function] is used to provide read permission on secrets stored in secretmanager to application service accounts. 
+      2. The [Cloud Function][cloud-function] is triggered when an object arrives in the GCS bucket `add-secret-permission-trg`. 
+      3. The Application Factory while creating a new application writes the service account that needs this access to the GCS bucket `add-secret-permission-trg` as an object. This invokes the Cloud Function that provides the service account the required access.
+   2. add-billing-permission function in multi-tenant admin project.
+      1. This [Cloud Function][cloud-function] is used to provide billing user role to application service accounts so that they can create new projects.
+      2. The [Cloud Function][cloud-function] is triggered when an object arrives in the GCS bucket `add-billing-permission-trg`.
+      3. The Application Factory while creating a new application writes the service account that needs this access to the GCS bucket `add-billing-permission-trg` as an object. This invokes the Cloud Function that provides the service account the required access.
+   3. add-project-permission function in multi-tenant admin project.
+      1. This [Cloud Function][cloud-function] is used to provide project creator role to application service accounts so that they can create new projects.
+      2. The [Cloud Function][cloud-function] is triggered when an object arrives in the GCS bucket `add-project-permission-trg`.
+      3. The Application Factory while creating a new application writes the service account that needs this access to the GCS bucket `add-project-permission-trg` as an object. This invokes the Cloud Function that provides the service account the required access.
+
+- A VPC in multi-tenant admin project for peering with Cloud Build service producer network. 
+- [Cloud Build private pool][private-pool] in multi-tenant admin project that will be running the pipelines multi-tenant project and application factory. 
 
 ## Usage
 
@@ -51,3 +56,5 @@ agreement with Google.
 [bootstrap]: ../launch-scripts/bootstrap.sh
 [cloud-build]: https://cloud.google.com/build/docs/overview
 [cloud-function]: https://cloud.google.com/functions
+[private-pool]: https://cloud.google.com/build/docs/private-pools/private-pools-overview
+[gcs]: https://cloud.google.com/storage
