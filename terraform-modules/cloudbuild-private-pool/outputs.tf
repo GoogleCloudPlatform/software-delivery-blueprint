@@ -28,3 +28,8 @@ output "workerpool_network" {
   value       = var.create_cloudbuild_network ? google_compute_network.private_pool_vpc[0].self_link : data.google_compute_network.workerpool_vpc[0].self_link
   description = "Self Link for Cloud Build workerpool VPC network"
 }
+
+output "multi_tenant_private_pool" {
+  value       = var.store_to_secret_mngr ? google_secret_manager_secret.private-pool[count.index].id : "none"
+  description = "Secret holding the name of the multi tenant private pool"
+}

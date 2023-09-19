@@ -170,3 +170,9 @@ availableSecrets:
     env: APP_FACTORY_PROJECT_NUM
   - versionName: projects/YOUR_SECRET_PROJECT_ID/secrets/secrets-project/versions/latest
     env: SECRETS_PROJECT
+  - versionName: projects/YOUR_SECRET_PROJECT_ID/secrets/multi-tenant-private-pool/versions/latest
+    env: WORKER_POOL
+options:
+  secretEnv:
+  - WORKER_POOL
+  workerPool: $$WORKER_POOL
