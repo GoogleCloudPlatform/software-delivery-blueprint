@@ -144,6 +144,20 @@ module "gkehub-cloud-function" {
   depends_on            = [ module.create_gke_1, module.deploy-cloud-function ]
 }
 
+module "privatepool-cloud-function" {
+  source                = "git::https://github.com/YOUR_GITHUB_ORG/terraform-modules.git//cloud-functions/grant-privatepool-access"
+  project_id            = module.create-gcp-project.project_id
+  function_name         = "add-privatepool-permission-${var.env}"
+  function_gcs          = "add-privatepool-permission-${var.env}-src"
+  trigger_gcs           = "add-privatepool-permission-${var.env}-trg"
+  region                = var.subnet_01_region
+  app_factory_project   = var.app_factory_project_num
+  secrets_project_id    = var.secrets_project_id
+  infra_project_id      = var.project_id
+  env                   = var.env
+  depends_on            = [ module.create_gke_1, module.gkehub-cloud-function ]
+}
+
 module "artifact-registry-iam" {
   source                = "git::https://github.com/YOUR_GITHUB_ORG/terraform-modules.git//artifact-registry/render"
   git_user              = var.github_user
@@ -153,20 +167,6 @@ module "artifact-registry-iam" {
   git_repo              = "terraform-modules"
   cluster_name          = module.create_gke_1.cluster_name.name
   service_account_name  = module.create_gke_1.cluster_name.service_account
-}
-
-module "cloud-deploy-target" {
-  source                = "git::https://github.com/YOUR_GITHUB_ORG/terraform-modules.git//cloud-deploy-targets/render"
-  git_user              = var.github_user
-  git_email             = var.github_email
-  git_org               = var.github_org
-  github_token          = var.github_token
-  git_repo              = "terraform-modules"
-  cluster_name          = module.create_gke_1.cluster_name.name
-  membership            = module.acm.membership_id
-  require_approval      = "false"
-  env_name              = var.env
-  depends_on            = [ module.artifact-registry-iam ]
 }
 
 module "landing-zone-template" {
@@ -180,4 +180,31 @@ module "landing-zone-template" {
   depends_on            = [ module.artifact-registry-iam ]
   env                   = var.env
   index                 = 1
+}
+
+module "cloudbuild-private-pool" {
+  source = "git::https://github.com/YOUR_GITHUB_ORG/terraform-modules.git//cloudbuild-private-pool"
+  project_id                = module.create-gcp-project.project_id
+  network_project_id        = module.create-gcp-project.project_id
+  location                  = var.subnet_01_region
+  worker_pool_name          = "cloudbuild-private-worker-pool-${var.env}"
+  create_cloudbuild_network = true
+  private_pool_vpc_name     = "cloudbuild-peered-vpc-${var.env}"
+  worker_address            = "10.37.0.0"
+  worker_range_name         = "gke-private-pool-worker-range-${var.env}"
+}
+
+module "cloud-deploy-target" {
+  source                = "git::https://github.com/YOUR_GITHUB_ORG/terraform-modules.git//cloud-deploy-targets/render"
+  git_user              = var.github_user
+  git_email             = var.github_email
+  git_org               = var.github_org
+  github_token          = var.github_token
+  git_repo              = "terraform-modules"
+  cluster_name          = module.create_gke_1.cluster_name.name
+  membership            = module.acm.membership_id
+  require_approval      = "false"
+  env_name              = var.env
+  private_pool          = module.cloudbuild-private-pool.workerpool_id
+  depends_on            = [ module.artifact-registry-iam, module.cloudbuild-private-pool ]
 }

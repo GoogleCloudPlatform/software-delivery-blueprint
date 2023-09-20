@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-resource "google_clouddeploy_target" "target" {
-  location = var.location
-  name     = var.name
+# Create custom SA for cloud function
+resource "google_service_account" "function-sa" {
+  project      = var.project_id
+  account_id   = "privatepool-fn-sa-${var.env}"
+  display_name = "Cloud Function service account"
+}
 
-  anthos_cluster {
-    membership = var.membership
-  }
-
-  require_approval = var.require_approval
-  project          = var.project
-  execution_configs {
-    service_account = var.service_account
-    usages          = ["RENDER", "DEPLOY"]
-    worker_pool      = var.private_pool
-  }
+resource "google_project_iam_member" "function-sa-roles" {
+  project = var.project_id
+  for_each = toset([
+    "roles/resourcemanager.projectIamAdmin",
+    "roles/storage.objectViewer"
+  ])
+  role   = each.key
+  member = "serviceAccount:${google_service_account.function-sa.email}"
 }

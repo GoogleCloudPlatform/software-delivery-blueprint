@@ -18,11 +18,23 @@ data "google_project" "project_number" {
   project_id = var.project_id
 }
 
+data "google_secret_manager_secret_version" "private-pool" {
+  secret = "private-pool-dev"
+  project = var.secret_project_id
+}
+
 locals {
   project_number = data.google_project.project_number.number
 }
 
 // Enable any extra APIs that are required for the admin project
+// The reason we enable Cloud Deploy API here and not while creating the app via app factory is that if we enable the API in application factory,
+// it will cause problems while deleting the app if there are CD resources created in the project. This is because the deletion will trigger TF to
+// disable the CD API that it enabled while creating the app and it will fail to do so unless all the CD resources are deleted.
+// But enabling the CD API here causes another problem where the Cloud Function tries to provide Workerpool User access to CD service agent
+// while creating the application but fails because the CD API is not enabled so the service agent do not exist.
+// update 09-15-2019 : We are moving enabling CD API from here to app factory sp the CD service agent get the workerpool user access via Cloud function..
+// See README.md in application-factory-template to learn how to delete an application
 module "project-service-cloudresourcemanager" {
   source  = "terraform-google-modules/project-factory/google//modules/project_services"
   version = "4.0.0"
@@ -31,7 +43,7 @@ module "project-service-cloudresourcemanager" {
 
   activate_apis = [
     "artifactregistry.googleapis.com",
-    "clouddeploy.googleapis.com",
+    //"clouddeploy.googleapis.com",
     "container.googleapis.com"
   ]
 }
@@ -47,6 +59,7 @@ module "app-web-hook" {
   project_id      = var.project_id
   service_account = var.cloudbuild_service_account
   secret_project_id = var.secret_project_id
+  private_pool    = data.google_secret_manager_secret_version.private-pool.secret_data
 }
 
 //Create GitHub trigger to invoke Cloud Build trigger

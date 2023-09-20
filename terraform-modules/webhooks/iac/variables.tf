@@ -43,3 +43,8 @@ variable "secret_project_id" {
   type = string
   description = "ID of the project that holds common secrets."
 }
+
+variable "private_pool" {
+  type = string
+  description = "Name of the private pool to be associated with the trigger."
+}

@@ -58,7 +58,7 @@ Platform developers and administrators use an infrastructure as code pipeline in
 
 The multi-tenant infrastructure component is a set of projects corresponding to the application environments. These projects contain resources used by several applications, to maximize resource utilization, governance and minimize operational overhead.
 
-In the base blueprint, the shared resources are [Google Kubernetes Engine][gke] (GKE) clusters, but this could be extended to include other resources like databases, buckets, etc. The goal of the multi-tenant infrastructure is to improve efficiency in terms of operational overhead, resource utilization (cost) and consistency between environments (development, staging and production).
+In the base blueprint, the shared resources are [Google Kubernetes Engine][gke] (GKE) clusters and [Cloud Build private pools][private-pool], but this could be extended to include other resources like databases, buckets, etc. The goal of the multi-tenant infrastructure is to improve efficiency in terms of operational overhead, resource utilization (cost) and consistency between environments (development, staging and production).
 
 Along with multi-tenant infrastructure , there are Automation workflows that remove the manual steps in Application and Infrastructure onboarding like access provisioning etc. These workflows are serviced by [Cloud Functions][cloud-function] and created in a separate project.
 
@@ -156,3 +156,4 @@ agreement with Google.
 [cloud-build]: https://cloud.google.com/build/docs/overview
 [gke]: https://cloud.google.com/kubernetes-engine
 [cloud-function]: https://cloud.google.com/functions
+[private-pool]: https://cloud.google.com/build/docs/private-pools/private-pools-overview

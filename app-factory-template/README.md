@@ -122,6 +122,8 @@ The application factory has four Cloud Build tiggers, each are defined as yaml f
 3.  `tf-plan`, performs a Terraform plan.
 4.  `tf-apply`, performs Terraform apply, updating the provisioned applications and teams in GitHub.
 
+The triggers in Application Factory is run with private pool created via [common-setup pipeline][common-setup-pipeline].
+
 Note: The script bootstrap.sh that creates your application factory accepts an input "TRIGGER_TYPE" which can be either `webhook` or `github`. 
 If `github` is passed as "TRIGGER_TYPE" to the script, the script creates GitHub triggers in Cloud Build. 
 If `webhook` is passed as "TRIGGER_TYPE" to the script, the script creates webhook triggers in Cloud Build. 

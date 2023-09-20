@@ -573,7 +573,8 @@ apikeys.googleapis.com \
 cloudidentity.googleapis.com \
 gkehub.googleapis.com \
 cloudfunctions.googleapis.com \
-anthosconfigmanagement.googleapis.com"
+anthosconfigmanagement.googleapis.com \
+servicenetworking.googleapis.com"
 
 print_and_execute "sleep 10"
 title_no_wait "Getting project number for ${INFRA_SETUP_PROJECT}"
@@ -655,6 +656,10 @@ print_and_execute "gcloud projects add-iam-policy-binding ${INFRA_SETUP_PROJECT_
 print_and_execute "gcloud projects add-iam-policy-binding ${INFRA_SETUP_PROJECT_ID}  --member=serviceAccount:${INFRA_PROJECT_NUMBER}@cloudbuild.gserviceaccount.com --role=roles/resourcemanager.projectIamAdmin"
 print_and_execute "gcloud projects add-iam-policy-binding ${INFRA_SETUP_PROJECT_ID}  --member=serviceAccount:${INFRA_PROJECT_NUMBER}@cloudbuild.gserviceaccount.com --role=roles/iam.serviceAccountUser"
 
+title_no_wait "Granting Cloud Build SA in ${INFRA_SETUP_PROJECT_ID} project permission to create VPC for private pools and worker pool"
+print_and_execute "gcloud projects add-iam-policy-binding ${INFRA_SETUP_PROJECT_ID}  --member=serviceAccount:${INFRA_PROJECT_NUMBER}@cloudbuild.gserviceaccount.com --role=roles/compute.networkAdmin"
+print_and_execute "gcloud projects add-iam-policy-binding ${INFRA_SETUP_PROJECT_ID}  --member=serviceAccount:${INFRA_PROJECT_NUMBER}@cloudbuild.gserviceaccount.com --role=roles/cloudbuild.workerPoolOwner"
+
 title_no_wait "Grant the custom account for billing cloud function access to read the secrets in the common secrets project"
 print_and_execute "gcloud projects add-iam-policy-binding ${SECRET_PROJECT_ID}  --member=serviceAccount:${CUSTOM_SA_BILLING}@${INFRA_SETUP_PROJECT_ID}.iam.gserviceaccount.com --role=roles/secretmanager.secretAccessor"
 
@@ -675,7 +680,8 @@ title_no_wait "Checkout dev branch..."
 print_and_execute "git checkout dev"
 title_no_wait "Replacing variables in ${INFRA_SETUP_REPO}..."
 print_and_execute "find . -type f -exec  sed -i \"s/YOUR_GITHUB_ORG/${GITHUB_ORG}/g\" {} +"
-sed -i "s?YOUR_SECRET_PROJECT_ID?${SECRET_PROJECT_ID}?" *.yaml
+print_and_execute "find . -type f -exec  sed -i \"s/YOUR_REGION/${REGION}/g\" {} +"
+print_and_execute "sed -i \"s?YOUR_SECRET_PROJECT_ID?${SECRET_PROJECT_ID}?\" *.yaml"
 if [[ -n ${FOLDER_ID} ]]; then
     sed -i "s/YOUR_FOLDER_ID/${FOLDER_ID}/"  env/*/variables.tf
 else
@@ -854,6 +860,8 @@ print_and_execute "printf ${APP_SETUP_PROJECT_ID} | gcloud secrets create applic
 title_no_wait "Give secret manager admin access to Cloud Build account"
 print_and_execute "gcloud projects add-iam-policy-binding ${APP_SETUP_PROJECT_ID} --member=serviceAccount:${APP_PROJECT_NUMBER}@cloudbuild.gserviceaccount.com --role=roles/secretmanager.admin"
 
+title_no_wait "Give workerpool user access on multi tenant project so app factory cloudbuild can use it"
+print_and_execute "gcloud projects add-iam-policy-binding ${INFRA_SETUP_PROJECT_ID} --member=serviceAccount:${APP_PROJECT_NUMBER}@cloudbuild.gserviceaccount.com --role=roles/cloudbuild.workerPoolUser"
 title_no_wait "Add Cloud build service account as billing account user on the billing account"
 print_and_execute "gcloud beta billing accounts get-iam-policy ${BILLING_ACCOUNT_ID} --format=json > ${LOG_DIR}/app_cloudbuild_billing-iam-policy-input.json"
 ${PYTHON} ${SCRIPT_DIR}/parsePolicy.py ${LOG_DIR}/app_cloudbuild_billing-iam-policy-input.json ${LOG_DIR}/app_cloudbuild_billing-iam-policy-output.json billing.user ${APP_PROJECT_NUMBER}@cloudbuild.gserviceaccount.com
@@ -869,6 +877,9 @@ print_and_execute "gsutil mb -p ${APP_SETUP_PROJECT_ID}  -l ${REGION} gs://${APP
 cd ${TEMP_DIR}/${APP_SETUP_REPO}
 title_no_wait "Replacing tf bucket in backend.tf in ${APP_SETUP_REPO}..."
 sed -i "s/YOUR_APP_INFRA_TERRAFORM_STATE_BUCKET/${APP_TF_BUCKET}/" backend.tf
+title_no_wait "Replacing infra setup project and region in cloudbuild yaml file in ${APP_SETUP_REPO}..."
+sed -i "s/YOUR_INFRA_PROJECT_ID/${INFRA_SETUP_PROJECT_ID}/" *.yaml
+sed -i "s/YOUR_REGION/${REGION}/" *.yaml
 title_no_wait "Replacing github org in github.tf in ${APP_SETUP_REPO}..."
 sed -i "s/YOUR_GITHUB_ORG/${GITHUB_ORG}/" github.tf
 git config --global user.name ${GITHUB_USER}
@@ -938,7 +949,7 @@ cd ${TEMP_DIR}/${INFRA_SETUP_REPO}
 git add .
 git config --global user.name ${GITHUB_USER}
 git config --global user.email "${GITHUB_USER}github.com"
-git commit -m "Initial setup"
+git commit -m "IGNORE: Initial setup"
 git push
 title_no_wait "The push to the ${INFRA_SETUP_REPO} has started the cloudbuild trigger. Go to https://console.cloud.google.com/cloud-build/builds?project=${INFRA_SETUP_PROJECT_ID} ."
 title_no_wait "Removing temp directory"

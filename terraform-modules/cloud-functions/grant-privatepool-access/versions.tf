@@ -14,19 +14,11 @@
  * limitations under the License.
  */
 
-resource "google_clouddeploy_target" "target" {
-  location = var.location
-  name     = var.name
-
-  anthos_cluster {
-    membership = var.membership
-  }
-
-  require_approval = var.require_approval
-  project          = var.project
-  execution_configs {
-    service_account = var.service_account
-    usages          = ["RENDER", "DEPLOY"]
-    worker_pool      = var.private_pool
+terraform {
+  required_providers {
+    google = {
+      source = "hashicorp/google"
+      version = ">= 4.28.0"
+    }
   }
 }

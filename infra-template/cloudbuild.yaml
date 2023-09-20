@@ -135,3 +135,4 @@ availableSecrets:
     env: GCP_BILLINGAC
 options:
   logging: CLOUD_LOGGING_ONLY
+  workerPool: YOUR_PRIVATE_POOL

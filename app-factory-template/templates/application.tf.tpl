@@ -66,6 +66,10 @@ data "google_secret_manager_secret_version" "YOUR_APPLICATION_NAME_acm-repo" {
   project = "YOUR_SECRET_PROJECT_ID"
 }
 
+data "google_secret_manager_secret_version" "YOUR_APPLICATION_NAME_private-pool" {
+  secret = "private-pool-dev"
+  project = "YOUR_SECRET_PROJECT_ID"
+}
 #Looking up the bucket name that is used to trigger cloud function to add deploy permissions to the application's CICD and IAC service accounts
 data "google_secret_manager_secret_version" "YOUR_APPLICATION_NAME_trigger-bucket-dep" {
   count = length(local.YOUR_APPLICATION_NAME_environments)
@@ -98,6 +102,14 @@ data "google_secret_manager_secret_version" "YOUR_APPLICATION_NAME_trigger-bucke
   project = "YOUR_SECRET_PROJECT_ID"
 }
 
+#Looking up the bucket name that is used to trigger cloud function to add WorkerPool User permissions to the application's CD service agent and CB default service account
+data "google_secret_manager_secret_version" "YOUR_APPLICATION_NAME_trigger-bucket-pool" {
+  count = length(local.YOUR_APPLICATION_NAME_environments)
+  secret = local.YOUR_APPLICATION_NAME_trigger_bucket_pool[local.YOUR_APPLICATION_NAME_environments[count.index]]
+  project = "YOUR_SECRET_PROJECT_ID"
+}
+
+
 locals {
     YOUR_APPLICATION_NAME_environments = ["dev", "staging", "prod"]
     YOUR_APPLICATION_NAME_namespace = zipmap(local.YOUR_APPLICATION_NAME_environments,[for env in local.YOUR_APPLICATION_NAME_environments : "YOUR_APPLICATION_NAME"])
@@ -107,6 +119,7 @@ locals {
     YOUR_APPLICATION_NAME_trigger_bucket_billing = "billing-permission-fn-trg-bucket"
     YOUR_APPLICATION_NAME_trigger_bucket_proj = "project-permission-fn-trg-bucket"
     YOUR_APPLICATION_NAME_trigger_bucket_connect = zipmap(local.YOUR_APPLICATION_NAME_environments,[for env in local.YOUR_APPLICATION_NAME_environments : "gkehub-permission-fn-trg-bucket-${env}"])
+    YOUR_APPLICATION_NAME_trigger_bucket_pool = zipmap(local.YOUR_APPLICATION_NAME_environments,[for env in local.YOUR_APPLICATION_NAME_environments : "privatepool-permission-fn-trg-bucket-${env}"])
 }
 
 //Create application seed/admin project and cloud build service accounts for iac and cicd
@@ -127,6 +140,7 @@ module "YOUR_APPLICATION_NAME-admin-seed" {
   trigger_bucket_billing = data.google_secret_manager_secret_version.YOUR_APPLICATION_NAME_trigger-bucket-billing.secret_data
   trigger_bucket_proj = data.google_secret_manager_secret_version.YOUR_APPLICATION_NAME_trigger-bucket-proj.secret_data
   trigger_bucket_connect = data.google_secret_manager_secret_version.YOUR_APPLICATION_NAME_trigger-bucket-connect.*.secret_data
+  trigger_bucket_pool = data.google_secret_manager_secret_version.YOUR_APPLICATION_NAME_trigger-bucket-pool.*.secret_data
 }
 
 module "YOUR_APPLICATION_NAME-iac-pipeline" {
@@ -143,11 +157,11 @@ module "YOUR_APPLICATION_NAME-iac-pipeline" {
   org_id = data.google_secret_manager_secret_version.YOUR_APPLICATION_NAME_gcp-org.secret_data
   billing_account = data.google_secret_manager_secret_version.YOUR_APPLICATION_NAME_gcp-billingac.secret_data
   state_bucket = module.YOUR_APPLICATION_NAME-admin-seed.iac_bucket_name
-  #depends_on = [module.YOUR_APPLICATION_NAME-copy-secrets]
   ci_sa  = module.YOUR_APPLICATION_NAME-admin-seed.cicd_sa_id
   cd_sa = module.YOUR_APPLICATION_NAME-admin-seed.clouddeploy_sa_email
   region = "YOUR_REGION"
   secret_project_id = "YOUR_SECRET_PROJECT_ID"
+  private_pool = data.google_secret_manager_secret_version.YOUR_APPLICATION_NAME_private-pool.secret_data
   folder_id = "YOUR_GCP_FOLDER_ID" //Not passing the folder id from the secret gcp-folder in multi-tenant project to allow the teams to create applications in separate folder if needed.
 }
 
@@ -220,5 +234,6 @@ module "YOUR_APPLICATION_NAME-cicd-repo" {
   env = local.YOUR_APPLICATION_NAME_environments
   region = "YOUR_REGION"
   secret_project_id = "YOUR_SECRET_PROJECT_ID"
+  private_pool = data.google_secret_manager_secret_version.YOUR_APPLICATION_NAME_private-pool.secret_data
 
 }

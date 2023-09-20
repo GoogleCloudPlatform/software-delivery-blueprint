@@ -47,3 +47,4 @@ availableSecrets:
     env: REGION
 options:
   logging: CLOUD_LOGGING_ONLY
+  workerPool: YOUR_PRIVATE_POOL

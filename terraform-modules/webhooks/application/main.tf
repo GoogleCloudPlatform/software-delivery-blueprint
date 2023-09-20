@@ -47,6 +47,12 @@ resource "google_secret_manager_secret_iam_policy" "policy" {
   policy_data = data.google_iam_policy.wh-secv-access.policy_data
 }
 
+//Look up private pool name from secret manager
+//data "google_secret_manager_secret_version" "private-pool" {
+//  secret = "private-pool-dev"
+//  project = var.secret_project_id
+//}
+
 resource "google_cloudbuild_trigger" "deploy-app" {
   name        = "deploy-app-${var.app_name}"
   description = "Webhook to deploy the app"
@@ -136,6 +142,7 @@ resource "google_cloudbuild_trigger" "deploy-app" {
 
     options {
       logging = "CLOUD_LOGGING_ONLY"
+      worker_pool = var.private_pool
     }
   }
   substitutions = {

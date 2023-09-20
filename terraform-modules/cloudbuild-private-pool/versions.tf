@@ -1,11 +1,11 @@
 /**
- * Copyright 2022 Google LLC
+ * Copyright 2021 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     https://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,19 +14,16 @@
  * limitations under the License.
  */
 
-resource "google_clouddeploy_target" "target" {
-  location = var.location
-  name     = var.name
-
-  anthos_cluster {
-    membership = var.membership
-  }
-
-  require_approval = var.require_approval
-  project          = var.project
-  execution_configs {
-    service_account = var.service_account
-    usages          = ["RENDER", "DEPLOY"]
-    worker_pool      = var.private_pool
+terraform {
+  required_version = ">= 0.13.0"
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = ">= 4.3.0" # google_cloudbuild_worker_pool in GA requires >= 4.3.0
+    }
+    google-beta = {
+      source  = "hashicorp/google-beta"
+      version = ">= 4.3.0"
+    }
   }
 }

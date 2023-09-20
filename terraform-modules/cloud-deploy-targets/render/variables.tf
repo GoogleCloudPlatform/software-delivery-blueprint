@@ -60,3 +60,8 @@ variable "env_name" {
   type        = string
   description = "Environment."
 }
+
+variable "private_pool" {
+  type        = string
+  description = "Id of the private pool."
+}
