@@ -130,7 +130,7 @@ resource "google_project_iam_member" "cloud-deploy-roles" {
 resource "google_secret_manager_secret" "clouddeploy-sa" {
   secret_id = "clouddeploy-sa"
   replication {
-    automatic = true
+    auto {}
   }
   project = module.admin-project.project_id
 }
@@ -240,7 +240,7 @@ resource "google_project_iam_member" "workload-identity-sa-roles" {
 resource "google_secret_manager_secret" "app-name" {
   secret_id = "app-name"
   replication {
-    automatic = true
+    auto {}
   }
   project = module.admin-project.project_id
 }
@@ -258,7 +258,7 @@ resource "google_secret_manager_secret_iam_member" "app-name-secret-access" {
 resource "google_secret_manager_secret" "region" {
   secret_id = "region"
   replication {
-    automatic = true
+    auto {}
   }
   project = module.admin-project.project_id
 }

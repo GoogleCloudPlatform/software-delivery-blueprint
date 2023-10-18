@@ -39,7 +39,7 @@ resource "google_service_account_iam_member" "update-workload-identity" {
 resource "google_secret_manager_secret" "ksa-secret" {
   secret_id = "${var.env}-kubernetes-sa"
   replication {
-    automatic = true
+    auto {}
   }
   project = var.project_id
 }
@@ -58,7 +58,7 @@ resource "google_secret_manager_secret_iam_member" "ksa-secret-access" {
 resource "google_secret_manager_secret" "namespace-secret" {
   secret_id = "${var.env}-namespace"
   replication {
-    automatic = true
+    auto {}
   }
   project = var.project_id
 }

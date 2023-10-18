@@ -40,7 +40,7 @@ resource "google_storage_bucket_iam_member" "member" {
 resource "google_secret_manager_secret" "trigger-bucket" {
   secret_id = "secret-permission-fn-trg-bucket"
   replication {
-    automatic = true
+    auto {}
   }
   project = var.project_id
 }
