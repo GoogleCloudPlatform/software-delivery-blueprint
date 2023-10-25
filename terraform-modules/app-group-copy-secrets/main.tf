@@ -29,7 +29,7 @@ resource "google_secret_manager_secret" "create-secret" {
   for_each  = toset(var.secrets)
   secret_id = split("/", data.google_secret_manager_secret_version.read-secret[each.key].name)[3]
   replication {
-    automatic = true
+    auto {}
   }
   project = var.seed_project_id
 }
@@ -51,7 +51,7 @@ resource "google_secret_manager_secret_iam_member" "secret-permission" {
 resource "google_secret_manager_secret" "app-name" {
   secret_id = "app-name"
   replication {
-    automatic = true
+    auto {}
   }
   project = var.seed_project_id
 }
@@ -69,7 +69,7 @@ resource "google_secret_manager_secret_iam_member" "app-name-secret-access" {
 resource "google_secret_manager_secret" "env-repo" {
   secret_id = "env-repo"
   replication {
-    automatic = true
+    auto {}
   }
   project = var.seed_project_id
 }
@@ -87,7 +87,7 @@ resource "google_secret_manager_secret_iam_member" "env-repo-secret-access" {
 resource "google_secret_manager_secret" "region" {
   secret_id = "region"
   replication {
-    automatic = true
+    auto {}
   }
   project = var.seed_project_id
 }

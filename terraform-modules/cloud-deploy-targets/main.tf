@@ -17,7 +17,7 @@ resource "google_clouddeploy_target" "target" {
 resource "google_secret_manager_secret" "clouddeploy-target" {
   secret_id = var.name
   replication {
-    automatic = true
+    auto {}
   }
   project = var.project
 }
