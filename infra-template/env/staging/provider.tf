@@ -12,9 +12,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-provider "google" { version = ">= 4.28.0" }
-provider "google-beta" { version = ">= 4.31.0" }
-provider "null" { version = "~> 2.1" }
-provider "random" { version = "~> 2.2" }
+
+terraform {
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = ">= 4.28.0"
+    }
+    google-beta = {
+      source  = "hashicorp/google-beta"
+      version = ">= 4.31.0"
+    }
+    null = {
+      version = "~> 2.1"
+    }
+    random = {
+      version = "~> 2.2"
+    }
+  }
+  provider_meta "google" {
+    module_name = "cloud-solutions/sdb-v1"
+  }
+}
 
 
