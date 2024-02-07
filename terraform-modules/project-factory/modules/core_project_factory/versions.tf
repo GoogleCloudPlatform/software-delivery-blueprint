@@ -35,4 +35,7 @@ terraform {
       version = ">= 2.2"
     }
   }
+  provider_meta "google" {
+    module_name = "cloud-solutions/sdb-v1"
+  }
 }
