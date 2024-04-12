@@ -58,3 +58,9 @@ variable "project_number" {
   type        = string
   description = "Project number where GKE cluster is to be created."
 }
+
+variable "security_group_domain" {
+  type        = string
+  description = "Authenticator security group domain used in RBAC for the GKE cluster."
+  default     = ""
+}
