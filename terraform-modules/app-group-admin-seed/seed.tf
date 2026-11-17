@@ -169,7 +169,7 @@ resource "google_storage_bucket_object" "secret-read-cicd" {
   name   = "${var.app_name}-CICD-SA.txt"
   content = google_service_account.cicd-sa[0].email
   bucket = var.trigger_bucket_sec
-  depends_on = [google_storage_bucket_object.secret-read-cicd,time_sleep.wait_20_seconds]
+  depends_on = [google_storage_bucket_object.secret-read-iac,time_sleep.wait_20_seconds]
 }
 # Add IaC SA to GCS so Cloud Function can provide it billing and project creator roles
 resource "google_storage_bucket_object" "billing-user-iac" {
