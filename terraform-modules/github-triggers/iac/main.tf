@@ -24,7 +24,7 @@ resource "google_cloudbuild_trigger" "trigger-infra" {
     owner = var.github_org
     name  = "${var.app_name}-infra"
     push {
-      branch = ".*"
+      branch = "^(dev|staging|prod)$"
     }
   }
 }
