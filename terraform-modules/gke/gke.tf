@@ -48,7 +48,14 @@ module "gke" {
   horizontal_pod_autoscaling = true
   http_load_balancing        = true
   cluster_resource_labels    = { "environ" : local.env, "region" : local.region }
-
+  enable_private_endpoint    = true
+  master_authorized_networks = var.subnet.ip_cidr_range
+  network_policy             = true
+  node_metadata              = "GKE_METADATA"
+  create_service_account     = true 
+  enable_shielded_nodes      = true
+  regional                   = true
+ 
   node_pools = [
     {
       name           = "node-pool-01"
